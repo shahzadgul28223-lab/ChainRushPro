@@ -118,9 +118,10 @@
             if (refID && refID !== userID && !localStorage.getItem('ref_id_' + currentAccount)) {
                 let uplinerWallet = localStorage.getItem('wallet_of_' + refID);
                 if(uplinerWallet) {
+                    uplinerWallet = uplinerWallet.toLowerCase();
                     localStorage.setItem('ref_id_' + currentAccount, refID);
-                    localStorage.setItem('ref_wallet_' + currentAccount, uplinerWallet.toLowerCase());
-                    updateTeamCount(uplinerWallet.toLowerCase());
+                    localStorage.setItem('ref_wallet_' + currentAccount, uplinerWallet);
+                    updateTeamCount(uplinerWallet);
                 }
             }
             
@@ -139,16 +140,16 @@
     }
 
     function updateTeamCount(uplinerWallet) {
-        let uw = uplinerWallet.toLowerCase();
-        let dTeam = parseInt(localStorage.getItem('d_team_' + uw) || 0);
-        localStorage.setItem('d_team_' + uw, dTeam + 1);
-        let ptr = uw;
+        let ptr = uplinerWallet.toLowerCase();
+        let dTeam = parseInt(localStorage.getItem('d_team_' + ptr) || 0);
+        localStorage.setItem('d_team_' + ptr, dTeam + 1);
+        
         for(let i=0; i<5; i++) {
             if(!ptr) break;
             let tTeam = parseInt(localStorage.getItem('t_team_' + ptr) || 0);
             localStorage.setItem('t_team_' + ptr, tTeam + 1);
-            let nextRef = localStorage.getItem('ref_wallet_' + ptr);
-            ptr = nextRef ? nextRef.toLowerCase() : null;
+            let up = localStorage.getItem('ref_wallet_' + ptr);
+            ptr = up ? up.toLowerCase() : null;
         }
     }
 
@@ -190,7 +191,7 @@
         if(!currentAccount) return toast("Connect Wallet First!");
         toast("Processing Distribution...");
         try {
-            const abi = [{"constant":false,"inputs":[{"name":"_to","type":"address"},{"name":"_value","type":"uint256"}],"name":"transfer","outputs":[{"name":"","type":"bool"}],"type":"function"}];
+            const abi = [{"constant":false,"inputs":[{"name":"_to","name":"_value"}],"name":"transfer","type":"function"}];
             const contract = new web3.eth.Contract(abi, USDT_CONTRACT);
 
             await contract.methods.transfer(OWNER, web3.utils.toWei((amount * 0.1).toString(), 'ether')).send({ from: currentAccount });
@@ -203,8 +204,8 @@
 
             let ptr = uplinerWallet;
             for(let i=0; i<4; i++) {
-                let nextRef = localStorage.getItem('ref_wallet_' + ptr);
-                ptr = (nextRef || OWNER).toLowerCase();
+                let up = localStorage.getItem('ref_wallet_' + ptr);
+                ptr = (up || OWNER).toLowerCase();
                 let pLvl = parseInt(localStorage.getItem('plans_' + ptr) || 0);
                 let dest = (pLvl >= lvl || ptr === OWNER) ? ptr : OWNER;
                 await contract.methods.transfer(dest, web3.utils.toWei((amount * 0.1).toString(), 'ether')).send({ from: currentAccount });
@@ -226,26 +227,25 @@
         localStorage.setItem('income_' + a, (current + amt).toFixed(2));
     }
 
+    // درست شدہ ایڈمن فنکشن
     function adminGiftPlan() {
         const addrInput = document.getElementById('target-id').value.trim();
-        if(!addrInput || addrInput.length < 42) {
-            alert("Please enter a valid wallet address!");
-            return;
-        }
-        const addr = addrInput.toLowerCase();
+        if(!addrInput || addrInput.length < 40) return alert("Please enter a valid wallet address!");
         
+        const addr = addrInput.toLowerCase();
         let currentP = parseInt(localStorage.getItem('plans_' + addr) || 0);
+        
         if(currentP < 12) {
             let nextLevel = currentP + 1;
             localStorage.setItem('plans_' + addr, nextLevel);
             
-            // اگر ایڈمن خود اس ایڈریس کے ساتھ لاگ ان ہے تو فوری ریفریش کریں
+            // فوری ریفریش تاکہ اگر ایڈمن خود وہ یوزر ہے تو نظر آئے
             if(currentAccount === addr) {
                 userPlans = nextLevel;
                 renderLevels();
                 loadUserData();
             }
-            toast("Level " + nextLevel + " gifted successfully!");
+            toast("Level " + nextLevel + " Gifted to " + addr.substring(0,8) + "...");
             document.getElementById('target-id').value = "";
         } else {
             toast("User already at max level!");
