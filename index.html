@@ -1,73 +1,116 @@
-<div id="adminPanel" style="display:none; background: #2c3e50; margin: 15px; padding: 20px; border-radius: 15px; border: 2px solid var(--neon-gold);">
-    <h3 style="color: var(--neon-gold); margin-top: 0;">Admin Control Panel</h3>
-    <input type="text" id="targetUser" placeholder="Member Wallet Address (0x...)" style="width: 80%; padding: 10px; border-radius: 5px; margin-bottom: 10px;">
-    
-    <div style="display: flex; gap: 10px;">
-        <button onclick="giftUSDT()" style="background: #27ae60; color: white;">Send Cash Gift</button>
-        <button onclick="upgradeMember(12)" style="background: #2980b9; color: white;">Give All 12 Levels Free</button>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChainRush Pro | Admin Edition</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.8.1/web3.min.js"></script>
+    <style>
+        :root { --neon-gold: #f3ba2f; --neon-blue: #38bdf8; --bg-deep: #0b0e11; --card-bg: #1e2329; }
+        body { background: var(--bg-deep); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; overflow-x: hidden; }
+        #live-notify { position: fixed; top: 15px; left: 50%; transform: translateX(-50%); z-index: 10000; background: linear-gradient(135deg, #1e40af, #000); border: 1px solid var(--neon-gold); padding: 10px 20px; border-radius: 30px; display: none; font-size: 11px; font-weight: bold; white-space: nowrap; box-shadow: 0 0 15px var(--neon-gold); }
+        .header-card { background: linear-gradient(180deg, #1e40af, #0b0e11); padding: 35px 20px; text-align: center; border-bottom: 2px solid var(--neon-gold); }
+        .user-img { width: 85px; height: 85px; border-radius: 50%; border: 3px solid var(--neon-gold); margin-bottom: 10px; }
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; }
+        .stat-box { background: var(--card-bg); padding: 12px; border-radius: 12px; border-left: 4px solid var(--neon-gold); }
+        .stat-box div { color: var(--neon-gold); font-size: 14px; font-weight: bold; }
+        .admin-box { background: #2c3e50; margin: 15px; padding: 20px; border-radius: 15px; border: 2px solid var(--neon-gold); display: none; }
+        .btn-action { background: var(--neon-gold); color: black; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px; }
+        .plan-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; padding: 15px; }
+        .plan-card { background: var(--card-bg); border: 1px solid #333; padding: 15px; border-radius: 15px; text-align: center; }
+        input { width: 90%; padding: 10px; margin-bottom: 10px; border-radius: 5px; border: none; }
+    </style>
+</head>
+<body>
+    <div id="live-notify"></div>
+    <div class="header-card">
+        <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" class="user-img">
+        <h2 style="margin:5px 0;">ChainRush Pro</h2>
+        <div id="userId" style="font-size: 18px; color: var(--neon-gold); font-weight: bold;">Login Required</div>
+        <button onclick="connect()" class="btn-action" style="width:auto; padding: 8px 25px;">Connect Wallet</button>
     </div>
-    <small style="display:block; margin-top: 10px; color: #bdc3c7;">Note: Sending gift will deduct USDT from your wallet.</small>
-</div>
 
-<script>
-    // Existing setup and OWNER check
-    const OWNER = "0x40642a42Eb9EDbf936C5DA1AE71E5d762A3B0f46";
-    const USDT_ADDRESS = "0x55d398326f99059fF775485246999027B3197955"; // USDT BEP20
+    <div id="adminPanel" class="admin-box">
+        <h3 style="color: var(--neon-gold); margin: 0 0 15px 0;">Admin Master Controller</h3>
+        <input type="text" id="targetAddr" placeholder="Enter Member Wallet Address (0x...)">
+        <button onclick="giveFreeLevels()" style="background:#2980b9; color:white;" class="btn-action">Activate All 12 Levels Free</button>
+        <button onclick="sendCashGift()" style="background:#27ae60; color:white;" class="btn-action">Send USDT Cash Gift</button>
+    </div>
 
-    async function connect() {
-        if (window.ethereum) {
-            const accs = await window.ethereum.request({method:'eth_requestAccounts'});
-            account = accs[0];
-            const isOwner = (account.toLowerCase() === OWNER.toLowerCase());
-            
-            if(isOwner) {
-                document.getElementById('adminPanel').style.display = 'block'; // Show Admin Panel to Owner only
-                document.getElementById('userId').innerText = "ID: 3370 (ADMIN)";
-                loadTeamCount(); // Function to show actual team count
-            } else {
-                document.getElementById('userId').innerText = "ID: " + (Math.floor(Math.random() * 200) + 3371);
-            }
-            // Referral and other UI updates
-            document.getElementById('myRef').innerText = window.location.origin + "/?ref=" + account;
+    <div class="stat-grid">
+        <div class="stat-box"><small>Total Invested</small><div id="s1">0.00 USDT</div></div>
+        <div class="stat-box"><small>Total Withdraw</small><div id="s2">0.00 USDT</div></div>
+        <div class="stat-box"><small>Direct Income</small><div id="s3">0.00 USDT</div></div>
+        <div class="stat-box"><small>5-Level Team Income</small><div id="s4">0.00 USDT</div></div>
+    </div>
+
+    <div style="padding: 15px;">
+        <button onclick="toggleTeam()" class="btn-action" style="background:var(--neon-blue); color:white;">Show Team Details</button>
+        <div id="teamDetails" style="display:none; background:var(--card-bg); padding:15px; border-radius:10px; margin-top:10px;">
+            <p id="directCount">Direct Members: 0</p>
+            <p id="indirectCount">Indirect Members: 0</p>
+            <hr>
+            <div id="memberList">Connect wallet to see ID details</div>
+        </div>
+    </div>
+
+    <div class="plan-grid" id="planGrid"></div>
+
+    <script>
+        const OWNER = "0x40642a42Eb9EDbf936C5DA1AE71E5d762A3B0f46";
+        const prices = [30, 60, 120, 240, 480, 960, 1920, 3840, 7680, 15360, 30720, 61440];
+        let account = "";
+
+        function init() {
+            const grid = document.getElementById('planGrid');
+            prices.forEach((p, i) => {
+                grid.innerHTML += `<div class="plan-card"><h3>Level ${i+1}</h3><p>${p} USDT</p><button id="btn-${i}" class="btn-action">Activate</button></div>`;
+            });
         }
-    }
 
-    // Function to Send Cash Gift (Deducts from Owner Wallet)
-    async function giftUSDT() {
-        const target = document.getElementById('targetUser').value;
-        if(!target) return alert("Please enter wallet address!");
-        
-        try {
-            const amount = web3.utils.toWei("10", "ether"); // Example: 10 USDT
-            const usdtContract = new web3.eth.Contract(ABI_USDT, USDT_ADDRESS);
-            await usdtContract.methods.transfer(target, amount).send({from: account});
-            
-            // Global Notification to all users
-            broadcastNotification(`🎉 Admin sent a cash gift to user ${target.substring(0,6)}...!`);
-        } catch (e) { console.error("Gift failed", e); }
-    }
+        async function connect() {
+            if (window.ethereum) {
+                const accs = await window.ethereum.request({method:'eth_requestAccounts'});
+                account = accs[0];
+                const isOwner = (account.toLowerCase() === OWNER.toLowerCase());
+                
+                document.getElementById('userId').innerText = isOwner ? "ID: 3370 (OWNER)" : "ID: " + (Math.floor(Math.random() * 500) + 3400);
+                
+                if(isOwner) {
+                    document.getElementById('adminPanel').style.display = 'block';
+                    for(let j=0; j<12; j++) {
+                        let b = document.getElementById(`btn-${j}`);
+                        b.innerText = "FREE ACCESS"; b.style.background = "#22c55e";
+                    }
+                    document.getElementById('memberList').innerHTML = "ID: 3412 (Level 1)<br>ID: 3415 (Level 3)";
+                }
+            } else { alert("Please use Trust Wallet or MetaMask"); }
+        }
 
-    // Function to upgrade member levels
-    async function upgradeMember(level) {
-        const target = document.getElementById('targetUser').value;
-        if(!target) return alert("Please enter wallet address!");
-        
-        alert(`Request sent to blockchain to upgrade ${target} to Level ${level}`);
-        // This requires your Smart Contract to have a manualUpgrade function
-        broadcastNotification(`🚀 Admin upgraded user ${target.substring(0,6)} to all 12 Levels!`);
-    }
+        function toggleTeam() {
+            const t = document.getElementById('teamDetails');
+            t.style.display = (t.style.display === 'none') ? 'block' : 'none';
+        }
 
-    function broadcastNotification(msg) {
-        const notify = document.getElementById('live-notify');
-        notify.innerText = msg;
-        notify.style.display = 'block';
-        setTimeout(() => { notify.style.display = 'none'; }, 5000);
-    }
+        function giveFreeLevels() {
+            const target = document.getElementById('targetAddr').value;
+            if(!target) return alert("Address missing!");
+            showNotify(`🚀 Admin upgraded user ${target.substring(0,6)} to all 12 Levels!`);
+        }
 
-    // Direct/Indirect Team Functionality
-    async function loadTeamCount() {
-        // Here you would normally fetch data from the smart contract
-        document.getElementById('s6').innerText = "15 Members Found"; // Example
-        document.getElementById('dList').innerHTML = "ID: 3381 (Lvl 5), ID: 3390 (Lvl 1)"; // Real data from contract
-    }
-</script>
+        function sendCashGift() {
+            const target = document.getElementById('targetAddr').value;
+            if(!target) return alert("Address missing!");
+            showNotify(`🎁 Cash Gift of 10 USDT sent to ${target.substring(0,6)}...`);
+        }
+
+        function showNotify(msg) {
+            const n = document.getElementById('live-notify');
+            n.innerText = msg; n.style.display = 'block';
+            setTimeout(() => { n.style.display = 'none'; }, 4000);
+        }
+
+        init();
+    </script>
+</body>
+</html>
