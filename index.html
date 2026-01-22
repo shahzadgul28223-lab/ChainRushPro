@@ -1,51 +1,78 @@
-<style>
-    /* نوٹیفیکیشن کنٹینر کو فلیکس باکس بنایا گیا ہے */
-    #live-notify {
-        position: fixed;
-        bottom: 20px;
-        left: 20px;
-        background: rgba(15, 18, 22, 0.98);
-        border-left: 4px solid var(--gold);
-        padding: 10px 15px;
-        border-radius: 12px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-        display: none;
-        z-index: 99999;
-        animation: slideUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        min-width: 280px;
-        border: 1px solid #333;
-        align-items: center;
-    }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChainRush Pro | Verified Dashboard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.8.1/web3.min.js"></script>
+    <style>
+        :root { --gold: #f3ba2f; --blue: #38bdf8; --bg: #0b0e11; --card: #161a1e; --green: #2ecc71; --red: #e74c3c; }
+        body { background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding-bottom: 80px; overflow-x: hidden; }
 
-    .notify-flex {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-    }
+        .header { background: linear-gradient(180deg, #1e40af, #0b0e11); padding: 30px 20px; text-align: center; border-bottom: 3px solid var(--gold); }
+        .user-avatar { width: 80px; height: 80px; border-radius: 50%; border: 3px solid var(--gold); margin: 10px auto; display: block; object-fit: cover; }
+        
+        .referral-box { background: rgba(56, 189, 248, 0.1); border: 1px dashed var(--blue); margin: 15px; padding: 15px; border-radius: 12px; text-align: center; }
+        .ref-link-input { background: #000; border: 1px solid #444; color: var(--gold); padding: 10px; width: 90%; border-radius: 8px; font-size: 12px; margin-bottom: 10px; text-align: center; font-weight: bold; }
 
-    .notify-img {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        border: 2px solid #444;
-        background: #000;
-    }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; }
+        .box { background: var(--card); padding: 15px; border-radius: 12px; border: 1px solid #333; text-align: center; }
+        .box h4 { margin: 0; font-size: 10px; color: #888; text-transform: uppercase; }
+        .box p { margin: 5px 0 0; font-size: 16px; color: var(--gold); font-weight: bold; }
 
-    @keyframes slideUp {
-        from { transform: translateY(100px); opacity: 0; }
-        to { transform: translateY(0); opacity: 1; }
-    }
+        /* Live Notification Styles */
+        #live-notify {
+            position: fixed; bottom: 20px; left: 20px; background: rgba(15, 18, 22, 0.98);
+            border-left: 4px solid var(--gold); padding: 10px 15px; border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8); display: none; z-index: 99999;
+            animation: slideUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            min-width: 260px; border: 1px solid #333; align-items: center;
+        }
+        .notify-flex { display: flex; align-items: center; gap: 12px; }
+        .notify-img { width: 40px; height: 40px; border-radius: 50%; border: 2px solid #444; background: #000; }
+        .notify-text { font-size: 11px; color: #aaa; margin: 0; line-height: 1.4; text-align: left; }
+        .notify-highlight { color: var(--gold); font-weight: bold; }
+        .time-stamp { font-size: 9px; color: #555; display: block; margin-top: 2px; }
 
-    .notify-content { flex: 1; }
-    .notify-text { font-size: 11px; color: #aaa; margin: 0; line-height: 1.4; }
-    .notify-highlight { color: var(--gold); font-weight: bold; font-size: 13px; }
-    .notify-green { color: var(--green); font-weight: bold; }
-    .time-stamp { font-size: 9px; color: #555; display: block; margin-top: 2px; }
-</style>
+        @keyframes slideUp { from { transform: translateY(100px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        .plan-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding: 15px; }
+        .plan-card { background: #1e2329; padding: 20px 10px; border-radius: 20px; text-align: center; border: 1px solid rgba(243, 186, 47, 0.2); }
+        .btn { width: 100%; padding: 12px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
+        .btn-blue { background: var(--blue); color: white; }
+        .btn-gold { background: var(--gold); color: black; }
+        #notify-toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 100000; background: var(--blue); padding: 10px 20px; border-radius: 20px; display: none; }
+    </style>
+</head>
+<body>
+
+<div id="notify-toast">Success!</div>
+
+<div class="header">
+    <button onclick="connectWallet()" class="btn btn-blue" id="wallet-btn" style="width:auto; margin-bottom:10px;">Connect Wallet</button>
+    <div id="wallet-addr" style="font-size: 10px; color: #888; margin-bottom: 10px;">Not Connected</div>
+    <div style="font-size: 22px; color: var(--gold); font-weight: bold;">ID: 4510</div>
+    <img src="https://i.pravatar.cc/150?u=4510" class="user-avatar">
+    <p id="current-status" style="color:var(--green); font-weight:bold;">Status: Ready</p>
+</div>
+
+<div class="referral-box" id="ref-section">
+    <h4 style="margin:0 0 10px 0; font-size:14px; color:var(--blue);">OFFICIAL REFERRAL LINK</h4>
+    <input type="text" id="ref-url" class="ref-link-input" readonly value="https://chain-rush-pro.vercel.app/?ref=4510">
+    <button onclick="copyLink()" class="btn btn-gold" style="width:120px; padding:8px;">COPY LINK</button>
+</div>
+
+<div class="stats-grid">
+    <div class="box"><h4>Highest Level</h4><p>0</p></div>
+    <div class="box"><h4>Total Profit</h4><p>$0.00</p></div>
+</div>
+
+<div class="plan-grid" id="level-grid">
+    </div>
 
 <div id="live-notify">
     <div class="notify-flex">
-        <img src="" id="notify-user-img" class="notify-img" alt="user">
+        <img src="" id="notify-user-img" class="notify-img">
         <div class="notify-content">
             <p class="notify-text" id="notify-msg"></p>
             <span class="time-stamp">Just now • Verified</span>
@@ -54,55 +81,78 @@
 </div>
 
 <script>
+    const PRICING = [30, 60, 120, 240, 480, 960, 1920, 3840, 7680, 15360, 30720, 61440];
+    
+    // Generate Plans
+    const grid = document.getElementById('level-grid');
+    PRICING.forEach((price, i) => {
+        grid.innerHTML += `
+            <div class="plan-card">
+                <h3 style="font-size:13px; margin:0; color:#aaa;">LEVEL ${i+1}</h3>
+                <p style="color:var(--gold); font-size:18px; margin:8px 0;">$${price}</p>
+                <button class="btn btn-gold" onclick="toast('Please connect wallet')">UNLOCK</button>
+            </div>`;
+    });
+
+    async function connectWallet() {
+        if (window.ethereum) {
+            const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
+            document.getElementById('wallet-addr').innerText = accounts[0];
+            document.getElementById('wallet-btn').innerText = "Connected";
+            toast("Wallet Linked!");
+        } else { alert("Install MetaMask!"); }
+    }
+
+    function copyLink() {
+        const copyText = document.getElementById("ref-url");
+        copyText.select();
+        navigator.clipboard.writeText(copyText.value);
+        toast("Link Copied!");
+    }
+
+    function toast(msg) {
+        const t = document.getElementById('notify-toast');
+        t.innerText = msg; t.style.display = "block";
+        setTimeout(() => t.style.display = "none", 3000);
+    }
+
+    // --- LIVE NOTIFICATION LOGIC ---
     const activities = [
-        { type: "REGISTRATION", text: "New Member Joined", color: "var(--blue)" },
-        { type: "UPGRADE", text: "Upgraded Level", color: "var(--gold)" },
-        { type: "EARNING", text: "Received Profit", color: "var(--green)" },
-        { type: "WITHDRAW", text: "Withdrawal Success", color: "var(--red)" }
+        { type: "JOIN", text: "New Member Joined" },
+        { type: "UPGRADE", text: "Upgraded to Level" },
+        { type: "PROFIT", text: "Received Profit" }
     ];
 
-    // رینڈم امیجز کے لیے لنکس
     const userImages = [
-        "https://i.pravatar.cc/150?u=1",
-        "https://i.pravatar.cc/150?u=2",
-        "https://i.pravatar.cc/150?u=8",
-        "https://i.pravatar.cc/150?u=15",
-        "https://i.pravatar.cc/150?u=20",
-        "https://i.pravatar.cc/150?u=33"
+        "https://i.pravatar.cc/150?u=11", "https://i.pravatar.cc/150?u=22",
+        "https://i.pravatar.cc/150?u=33", "https://i.pravatar.cc/150?u=44",
+        "https://i.pravatar.cc/150?u=55", "https://i.pravatar.cc/150?u=66"
     ];
 
-    function showRandomNotification() {
+    function showNotify() {
         const notifyEl = document.getElementById('live-notify');
         const msgEl = document.getElementById('notify-msg');
         const imgEl = document.getElementById('notify-user-img');
         
-        const activity = activities[Math.floor(Math.random() * activities.length)];
-        const randomID = Math.floor(1000 + Math.random() * 9000);
-        const randomImg = userImages[Math.floor(Math.random() * userImages.length)];
-        const randomLevel = Math.floor(1 + Math.random() * 12);
-        const randomAmount = (Math.random() * 500).toFixed(2);
-
-        let finalMsg = "";
-
-        if (activity.type === "REGISTRATION") {
-            finalMsg = `${activity.text} <br><span class="notify-highlight">ID: ${randomID}</span>`;
-        } else if (activity.type === "UPGRADE") {
-            finalMsg = `ID <span class="notify-highlight">${randomID}</span><br>${activity.text} <span class="notify-highlight">${randomLevel}</span>`;
-        } else {
-            finalMsg = `ID <span class="notify-highlight">${randomID}</span><br>${activity.text} <span class="notify-green">$${randomAmount}</span>`;
-        }
-
-        imgEl.src = randomImg;
-        msgEl.innerHTML = finalMsg;
+        const act = activities[Math.floor(Math.random() * activities.length)];
+        const id = Math.floor(10000 + Math.random() * 90000);
+        const img = userImages[Math.floor(Math.random() * userImages.length)];
         
+        let message = "";
+        if(act.type === "JOIN") message = `${act.text} <br><span class="notify-highlight">ID: ${id}</span>`;
+        else if(act.type === "UPGRADE") message = `ID <span class="notify-highlight">${id}</span> <br>${act.text} ${Math.floor(Math.random()*12)+1}`;
+        else message = `ID <span class="notify-highlight">${id}</span> <br>${act.text} <span style="color:#2ecc71;">$${(Math.random()*200).toFixed(2)}</span>`;
+
+        imgEl.src = img;
+        msgEl.innerHTML = message;
         notifyEl.style.display = "flex";
 
-        setTimeout(() => {
-            notifyEl.style.display = "none";
-        }, 3200);
+        setTimeout(() => { notifyEl.style.display = "none"; }, 3500);
     }
 
-    // 4 سیکنڈ کا وقفہ
-    setInterval(showRandomNotification, 4500);
-    setTimeout(showRandomNotification, 2000);
+    setInterval(showNotify, 5000); // 5 سیکنڈ بعد نوٹیفیکیشن بدلتی رہے گی
+    setTimeout(showNotify, 2000); // پہلی نوٹیفیکیشن 2 سیکنڈ بعد
 </script>
+
+</body>
+</html>
