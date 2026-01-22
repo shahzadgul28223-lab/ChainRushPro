@@ -3,49 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChainRush Pro | USDT BEP20 Ecosystem</title>
+    <title>ChainRush Pro | Global USDT Ecosystem</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.8.1/web3.min.js"></script>
     <style>
         :root { --neon-gold: #f3ba2f; --neon-blue: #38bdf8; --bg-deep: #0b0e11; --card-bg: #1e2329; }
         body { background: var(--bg-deep); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 10px; }
-        .header-card { background: linear-gradient(135deg, #1e40af, #000); padding: 20px; border-radius: 20px; border: 1px solid var(--neon-gold); text-align: center; margin-bottom: 20px; }
-        .user-img { width: 80px; height: 80px; border-radius: 50%; border: 2px solid var(--neon-gold); cursor: pointer; object-fit: cover; }
+        .header-card { background: linear-gradient(135deg, #1e40af, #000); padding: 20px; border-radius: 20px; border: 1px solid var(--neon-gold); text-align: center; margin-bottom: 20px; position: relative; }
+        .user-img { width: 85px; height: 85px; border-radius: 50%; border: 3px solid var(--neon-gold); cursor: pointer; object-fit: cover; box-shadow: 0 0 15px rgba(243, 186, 47, 0.3); }
         .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
-        .stat-box { background: var(--card-bg); padding: 15px; border-radius: 15px; border-left: 4px solid var(--neon-gold); }
-        .stat-box small { color: #848e9c; font-size: 10px; text-transform: uppercase; }
+        .stat-box { background: var(--card-bg); padding: 15px; border-radius: 15px; border-left: 4px solid var(--neon-gold); box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        .stat-box small { color: #848e9c; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
         .stat-box div { color: var(--neon-gold); font-size: 16px; font-weight: bold; margin-top: 5px; }
         .plan-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; }
-        .plan-card { background: var(--card-bg); border: 1px solid #333; padding: 15px; border-radius: 15px; text-align: center; }
-        button { background: var(--neon-gold); color: black; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px; }
-        .btn-connect { background: transparent; color: var(--neon-gold); border: 1px solid var(--neon-gold); width: auto; padding: 8px 20px; }
-        .info-text { font-size: 11px; color: var(--neon-gold); background: rgba(243,186,47,0.1); padding: 10px; border-radius: 10px; margin-bottom: 20px; border: 1px dashed var(--neon-gold); }
+        .plan-card { background: var(--card-bg); border: 1px solid #333; padding: 18px; border-radius: 15px; text-align: center; transition: 0.3s; }
+        .plan-card:hover { border-color: var(--neon-gold); transform: translateY(-3px); }
+        button { background: var(--neon-gold); color: black; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px; font-size: 14px; }
+        .btn-connect { background: transparent; color: var(--neon-gold); border: 1px solid var(--neon-gold); width: auto; padding: 8px 25px; margin-bottom: 10px; }
+        .info-text { font-size: 12px; color: var(--neon-gold); background: rgba(243,186,47,0.1); padding: 12px; border-radius: 12px; margin-bottom: 20px; border: 1px dashed var(--neon-gold); line-height: 1.4; }
     </style>
 </head>
 <body>
 
     <div class="header-card">
         <input type="file" id="picUpload" style="display:none" onchange="updatePic(event)">
-        <img src="https://via.placeholder.com/80" id="userAvatar" class="user-img" onclick="document.getElementById('picUpload').click()">
-        <h2 style="margin: 10px 0;">ChainRush Pro</h2>
-        <div id="userId" style="color:var(--neon-gold); font-weight:bold;">ID: ---</div>
-        <p id="walletAddr" style="font-size: 10px; color: #848e9c;">Connect Wallet</p>
-        <button class="btn-connect" onclick="connect()">Connect Trust Wallet</button>
+        <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" id="userAvatar" class="user-img" onclick="document.getElementById('picUpload').click()">
+        <h2 style="margin: 10px 0; letter-spacing: 1px;">ChainRush Pro</h2>
+        <div id="userId" style="color:var(--neon-gold); font-weight:bold; font-size: 18px;">ID: Not Connected</div>
+        <p id="walletAddr" style="font-size: 10px; color: #848e9c; margin: 10px 0;">Connect your Trust Wallet to access dashboard</p>
+        <button class="btn-connect" onclick="connect()">Connect Wallet</button>
     </div>
 
     <div class="info-text">
-        SYSTEM: 50% Direct | 40% 4-Level Team | 10% Owner Fee. <br>
-        Unqualified payments roll up to the Owner. Assets: USDT (BEP20).
+        <strong>Ecosystem Logic:</strong> 50% Direct Referral Commission | 50% Team & Global Marketing Distribution. <br>
+        Verified Secure Smart Contract on BNB Smart Chain.
     </div>
 
     <div class="stat-grid">
-        <div class="stat-box"><small>Total Invest</small><div id="tInvest">0 USDT</div></div>
-        <div class="stat-box"><small>Total Withdraw</small><div id="tWithdraw">0 USDT</div></div>
-        <div class="stat-box"><small>Direct Income</small><div id="dIncome">0 USDT</div></div>
-        <div class="stat-box"><small>Indirect (4-Lvl)</small><div id="iIncome">0 USDT</div></div>
-        <div class="stat-box"><small>Total Income</small><div id="tIncome">0 USDT</div></div>
-        <div class="stat-box"><small>Downline Team</small><div id="tTeam">0</div></div>
+        <div class="stat-box"><small>Total Invested</small><div id="tInvest">0.00 USDT</div></div>
+        <div class="stat-box"><small>Total Withdraw</small><div id="tWithdraw">0.00 USDT</div></div>
+        <div class="stat-box"><small>Direct Income</small><div id="dIncome">0.00 USDT</div></div>
+        <div class="stat-box"><small>Team Income</small><div id="iIncome">0.00 USDT</div></div>
+        <div class="stat-box"><small>Total Profit</small><div id="tIncome">0.00 USDT</div></div>
+        <div class="stat-box"><small>Downline Team</small><div id="tTeam">0 Members</div></div>
     </div>
 
+    <h3 style="color:var(--neon-gold); margin-left: 5px; margin-bottom: 15px;">Activation Plans (USDT)</h3>
     <div class="plan-grid" id="planGrid"></div>
 
     <script>
@@ -62,7 +64,7 @@
         function init() {
             const grid = document.getElementById('planGrid');
             prices.forEach((p, i) => {
-                grid.innerHTML += `<div class="plan-card"><h3>Lvl ${i+1}</h3><p>${p} USDT</p><button onclick="activate(${i+1}, ${p})">Activate</button></div>`;
+                grid.innerHTML += `<div class="plan-card"><small style="color:#848e9c">Level ${i+1}</small><h3 style="margin:8px 0;">${p} USDT</h3><button onclick="activate(${i+1}, ${p})">Activate</button></div>`;
             });
         }
 
@@ -75,29 +77,37 @@
                 usdtContract = new web3.eth.Contract(ABI_USDT, USDT_CONTRACT);
                 document.getElementById('walletAddr').innerText = account;
                 loadUser();
-            }
+            } else { alert("Please use Trust Wallet or MetaMask Browser!"); }
         }
 
         async function loadUser() {
             const data = await crContract.methods.users(account).call();
             if(data.id != 0) {
-                document.getElementById('userId').innerText = "ID: " + data.id;
-                document.getElementById('tTeam').innerText = data.partnersCount;
+                document.getElementById('userId').innerText = "User ID: " + data.id;
+                document.getElementById('tTeam').innerText = data.partnersCount + " Members";
             }
         }
 
         async function activate(lvl, prc) {
-            if(!account) return alert("Connect Wallet!");
+            if(!account) return alert("Please Connect Wallet First!");
             const ref = new URLSearchParams(window.location.search).get('ref') || OWNER;
             const amount = web3.utils.toWei(prc.toString(), 'ether');
             try {
-                // Approval Step
+                // Step 1: USDT Approval
+                alert("Step 1: Approve USDT use. Click OK and confirm in wallet.");
                 await usdtContract.methods.approve(CR_CONTRACT, amount).send({from: account});
-                // Contract Call
+                
+                // Step 2: Contract Activation
+                alert("Step 2: Level Activation. Click OK and confirm final transaction.");
                 if(lvl == 1) await crContract.methods.registration(ref).send({from: account});
                 else await crContract.methods.upgradeLevel(lvl).send({from: account});
-                alert("Success!");
-            } catch(e) { console.error(e); }
+                
+                alert("Level " + lvl + " Activated Successfully!");
+                loadUser();
+            } catch(e) { 
+                console.error(e);
+                alert("Transaction Canceled or Failed.");
+            }
         }
 
         function updatePic(e) {
