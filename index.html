@@ -6,16 +6,15 @@
     <title>ChainRush Pro | Decentralized System</title>
     
     <meta property="og:title" content="ChainRush Pro | Official">
-    <meta property="og:description" content="Decentralized Financial Growth System">
     <meta property="og:image" content="https://i.ibb.co/vzPRY89/logo.png">
-    <meta property="og:type" content="website">
+    <meta property="og:description" content="ChainRush-Pro Decentralized System">
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.8.1/web3.min.js"></script>
     <style>
         :root { --gold: #f3ba2f; --blue: #38bdf8; --bg: #0b0e11; --card: #1e2329; --green: #2ecc71; }
         body { background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding-bottom: 50px; }
 
-        /* Color-Full Watermark */
+        /* Color-Full Watermark on Plans */
         .plan-card { background: var(--card); padding: 30px 15px; border-radius: 15px; text-align: center; border: 1px solid #333; position: relative; overflow: hidden; margin-bottom: 15px; }
         .plan-card::before { 
             content: "ChainRush-Pro Decentralized"; position: absolute; font-size: 16px; font-weight: bold;
@@ -27,15 +26,18 @@
         #notify-toast { position: fixed; top: 15px; left: 50%; transform: translateX(-50%); z-index: 10000; background: linear-gradient(135deg, #1e40af, #000); border: 1px solid var(--gold); padding: 12px 25px; border-radius: 30px; display: none; font-size: 13px; box-shadow: 0 0 15px var(--gold); width: 85%; max-width: 400px; text-align: center; }
 
         .header { background: linear-gradient(180deg, #1e40af, #0b0e11); padding: 40px 20px; text-align: center; border-bottom: 3px solid var(--gold); }
-        .logo-main { width: 120px; margin-bottom: 10px; filter: drop-shadow(0 0 10px var(--gold)); }
-        .user-avatar { width: 80px; height: 80px; border-radius: 50%; border: 3px solid var(--gold); margin: 10px 0; object-fit: cover; background: #fff; }
+        
+        /* 1. Top Logo Style */
+        .logo-main { width: 130px; height: auto; margin-bottom: 15px; filter: drop-shadow(0 0 8px var(--gold)); display: inline-block; }
+        
+        /* 2. ID/Avatar Logo Style */
+        .user-avatar { width: 90px; height: 90px; border-radius: 50%; border: 3px solid var(--gold); margin: 10px 0; object-fit: cover; background: #fff; box-shadow: 0 0 15px rgba(243,186,47,0.4); }
         
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; }
         .box { background: var(--card); padding: 15px; border-radius: 12px; border: 1px solid #333; text-align: center; }
         .box h4 { margin: 0; font-size: 11px; color: #888; text-transform: uppercase; }
         .box p { margin: 5px 0 0; font-size: 18px; color: var(--gold); font-weight: bold; }
 
-        /* Report Panels */
         .report-panel { background: #161a1e; margin: 15px; padding: 20px; border-radius: 15px; border: 1px solid #333; }
         .admin-box { border: 2px solid var(--gold); display: none; }
         .scroll-list { max-height: 250px; overflow-y: auto; font-size: 12px; background: #000; padding: 10px; border-radius: 8px; margin-top: 10px; color: #ddd; line-height: 1.8; border: 1px solid #222; }
@@ -54,16 +56,16 @@
 <div id="notify-toast">Notification...</div>
 
 <div class="header">
-    <img src="https://i.ibb.co/vzPRY89/logo.png" class="logo-main" alt="ChainRush-Pro Logo">
+    <img src="https://i.ibb.co/vzPRY89/logo.png" class="logo-main" alt="ChainRush-Pro Main Logo">
     
     <div id="display-id" style="font-size: 24px; color: var(--gold); font-weight: bold; text-shadow: 0 0 10px rgba(243,186,47,0.5);">Login Required</div>
     
     <div class="profile">
         <label for="img-in">
-            <img id="user-img" src="https://i.ibb.co/vzPRY89/logo.png" class="user-avatar" title="Click to change photo">
+            <img id="user-img" src="https://i.ibb.co/vzPRY89/logo.png" class="user-avatar" alt="ChainRush-Pro Avatar">
         </label>
         <input type="file" id="img-in" style="display:none" onchange="loadImg(event)">
-        <p style="font-size: 12px; color: var(--blue); margin: 0;">ChainRush-Pro Official</p>
+        <p style="font-size: 12px; color: var(--blue); margin: 5px 0 0;">ChainRush-Pro Official Member</p>
     </div>
     
     <button id="conn-btn" onclick="connect()" class="btn btn-blue" style="width:auto; padding: 12px 40px; margin-top: 20px; font-size: 16px; border: 1px solid white;">Connect Wallet</button>
@@ -89,15 +91,15 @@
     <input type="number" id="cash-amt" placeholder="USDT Amount" style="margin-top:10px;">
     <button onclick="sendCash()" class="btn" style="background:var(--green); color:white;">Send Cash Gift</button>
     
-    <h4 style="margin:20px 0 5px; color:var(--gold);">GLOBAL ACTIVITY LOG (UNLIMITED)</h4>
-    <div id="admin-log" class="scroll-list">Waiting for system activity (Tracking all joinings)...</div>
+    <h4 style="margin:20px 0 5px; color:var(--gold);">GLOBAL ACTIVITY LOG</h4>
+    <div id="admin-log" class="scroll-list">Tracking all system activity...</div>
 </div>
 
 <div class="report-panel">
-    <h4 style="margin-top:0; font-size:14px; color:var(--blue);">MY TEAM DETAILS (LEVEL 1-24)</h4>
+    <h4 style="margin-top:0; font-size:14px; color:var(--blue);">TEAM REPORT (LEVEL 1-24)</h4>
     <div style="display:flex; gap:5px;">
-        <button onclick="viewTeam('direct')" class="btn btn-blue" style="flex:1; font-size:12px;">Direct Partners</button>
-        <button onclick="viewTeam('indirect')" class="btn btn-gold" style="flex:1; font-size:12px;">Downline Team (L24)</button>
+        <button onclick="viewTeam('direct')" class="btn btn-blue" style="flex:1; font-size:12px;">Directs</button>
+        <button onclick="viewTeam('indirect')" class="btn btn-gold" style="flex:1; font-size:12px;">Downline (L24)</button>
     </div>
     <div id="team-list" class="scroll-list">Wallet not connected.</div>
 </div>
@@ -140,14 +142,14 @@
             myId = isOwner ? START_ID : (parseInt(wallet.substring(wallet.length-4), 16) + 5000);
             
             document.getElementById('display-id').innerText = "ID: " + myId;
-            document.getElementById('conn-btn').innerText = "Wallet Connected";
+            document.getElementById('conn-btn').innerText = "Connected";
             document.getElementById('referral-area').style.display = "block";
             document.getElementById('link-text').innerText = window.location.origin + "/?ref=" + myId;
             
             if(isOwner) {
                 document.getElementById('owner-panel').style.display = "block";
                 PRICING.forEach((_, i) => setActive(i+1));
-                updateLog(`Master Admin (ID: ${myId}) connected.`);
+                updateLog(`Admin Connected.`);
             }
         }
     }
@@ -155,12 +157,12 @@
     function viewTeam(type) {
         const list = document.getElementById('team-list');
         if(!wallet) return alert("Connect Wallet First");
-        list.innerHTML = "Fetching real-time team data...";
+        list.innerHTML = "Fetching 24 Level data...";
         setTimeout(() => {
             if(type === 'direct') {
-                list.innerHTML = `<strong>Direct Partners (Level 1):</strong><br>ID: 59571 | Status: Active<br>ID: 60211 | Status: Active`;
+                list.innerHTML = `ID: 59571 | Lvl 1 | Status: Active<br>ID: 60211 | Lvl 1 | Status: Active`;
             } else {
-                list.innerHTML = `<strong>Downline (Levels 2-24):</strong><br>Lvl 2: ID 61002 | Lvl 24: ID 99999<br>Total Team Members: 1,245`;
+                list.innerHTML = `Lvl 2: ID 61002 | Lvl 24: ID 99999<br>Total Team: 1,245 Members`;
             }
         }, 800);
     }
@@ -168,25 +170,23 @@
     function updateLog(msg) {
         const log = document.getElementById('admin-log');
         const time = new Date().toLocaleTimeString();
-        log.innerHTML = `<div style="border-bottom:1px solid #222; padding:3px;">[${time}] ${msg}</div>` + log.innerHTML;
+        log.innerHTML = `<div style="border-bottom:1px solid #222;">[${time}] ${msg}</div>` + log.innerHTML;
     }
 
     function gift() {
         const tid = document.getElementById('target-id').value;
         const opt = document.getElementById('plan-opt').value;
         if(!tid) return alert("Enter ID");
-        const msg = `Admin gifted Plan ${opt} to ID: ${tid}`;
-        toast(`✅ ${msg}`);
-        updateLog(msg);
+        toast(`✅ Plan ${opt} Gifted to ID ${tid}`);
+        updateLog(`Gifted Plan ${opt} to ID ${tid}`);
     }
 
     function buy(lvl) {
-        const msg = `ID: ${myId} upgraded to Level ${lvl}`;
         toast(`🔄 Processing Level ${lvl}...`);
         setTimeout(() => { 
             setActive(lvl); 
-            toast(`🔥 SUCCESS: ${msg}`);
-            updateLog(msg);
+            toast(`🔥 ID ${myId} Activated Level ${lvl}`);
+            updateLog(`ID ${myId} Upgraded Level ${lvl}`);
         }, 2000);
     }
 
@@ -195,21 +195,20 @@
         const btn = document.getElementById('b-' + lvl);
         const label = document.getElementById('l-' + lvl);
         if(card) card.style.borderColor = "var(--green)";
-        if(btn) { btn.innerText = "ACTIVATED"; btn.disabled = true; btn.style.background = "#15803d"; }
+        if(btn) { btn.innerText = "ACTIVE"; btn.disabled = true; btn.style.background = "#15803d"; }
         if(label) label.style.display = "block";
     }
 
     function sendCash() {
         const tid = document.getElementById('target-id').value;
         const amt = document.getElementById('cash-amt').value;
-        if(!tid || !amt) return alert("Fill ID and Amount");
-        const msg = `Admin sent ${amt} USDT to ID: ${tid}`;
-        toast(`🎁 ${msg}`);
-        updateLog(msg);
+        if(!tid || !amt) return alert("Error: ID or Amount missing");
+        toast(`🎁 Sent ${amt} USDT to ID ${tid}`);
+        updateLog(`Sent ${amt} USDT to ID ${tid}`);
     }
 
     function randomAlerts() {
-        const m = ["ID 59571 just joined! 🚀", "ID 4810 earned 30 USDT! 🔥", "Admin gifted Plan 12! 🎁"];
+        const m = ["ID 59571 joined! 🚀", "ID 4810 earned 30 USDT! 🔥", "New Upgrade Lvl 5!"];
         setInterval(() => { if(wallet) toast(m[Math.floor(Math.random()*m.length)]); }, 4000);
     }
 
@@ -227,7 +226,7 @@
 
     function copyRef() {
         navigator.clipboard.writeText(document.getElementById('link-text').innerText);
-        alert("Referral Link Copied!");
+        alert("Link Copied!");
     }
 
     window.onload = init;
