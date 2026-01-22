@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChainRush Pro | Final Master</title>
+    <title>ChainRush Pro | Ultimate Master Control</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.8.1/web3.min.js"></script>
     <style>
         :root { --neon-gold: #f3ba2f; --neon-blue: #38bdf8; --bg-deep: #0b0e11; --card-bg: #1e2329; }
@@ -14,15 +14,15 @@
         .btn-gold { background: var(--neon-gold); color: black; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px; }
         input, select { width: 92%; padding: 12px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #333; background: #0b0e11; color: white; }
         .team-box { background: var(--card-bg); margin: 15px; padding: 15px; border-radius: 15px; border: 1px solid #333; }
+        .active-lvl { background: #15803d !important; color: white !important; box-shadow: 0 0 10px #15803d; }
         .plan-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; padding: 15px; }
         .plan-card { background: var(--card-bg); border: 1px solid #333; padding: 15px; border-radius: 15px; text-align: center; }
-        .active-lvl { background: #15803d !important; color: white !important; }
     </style>
 </head>
 <body>
     <div id="live-notify"></div>
     <div class="header-card">
-        <h2 style="margin:0;">ChainRush Pro</h2>
+        <h2>ChainRush Pro</h2>
         <div id="userId" style="font-size: 18px; color: var(--neon-gold); margin: 10px 0;">Login Required</div>
         <button id="mainBtn" onclick="connect()" class="btn-gold" style="width:auto; padding: 8px 30px;">Connect Wallet</button>
     </div>
@@ -32,27 +32,23 @@
         <input type="text" id="targetUser" placeholder="Member Wallet Address (0x...)">
         <select id="levelType">
             <option value="all">Full Upgrade (All 12 Levels)</option>
-            <option value="1">Level 1 Only</option>
+            <option value="1">Level 1</option><option value="2">Level 2</option><option value="3">Level 3</option>
+            <option value="4">Level 4</option><option value="5">Level 5</option><option value="6">Level 6</option>
+            <option value="7">Level 7</option><option value="8">Level 8</option><option value="9">Level 9</option>
+            <option value="10">Level 10</option><option value="11">Level 11</option><option value="12">Level 12</option>
         </select>
-        <button onclick="adminUpgrade()" style="background:#2980b9; color:white;" class="btn-gold">Give Free Plan</button>
+        <button onclick="adminUpgrade()" class="btn-gold" style="background:#2980b9; color:white;">Give Free Plan</button>
         <hr style="border:0.5px solid #333; margin:15px 0;">
         <input type="number" id="cashAmount" placeholder="Enter USDT Amount">
-        <button onclick="adminGift()" style="background:#27ae60; color:white;" class="btn-gold">Send Cash Gift</button>
-    </div>
-
-    <div id="refArea" style="display:none; text-align:center; padding:15px; background:rgba(56,189,248,0.1); margin:15px; border-radius:15px; border:1px dashed var(--neon-blue);">
-        <small>YOUR REFERRAL LINK</small>
-        <div id="refLink" style="font-size:11px; margin:10px 0; color:var(--neon-blue); word-break:break-all;"></div>
-        <button onclick="copyRef()" style="background:var(--neon-blue); color:white; border:none; padding:5px 15px; border-radius:5px;">COPY LINK</button>
+        <button onclick="adminGift()" class="btn-gold" style="background:#27ae60; color:white;">Send Cash Gift</button>
     </div>
 
     <div class="team-box">
-        <div style="display:flex; justify-content:space-between; margin-bottom:10px; gap:5px;">
-            <button onclick="showTeam('direct')" style="flex:1; background:#333; color:white; border:none; padding:10px; border-radius:5px; cursor:pointer;">Direct Team</button>
-            <button onclick="showTeam('indirect')" style="flex:1; background:#333; color:white; border:none; padding:10px; border-radius:5px; cursor:pointer;">Indirect Team</button>
+        <div style="display:flex; gap:5px; margin-bottom:10px;">
+            <button onclick="updateTeamDisplay('direct')" style="flex:1; background:#333; color:white; border:none; padding:10px; border-radius:5px; cursor:pointer;">Direct Team</button>
+            <button onclick="updateTeamDisplay('indirect')" style="flex:1; background:#333; color:white; border:none; padding:10px; border-radius:5px; cursor:pointer;">Indirect Team</button>
         </div>
-        <input type="text" id="idSearch" placeholder="Search Member ID..." onkeyup="searchID()">
-        <div id="teamDisplay" style="font-size:13px; color:#bdc3c7; min-height:40px;">Connect wallet to see team.</div>
+        <div id="teamDisplay" style="font-size:13px; color:#bdc3c7; min-height:40px;">No members yet.</div>
     </div>
 
     <div class="plan-grid" id="planGrid"></div>
@@ -61,6 +57,7 @@
         const OWNER = "0x40642a42Eb9EDbf936C5DA1AE71E5d762A3B0f46";
         const prices = [30, 60, 120, 240, 480, 960, 1920, 3840, 7680, 15360, 30720, 61440];
         let account = "";
+        let database = { direct: [], indirect: [] };
 
         function init() {
             const grid = document.getElementById('planGrid');
@@ -74,59 +71,50 @@
                 const accs = await window.ethereum.request({ method: 'eth_requestAccounts' });
                 account = accs[0];
                 const isOwner = (account.toLowerCase() === OWNER.toLowerCase());
-                
-                // Set ID
                 document.getElementById('userId').innerText = isOwner ? "ID: 3370 (OWNER)" : "ID: " + parseInt(account.substring(account.length-4), 16);
-                document.getElementById('mainBtn').innerText = "Wallet Connected";
-                
-                // Referral & Admin View
-                document.getElementById('refArea').style.display = "block";
-                document.getElementById('refLink').innerText = window.location.origin + "/?ref=" + account;
+                document.getElementById('mainBtn').innerText = "Connected";
                 if(isOwner) {
                     document.getElementById('masterPanel').style.display = 'block';
-                    // Auto-activate all 12 levels for Owner
-                    for(let i=0; i<12; i++) {
-                        let btn = document.getElementById(`lvl-btn-${i}`);
-                        btn.innerText = "ACTIVE"; btn.className = "btn-gold active-lvl";
-                    }
+                    for(let i=0; i<12; i++) activateLevelUI(i);
                 }
-                document.getElementById('teamDisplay').innerText = "Direct: 0 | Indirect: 0";
             }
+        }
+
+        function activateLevelUI(idx) {
+            let btn = document.getElementById(`lvl-btn-${idx}`);
+            if(btn) { btn.innerText = "ACTIVE"; btn.className = "btn-gold active-lvl"; }
         }
 
         function adminUpgrade() {
             const target = document.getElementById('targetUser').value;
-            if(!target || target.length < 40) return alert("Please enter a valid wallet address!");
-            notify(`🚀 Success: All 12 Levels activated for user ${target.substring(0,6)}...`);
+            const lvl = document.getElementById('levelType').value;
+            if(!target || target.length < 40) return alert("Enter valid address!");
+            
+            // ممبر کو ڈیٹا بیس میں ڈالیں
+            const id = parseInt(target.substring(target.length-4), 16);
+            database.direct.push({id: id, addr: target, level: lvl});
+            
+            notify(`🚀 Success: ${lvl === 'all' ? 'All Levels' : 'Level '+lvl} gifted to ID: ${id}`);
+            updateTeamDisplay('direct');
         }
 
         function adminGift() {
             const amt = document.getElementById('cashAmount').value;
-            const target = document.getElementById('targetUser').value;
-            if(!amt || !target) return alert("Enter address and amount!");
-            notify(`🎁 Gift: ${amt} USDT sent to ${target.substring(0,6)}...`);
+            if(!amt) return alert("Enter amount!");
+            notify(`🎁 Gift: ${amt} USDT sent successfully!`);
         }
 
-        function showTeam(type) {
-            if(!account) return alert("Connect wallet first!");
+        function updateTeamDisplay(type) {
             const display = document.getElementById('teamDisplay');
-            display.innerHTML = type === 'direct' ? "<b>Direct:</b> ID 3450, ID 3488" : "<b>Indirect:</b> ID 3610, ID 3615";
-        }
-
-        function searchID() {
-            const val = document.getElementById('idSearch').value;
-            if(val) document.getElementById('teamDisplay').innerHTML = `Searching ID ${val}... Member Found (Lvl 1)`;
+            const members = database[type];
+            if(members.length === 0) display.innerHTML = `No ${type} members yet.`;
+            else display.innerHTML = members.map(m => `ID: ${m.id} | Level: ${m.level} | ${m.addr.substring(0,6)}...`).join('<br>');
         }
 
         function notify(msg) {
             const n = document.getElementById('live-notify');
             n.innerText = msg; n.style.display = 'block';
             setTimeout(() => n.style.display = 'none', 5000);
-        }
-
-        function copyRef() {
-            navigator.clipboard.writeText(document.getElementById('refLink').innerText);
-            alert("Copied!");
         }
 
         init();
