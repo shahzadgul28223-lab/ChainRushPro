@@ -1,4 +1,4 @@
-ard<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -12,7 +12,6 @@ ard<!DOCTYPE html>
         .header { background: linear-gradient(180deg, #1e40af, #0b0e11); padding: 30px 20px; text-align: center; border-bottom: 3px solid var(--gold); }
         .user-avatar { width: 80px; height: 80px; border-radius: 50%; border: 3px solid var(--gold); margin: 10px auto; display: block; object-fit: cover; }
         
-        /* Live Notification Styles (Top) */
         #live-notify { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: rgba(15, 18, 22, 0.98); border-bottom: 3px solid var(--gold); padding: 10px 20px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); display: none; z-index: 99999; animation: slideDown 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); min-width: 280px; border: 1px solid #333; align-items: center; }
         .notify-flex { display: flex; align-items: center; gap: 15px; }
         .notify-img { width: 45px; height: 45px; border-radius: 50%; border: 2px solid var(--gold); background: #000; }
@@ -27,6 +26,10 @@ ard<!DOCTYPE html>
         .box { background: var(--card); padding: 15px; border-radius: 12px; border: 1px solid #333; text-align: center; }
         .box h4 { margin: 0; font-size: 10px; color: #888; text-transform: uppercase; }
         .box p { margin: 5px 0 0; font-size: 16px; color: var(--gold); font-weight: bold; }
+
+        .report-section { background: var(--card); margin: 15px; padding: 15px; border-radius: 12px; border: 1px solid #333; }
+        .report-header { color: var(--blue); font-size: 14px; border-bottom: 1px solid #333; padding-bottom: 8px; margin-bottom: 10px; font-weight: bold; }
+        .team-row { display: flex; justify-content: space-between; font-size: 11px; padding: 6px 0; border-bottom: 1px solid #222; }
 
         .admin-panel { background: #1a1d21; margin: 15px; padding: 15px; border-radius: 12px; border: 1px solid var(--red); display: none; }
         .plan-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding: 15px; }
@@ -57,14 +60,17 @@ ard<!DOCTYPE html>
 <div class="header">
     <button onclick="connectWallet()" class="btn btn-blue" id="wallet-btn" style="width:auto; margin-bottom:10px;">Connect Wallet</button>
     <div id="wallet-addr" style="font-size: 10px; color: #888; margin-bottom: 10px;">Not Connected</div>
-    <div style="font-size: 22px; color: var(--gold); font-weight: bold;">ID: 4510</div>
+    <div id="user-display-id" style="font-size: 22px; color: var(--gold); font-weight: bold;">ID: 4510</div>
     <img src="https://i.pravatar.cc/150?u=4510" class="user-avatar">
 </div>
 
 <div class="admin-panel" id="admin-panel">
     <h4 style="margin:0; color:var(--red);">ADMIN CONTROL PANEL</h4>
-    <input type="text" id="target-id" placeholder="Enter Wallet Address">
-    <button onclick="adminGiftPlan()" class="btn btn-red">GIFT NEXT PLAN (FREE)</button>
+    <p style="font-size: 10px; color: #ccc;">Step-by-Step Gifting System</p>
+    <input type="text" id="target-id" placeholder="Enter Wallet Address (0x...)">
+    <button onclick="adminGiftPlan()" class="btn btn-red">UNLOCK NEXT LEVEL FOR USER</button>
+    <h4 style="margin:15px 0 5px 0; color:var(--blue); font-size: 12px;">RECENT MEMBERS</h4>
+    <div id="admin-member-list" style="max-height: 150px; overflow-y: auto; font-size: 10px; background: #000; padding: 5px; border-radius: 5px;"></div>
 </div>
 
 <div class="referral-box">
@@ -75,13 +81,26 @@ ard<!DOCTYPE html>
 <div class="stats-grid">
     <div class="box"><h4>Highest Level</h4><p id="stat-level">0</p></div>
     <div class="box"><h4>Total Income</h4><p id="stat-total">$0.00</p></div>
+    <div class="box"><h4>Direct Income</h4><p id="stat-direct">$0.00</p></div>
+    <div class="box"><h4>Indirect Income</h4><p id="stat-indirect">$0.00</p></div>
+</div>
+
+<div class="report-section">
+    <div class="report-header">TEAM REPORT (5 LEVELS)</div>
+    <div id="team-content">
+        <div class="team-row"><span>Level 1 (Direct)</span><span id="t-l1">0 Members</span></div>
+        <div class="team-row"><span>Level 2</span><span id="t-l2">0 Members</span></div>
+        <div class="team-row"><span>Level 3</span><span id="t-l3">0 Members</span></div>
+        <div class="team-row"><span>Level 4</span><span id="t-l4">0 Members</span></div>
+        <div class="team-row"><span>Level 5</span><span id="t-l5">0 Members</span></div>
+    </div>
 </div>
 
 <div class="plan-grid" id="level-grid"></div>
 
 <script>
     const OWNER = "0x40642a42eb9edbf936c5da1ae71e5d762a3b0f46".toLowerCase();
-    const USDT_CONTRACT = "0x55d398326f99059fF775485246999027B3197955"; // USDT BEP20
+    const USDT_CONTRACT = "0x55d398326f99059fF775485246999027B3197955";
     const PRICING = [30, 60, 120, 240, 480, 960, 1920, 3840, 7680, 15360, 30720, 61440];
     
     let web3;
@@ -96,16 +115,32 @@ ard<!DOCTYPE html>
             document.getElementById('wallet-addr').innerText = currentAccount;
             
             if(currentAccount === OWNER) {
-                userPlans = 12;
+                userPlans = 12; // ایڈمن کو تمام پلان فری مل گئے
                 document.getElementById('admin-panel').style.display = 'block';
-                toast("Admin Mode Active");
+                toast("Welcome Admin! All Levels Unlocked.");
             } else {
                 userPlans = parseInt(localStorage.getItem('plans_' + currentAccount) || 0);
                 document.getElementById('admin-panel').style.display = 'none';
             }
+            
+            loadUserData();
             renderLevels();
+            updateAdminList();
             toast("Connected!");
         } else { alert("Please use Trust Wallet or MetaMask"); }
+    }
+
+    function loadUserData() {
+        const total = parseFloat(localStorage.getItem('total_' + currentAccount) || 0);
+        document.getElementById('stat-level').innerText = userPlans;
+        document.getElementById('stat-total').innerText = "$" + total.toFixed(2);
+        document.getElementById('stat-direct').innerText = "$" + (total * 0.5).toFixed(2);
+        document.getElementById('stat-indirect').innerText = "$" + (total * 0.1).toFixed(2);
+
+        for(let i=1; i<=5; i++) {
+            const count = localStorage.getItem('team_l' + i + '_' + currentAccount) || "0";
+            document.getElementById('t-l' + i).innerText = count + " Members";
+        }
     }
 
     function renderLevels() {
@@ -114,6 +149,9 @@ ard<!DOCTYPE html>
         PRICING.forEach((price, i) => {
             const lvl = i + 1;
             const active = lvl <= userPlans;
+            // صرف اگلا پلان ان لاک ہو گا، باقی سب لاک رہیں گے
+            const canUnlock = (lvl === userPlans + 1);
+
             grid.innerHTML += `
                 <div class="plan-card" style="border-color: ${active ? 'var(--green)' : '#333'}">
                     <span class="active-tag" style="display: ${active ? 'block' : 'none'}">ACTIVE</span>
@@ -121,20 +159,17 @@ ard<!DOCTYPE html>
                     <p>$${price}</p>
                     <button class="btn ${active ? 'btn-blue' : 'btn-gold'}" 
                         onclick="${active ? '' : `processPayment(${lvl}, ${price})`}"
-                        ${(!active && lvl !== userPlans + 1) ? 'disabled style="opacity:0.3"' : ''}>
-                        ${active ? 'LIFETIME ACTIVE' : (lvl === userPlans + 1 ? 'UNLOCK' : 'LOCKED')}
+                        ${(!active && !canUnlock) ? 'disabled style="opacity:0.2"' : ''}>
+                        ${active ? 'LIFETIME ACTIVE' : (canUnlock ? 'UNLOCK' : 'LOCKED')}
                     </button>
                 </div>`;
         });
-        document.getElementById('stat-level').innerText = userPlans;
     }
 
     async function processPayment(lvl, amount) {
         if(!currentAccount) return toast("Connect Wallet First!");
-        toast("Requesting USDT Transfer...");
-        
+        toast("Processing Payment...");
         try {
-            // BEP20 USDT Transfer Logic
             const amountInWei = web3.utils.toWei(amount.toString(), 'ether');
             const abi = [{"constant":false,"inputs":[{"name":"_to","type":"address"},{"name":"_value","type":"uint256"}],"name":"transfer","outputs":[{"name":"","type":"bool"}],"type":"function"}];
             const contract = new web3.eth.Contract(abi, USDT_CONTRACT);
@@ -144,39 +179,51 @@ ard<!DOCTYPE html>
             userPlans = lvl;
             localStorage.setItem('plans_' + currentAccount, userPlans);
             renderLevels();
-            toast("Payment Success! Level " + lvl + " Unlocked.");
+            toast("Level " + lvl + " Activated!");
         } catch (e) {
-            toast("Transaction Failed");
+            toast("Payment Cancelled");
         }
     }
 
-    // Live Notification Logic (Every 5 seconds)
-    const activities = ["New Member Joined", "Upgraded Level", "Received Profit"];
-    function showNotify() {
-        const notifyEl = document.getElementById('live-notify');
-        const msgEl = document.getElementById('notify-msg');
-        const imgEl = document.getElementById('notify-user-img');
-        
-        const act = activities[Math.floor(Math.random() * activities.length)];
-        const id = Math.floor(10000 + Math.random() * 90000);
-        const img = `https://i.pravatar.cc/150?img=${Math.floor(Math.random() * 70)}`;
-        
-        msgEl.innerHTML = `${act} <br><span class="notify-highlight">ID: ${id}</span>`;
-        imgEl.src = img;
-        notifyEl.style.display = "flex";
-
-        setTimeout(() => { notifyEl.style.display = "none"; }, 3500);
-    }
-
-    setInterval(showNotify, 5000); // نوٹیفیکیشن ہر 5 سیکنڈ بعد بدلے گی
-
     function adminGiftPlan() {
         const addr = document.getElementById('target-id').value.toLowerCase();
-        if(addr.length < 20) return alert("Enter valid wallet");
-        let p = parseInt(localStorage.getItem('plans_' + addr) || 0);
-        localStorage.setItem('plans_' + addr, p + 1);
-        toast("Level Gifted Successfully!");
+        if(addr.length < 20) return alert("Enter valid wallet address");
+        
+        // ممبر کا موجودہ پلان چیک کر کے اگلا پلان دینا (سٹیپ بائی سٹیپ)
+        let currentP = parseInt(localStorage.getItem('plans_' + addr) || 0);
+        if(currentP >= 12) return toast("User already at Max Level!");
+        
+        let nextP = currentP + 1;
+        localStorage.setItem('plans_' + addr, nextP);
+        toast("Level " + nextP + " Gifted to User!");
+        updateAdminList();
     }
+
+    function updateAdminList() {
+        if(currentAccount !== OWNER) return;
+        const list = document.getElementById('admin-member-list');
+        list.innerHTML = "";
+        // لوکل اسٹوریج سے ممبرز دکھانا (ڈیمو)
+        Object.keys(localStorage).forEach(key => {
+            if(key.startsWith('plans_')) {
+                let wallet = key.split('_')[1];
+                let lvl = localStorage.getItem(key);
+                list.innerHTML += `<div class='team-row'><span>${wallet.substring(0,10)}...</span><span>Level: ${lvl}</span></div>`;
+            }
+        });
+    }
+
+    // Live Notifications
+    setInterval(() => {
+        const notifyEl = document.getElementById('live-notify');
+        const acts = ["New Member Joined", "Level Upgraded", "Profit Distributed"];
+        const act = acts[Math.floor(Math.random() * acts.length)];
+        const id = Math.floor(10000 + Math.random() * 90000);
+        document.getElementById('notify-user-img').src = `https://i.pravatar.cc/150?img=${Math.floor(Math.random() * 70)}`;
+        document.getElementById('notify-msg').innerHTML = `${act} <br><span class="notify-highlight">ID: ${id}</span>`;
+        notifyEl.style.display = "flex";
+        setTimeout(() => notifyEl.style.display = "none", 3500);
+    }, 5000);
 
     function toast(m) {
         const t = document.getElementById('notify-toast');
