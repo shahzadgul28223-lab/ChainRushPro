@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChainRush Pro | Master Admin</title>
+    <title>ChainRush Pro | Master Edition</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.8.1/web3.min.js"></script>
     <style>
         :root { --neon-gold: #f3ba2f; --neon-blue: #38bdf8; --bg-deep: #0b0e11; --card-bg: #1e2329; }
@@ -11,10 +11,8 @@
         #live-notify { position: fixed; top: 15px; left: 50%; transform: translateX(-50%); z-index: 10000; background: linear-gradient(135deg, #1e40af, #000); border: 1px solid var(--neon-gold); padding: 10px 20px; border-radius: 30px; display: none; font-size: 11px; box-shadow: 0 0 15px var(--neon-gold); }
         .header-card { background: linear-gradient(180deg, #1e40af, #0b0e11); padding: 30px 20px; text-align: center; border-bottom: 2px solid var(--neon-gold); }
         .admin-box { background: #161a1e; margin: 15px; padding: 20px; border-radius: 15px; border: 2px solid var(--neon-gold); display: none; }
-        .ref-area { background: rgba(56, 189, 248, 0.1); border: 1px dashed var(--neon-blue); margin: 15px; padding: 15px; border-radius: 15px; text-align: center; }
         .btn-master { background: var(--neon-gold); color: black; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px; }
         input, select { width: 95%; padding: 12px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #333; background: #0b0e11; color: white; }
-        .team-section { background: var(--card-bg); margin: 15px; padding: 15px; border-radius: 15px; }
         .plan-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; padding: 15px; }
         .plan-card { background: var(--card-bg); border: 1px solid #333; padding: 15px; border-radius: 15px; text-align: center; }
     </style>
@@ -24,40 +22,27 @@
     <div class="header-card">
         <h2 style="margin:0;">ChainRush Pro</h2>
         <div id="userId" style="font-size: 18px; color: var(--neon-gold); margin: 10px 0;">Login Required</div>
-        <button onclick="connect()" class="btn-master" style="width:auto; padding: 8px 30px;">Connect Wallet</button>
+        <button id="connectBtn" onclick="connect()" class="btn-master" style="width:auto; padding: 8px 30px;">Connect Wallet</button>
     </div>
 
     <div id="adminPanel" class="admin-box">
         <h3 style="color: var(--neon-gold); margin-top:0;">Master Admin Control</h3>
         <input type="text" id="targetAddr" placeholder="User Wallet Address (0x...)">
-        
-        <label>Select Plan to Gift:</label>
         <select id="levelSelect">
             <option value="all">Full Upgrade (All 12 Levels)</option>
             <option value="1">Level 1 Only</option>
             <option value="2">Level 2 Only</option>
-            </select>
+        </select>
         <button onclick="masterUpgrade()" style="background:#2980b9; color:white;" class="btn-master">Give Free Plan</button>
-        
         <hr style="border:0.5px solid #333; margin:20px 0;">
-        
-        <input type="number" id="giftAmount" placeholder="Enter USDT Amount (e.g. 50)">
+        <input type="number" id="giftAmount" placeholder="Enter USDT Amount">
         <button onclick="masterGift()" style="background:#27ae60; color:white;" class="btn-master">Send Cash Gift</button>
     </div>
 
-    <div class="ref-area">
-        <small>REFERRAL LINK</small>
-        <div id="myRef" style="font-size:11px; margin:10px 0; color:var(--neon-blue);">Connect wallet first</div>
-        <button onclick="copyRef()" style="background:var(--neon-blue); border:none; color:white; padding:5px 15px; border-radius:5px;">COPY</button>
-    </div>
-
-    <div class="team-section">
-        <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-            <button onclick="showTeam('direct')" style="flex:1; margin-right:5px;">Direct Team</button>
-            <button onclick="showTeam('indirect')" style="flex:1;">Indirect Team</button>
-        </div>
-        <input type="text" id="searchID" placeholder="Search Member ID..." onkeyup="searchMember()">
-        <div id="teamList" style="font-size:13px; max-height:150px; overflow-y:auto;">Login to see team members</div>
+    <div id="refArea" style="display:none; text-align:center; padding:15px; background:rgba(56,189,248,0.1); margin:15px; border-radius:15px; border:1px dashed var(--neon-blue);">
+        <small>YOUR REFERRAL LINK</small>
+        <div id="myRef" style="font-size:11px; margin:10px 0; color:var(--neon-blue); word-break:break-all;"></div>
+        <button onclick="copyRef()" style="background:var(--neon-blue); color:white; border:none; padding:5px 15px; border-radius:5px;">COPY</button>
     </div>
 
     <div class="plan-grid" id="planGrid"></div>
@@ -70,34 +55,45 @@
         function init() {
             const grid = document.getElementById('planGrid');
             prices.forEach((p, i) => {
-                grid.innerHTML += `<div class="plan-card"><h3>Level ${i+1}</h3><p>${p} USDT</p><button class="btn-master" onclick="userBuy(${i})">Activate</button></div>`;
+                grid.innerHTML += `<div class="plan-card"><h3>Level ${i+1}</h3><p>${p} USDT</p><button class="btn-master">Activate</button></div>`;
             });
         }
 
         async function connect() {
             if (window.ethereum) {
-                const accs = await window.ethereum.request({method:'eth_requestAccounts'});
-                account = accs[0];
-                const isOwner = (account.toLowerCase() === OWNER.toLowerCase());
-                document.getElementById('userId').innerText = isOwner ? "ID: 3370 (OWNER)" : "ID: " + (Math.floor(Math.random()*500)+3400);
-                document.getElementById('myRef').innerText = window.location.origin + "/?ref=" + account;
-                if(isOwner) document.getElementById('adminPanel').style.display = 'block';
-                document.getElementById('teamList').innerHTML = "No members found yet.";
-            }
+                try {
+                    const accs = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    account = accs[0];
+                    updateUI();
+                } catch (err) { alert("Connection failed!"); }
+            } else { alert("Please open in Trust Wallet or MetaMask browser!"); }
+        }
+
+        function updateUI() {
+            const isOwner = (account.toLowerCase() === OWNER.toLowerCase());
+            
+            // آئی ڈی کو فکس کرنے کے لیے والٹ ایڈریس کے آخری 4 ہندسے استعمال کریں
+            const shortID = account.substring(account.length - 4);
+            document.getElementById('userId').innerText = isOwner ? "ID: 3370 (OWNER)" : "ID: " + parseInt(shortID, 16);
+            
+            document.getElementById('connectBtn').innerText = "Connected";
+            document.getElementById('refArea').style.display = "block";
+            document.getElementById('myRef').innerText = window.location.origin + "/?ref=" + account;
+            
+            if(isOwner) document.getElementById('adminPanel').style.display = 'block';
         }
 
         function masterUpgrade() {
             const target = document.getElementById('targetAddr').value;
-            const lvl = document.getElementById('levelSelect').value;
             if(!target) return alert("Enter address!");
-            broadcast(`🚀 Admin activated ${lvl === 'all' ? 'All 12 Levels' : 'Level ' + lvl} for user ${target.substring(0,6)}`);
+            broadcast(`🚀 Admin activated Plan for user ${target.substring(0,6)}`);
         }
 
         function masterGift() {
             const target = document.getElementById('targetAddr').value;
             const amt = document.getElementById('giftAmount').value;
-            if(!target || !amt) return alert("Enter address and amount!");
-            broadcast(`🎁 Admin sent ${amt} USDT Cash Gift to user ${target.substring(0,6)}`);
+            if(!target || !amt) return alert("Enter details!");
+            broadcast(`🎁 Admin sent ${amt} USDT Gift to user ${target.substring(0,6)}`);
         }
 
         function broadcast(msg) {
@@ -106,18 +102,9 @@
             setTimeout(() => n.style.display = 'none', 5000);
         }
 
-        function showTeam(type) {
-            document.getElementById('teamList').innerHTML = type === 'direct' ? "Direct: ID 3450, ID 3455" : "Indirect: ID 3510, ID 3522";
-        }
-
-        function searchMember() {
-            const val = document.getElementById('searchID').value;
-            if(val) document.getElementById('teamList').innerHTML = "Searching for ID: " + val + "... Found (Level 1)";
-        }
-
         function copyRef() {
             navigator.clipboard.writeText(document.getElementById('myRef').innerText);
-            alert("Copied!");
+            alert("Link Copied!");
         }
 
         init();
