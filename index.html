@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChainRush Pro | USDT BEP20 Ecosystem</title>
+    <title>ChainRush Pro | Global USDT Ecosystem</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.8.1/web3.min.js"></script>
     <style>
         :root { --neon-gold: #f3ba2f; --neon-blue: #38bdf8; --bg-deep: #0b0e11; --card-bg: #1e2329; }
@@ -14,20 +14,31 @@
             position: fixed; top: 15px; left: 50%; transform: translateX(-50%); z-index: 10000;
             background: linear-gradient(135deg, #1e40af, #000); border: 1px solid var(--neon-gold);
             padding: 12px 25px; border-radius: 30px; box-shadow: 0 0 20px rgba(243,186,47,0.4);
-            display: none; font-size: 13px; font-weight: bold; white-space: nowrap;
+            display: none; font-size: 12px; font-weight: bold; white-space: nowrap;
         }
 
         .header-card { background: linear-gradient(180deg, #1e40af, #0b0e11); padding: 40px 20px; text-align: center; border-bottom: 2px solid var(--neon-gold); }
-        .user-img { width: 95px; height: 95px; border-radius: 50%; border: 3px solid var(--neon-gold); margin-bottom: 15px; box-shadow: 0 0 15px var(--neon-gold); }
+        .user-img { width: 90px; height: 90px; border-radius: 50%; border: 3px solid var(--neon-gold); margin-bottom: 10px; box-shadow: 0 0 15px var(--neon-gold); }
+        
         .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 15px; }
         .stat-box { background: var(--card-bg); padding: 15px; border-radius: 15px; border-left: 4px solid var(--neon-gold); }
         .stat-box small { color: #848e9c; font-size: 10px; text-transform: uppercase; }
-        .stat-box div { color: var(--neon-gold); font-size: 15px; font-weight: bold; margin-top: 5px; }
+        .stat-box div { color: var(--neon-gold); font-size: 14px; font-weight: bold; margin-top: 5px; }
 
-        .ref-box { background: rgba(56, 189, 248, 0.1); border: 1px dashed var(--neon-blue); margin: 15px; padding: 15px; border-radius: 12px; text-align: center; }
+        /* Advanced Team Section */
+        .team-container { background: var(--card-bg); margin: 15px; padding: 15px; border-radius: 20px; border: 1px solid #333; }
+        .team-tabs { display: flex; gap: 10px; margin-bottom: 15px; }
+        .tab-btn { flex: 1; padding: 10px; border-radius: 8px; border: 1px solid var(--neon-blue); background: transparent; color: var(--neon-blue); font-size: 12px; cursor: pointer; font-weight: bold; }
+        .tab-btn.active { background: var(--neon-blue); color: white; }
+        
+        .team-display { display: none; margin-top: 10px; max-height: 300px; overflow-y: auto; }
+        .member-row { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #222; font-size: 13px; background: rgba(255,255,255,0.02); margin-bottom: 5px; border-radius: 8px; }
+        .member-id { color: var(--neon-gold); font-weight: bold; }
+        .member-plan { background: rgba(56, 189, 248, 0.2); color: var(--neon-blue); padding: 4px 8px; border-radius: 5px; font-size: 11px; border: 1px solid var(--neon-blue); }
+
+        .btn-main { background: var(--neon-gold); color: black; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px; }
         .plan-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; padding: 15px; }
-        .plan-card { background: var(--card-bg); border: 1px solid #333; padding: 20px; border-radius: 20px; text-align: center; }
-        button { background: var(--neon-gold); color: black; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px; }
+        .plan-card { background: var(--card-bg); border: 1px solid #333; padding: 18px; border-radius: 18px; text-align: center; }
     </style>
 </head>
 <body>
@@ -35,17 +46,10 @@
     <div id="live-notify"></div>
 
     <div class="header-card">
-        <input type="file" id="picInput" style="display:none" onchange="loadPic(event)">
-        <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" class="user-img" id="userPfp" onclick="document.getElementById('picInput').click()">
+        <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" class="user-img">
         <h2 style="margin:5px 0;">ChainRush Pro</h2>
         <div id="userId" style="font-size: 18px; color: var(--neon-gold); font-weight: bold;">ID: 3370</div>
-        <button onclick="connect()" style="width:auto; padding: 10px 30px; margin-top: 15px;">Connect Wallet</button>
-    </div>
-
-    <div class="ref-box">
-        <small style="color:#848e9c">SHARE REFERRAL LINK</small>
-        <span id="myRef" style="display:block; font-size:11px; margin:10px 0; color:var(--neon-blue);">Connect Wallet to get link</span>
-        <button onclick="copyRef()" style="background:var(--neon-blue); color:white; padding:8px; font-size:12px;">COPY LINK</button>
+        <button onclick="connect()" style="width:auto; padding: 8px 25px; margin-top: 15px; background:var(--neon-gold); border-radius:10px; border:none; font-weight:bold;">Connect Wallet</button>
     </div>
 
     <div class="stat-grid">
@@ -53,8 +57,23 @@
         <div class="stat-box"><small>Total Withdraw</small><div id="s2">0.00 USDT</div></div>
         <div class="stat-box"><small>Direct Income</small><div id="s3">0.00 USDT</div></div>
         <div class="stat-box"><small>5-Level Team Income</small><div id="s4">0.00 USDT</div></div>
-        <div class="stat-box"><small>Total Profit</small><div id="s5">0.00 USDT</div></div>
-        <div class="stat-box"><small>Downline Team</small><div id="s6">0 Members</div></div>
+    </div>
+
+    <div class="team-container">
+        <button class="btn-main" style="background:var(--neon-blue); color:white; margin-bottom:15px;" onclick="toggleTeamPanel()">View Team Detailed Structure</button>
+        
+        <div id="teamPanel" style="display:none;">
+            <div class="team-tabs">
+                <button class="tab-btn active" id="btnDirect" onclick="switchTab('direct')">Direct Team</button>
+                <button class="tab-btn" id="btnIndirect" onclick="switchTab('indirect')">Indirect Team</button>
+            </div>
+
+            <div id="directList" class="team-display" style="display:block;">
+                </div>
+            
+            <div id="indirectList" class="team-display">
+                </div>
+        </div>
     </div>
 
     <div class="plan-grid" id="planGrid"></div>
@@ -62,61 +81,70 @@
     <script>
         const OWNER = "0x40642a42Eb9EDbf936C5DA1AE71E5d762A3B0f46";
         const prices = [10, 20, 40, 80, 160, 320, 640, 1280, 2560, 5120, 10240, 20480];
-        let account;
 
-        // Decentralized Notification Engine
+        // Decenteralized Notification Logic
         setInterval(() => {
             const notify = document.getElementById('live-notify');
-            const ids = Math.floor(Math.random() * 100) + 3350;
-            const lvls = Math.floor(Math.random() * 12) + 1;
-            const usdt = [10, 50, 100, 500][Math.floor(Math.random() * 4)];
-            
+            const ids = Math.floor(Math.random() * 200) + 3350;
             const msgs = [
-                `🔔 User ${ids} received a gift from ChainRush Decentralized System!`,
-                `🔔 User ${ids} just upgraded to Level ${lvls}!`,
-                `🔔 ID ${ids} earned ${usdt} USDT from 5-Level Team Overflow!`,
-                `🔔 New Participant ${ids+7} registered in ChainRush Ecosystem!`
+                `🔔 ID ${ids} joined via ChainRush Decentralized System!`,
+                `🔔 User ${ids} just upgraded to a new Plan!`,
+                `🔔 ID ${ids} received Team Spillover Income!`
             ];
-            
             notify.innerText = msgs[Math.floor(Math.random() * msgs.length)];
             notify.style.display = 'block';
-            setTimeout(() => { notify.style.display = 'none'; }, 3500);
-        }, 4000);
+            setTimeout(() => { notify.style.display = 'none'; }, 3000);
+        }, 5000);
 
         function init() {
             const grid = document.getElementById('planGrid');
             prices.forEach((p, i) => {
-                grid.innerHTML += `<div class="plan-card"><h3>Level ${i+1}</h3><p>${p} USDT</p><button id="btn-${i}" onclick="activate(${i+1},${p})">Activate</button></div>`;
+                grid.innerHTML += `<div class="plan-card"><h3>Lvl ${i+1}</h3><p>${p} USDT</p><button id="lvl-btn-${i}" class="btn-main" style="font-size:12px;">Activate</button></div>`;
             });
+            loadDummyTeam();
+        }
+
+        function toggleTeamPanel() {
+            const panel = document.getElementById('teamPanel');
+            panel.style.display = (panel.style.display === 'none') ? 'block' : 'none';
+        }
+
+        function switchTab(type) {
+            document.getElementById('directList').style.display = (type === 'direct') ? 'block' : 'none';
+            document.getElementById('indirectList').style.display = (type === 'indirect') ? 'block' : 'none';
+            document.getElementById('btnDirect').classList.toggle('active', type === 'direct');
+            document.getElementById('btnIndirect').classList.toggle('active', type === 'indirect');
+        }
+
+        function loadDummyTeam() {
+            const dList = document.getElementById('directList');
+            const iList = document.getElementById('indirectList');
+            
+            // Direct Team Members
+            for(let k=1; k<=3; k++) {
+                dList.innerHTML += `<div class="member-row"><span class="member-id">ID: 33${80+k}</span><span class="member-plan">Plan: Level ${k+1}</span></div>`;
+            }
+            
+            // Indirect Team Members
+            for(let m=1; m<=5; m++) {
+                iList.innerHTML += `<div class="member-row"><span class="member-id">ID: 34${10+m}</span><span class="member-plan">Plan: Level ${m}</span></div>`;
+            }
         }
 
         async function connect() {
             if (window.ethereum) {
                 const accs = await window.ethereum.request({method:'eth_requestAccounts'});
-                account = accs[0];
+                const account = accs[0];
                 const isOwner = account.toLowerCase() === OWNER.toLowerCase();
-                document.getElementById('userId').innerText = isOwner ? "ID: 3370" : "ID: " + (Math.floor(Math.random() * 500) + 3371);
-                document.getElementById('myRef').innerText = window.location.origin + "/?ref=" + account;
-                
-                // If you are owner, all 12 levels show as activated/free
+                document.getElementById('userId').innerText = isOwner ? "ID: 3370" : "ID: 3371";
                 if(isOwner) {
                     for(let i=0; i<12; i++) {
-                        document.getElementById(`btn-${i}`).innerText = "FREE ACCESS";
-                        document.getElementById(`btn-${i}`).style.background = "#22c55e";
+                        const btn = document.getElementById(`lvl-btn-${i}`);
+                        btn.innerText = "FREE ACCESS";
+                        btn.style.background = "#22c55e";
                     }
                 }
             }
-        }
-
-        function copyRef() {
-            navigator.clipboard.writeText(document.getElementById('myRef').innerText);
-            alert("Referral Link Copied!");
-        }
-
-        function loadPic(e) {
-            const r = new FileReader();
-            r.onload = () => document.getElementById('userPfp').src = r.result;
-            r.readAsDataURL(e.target.files[0]);
         }
 
         init();
