@@ -3,204 +3,177 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChainRush Pro | Decentralized Matrix</title>
-    <meta property="og:title" content="ChainRush Pro Decentralized">
+    <title>ChainRush Pro | Official</title>
+    <meta property="og:title" content="ChainRush Pro | Decentralized System">
     <meta property="og:image" content="https://i.ibb.co/vzPRY89/logo.png">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.8.1/web3.min.js"></script>
     <style>
         :root { --gold: #f3ba2f; --blue: #38bdf8; --bg: #0b0e11; --card: #1e2329; --green: #2ecc71; }
         body { background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding-bottom: 50px; }
 
-        /* Background Decentralized Watermark */
-        .plan-card::before { content: "DECENTRALIZED"; position: absolute; font-size: 14px; opacity: 0.05; transform: rotate(-45deg); top: 40%; left: 10%; color: white; pointer-events: none; }
+        /* Color-Full Watermark on Plans */
+        .plan-card { background: var(--card); padding: 30px 15px; border-radius: 15px; text-align: center; border: 1px solid #333; position: relative; overflow: hidden; }
+        .plan-card::before { 
+            content: "ChainRush-Pro Decentralized"; 
+            position: absolute; 
+            font-size: 16px; 
+            font-weight: bold;
+            background: linear-gradient(45deg, var(--gold), var(--blue), var(--green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            opacity: 0.15; 
+            transform: rotate(-30deg); 
+            top: 40%; left: -10%; width: 120%; pointer-events: none; 
+        }
 
-        /* Notifications */
-        #notify-box { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; background: rgba(30, 64, 175, 0.9); border: 1px solid var(--gold); padding: 12px 25px; border-radius: 30px; display: none; font-size: 13px; box-shadow: 0 0 20px var(--gold); }
+        /* Fixed Notification */
+        #notify-toast { position: fixed; top: 15px; left: 50%; transform: translateX(-50%); z-index: 10000; background: linear-gradient(135deg, #1e40af, #000); border: 1px solid var(--gold); padding: 12px 25px; border-radius: 30px; display: none; font-size: 13px; box-shadow: 0 0 15px var(--gold); width: 85%; max-width: 400px; text-align: center; }
 
-        /* Header */
         .header { background: linear-gradient(180deg, #1e40af, #0b0e11); padding: 40px 20px; text-align: center; border-bottom: 3px solid var(--gold); }
-        .logo-img { width: 100px; margin-bottom: 10px; }
-        .profile-section { margin-top: 15px; }
-        .user-photo { width: 80px; height: 80px; border-radius: 50%; border: 3px solid var(--gold); object-fit: cover; cursor: pointer; }
-
-        /* Stats Grid */
+        .logo-main { width: 90px; margin-bottom: 10px; border-radius: 50%; box-shadow: 0 0 20px var(--gold); }
+        .user-avatar { width: 70px; height: 70px; border-radius: 50%; border: 2px solid var(--gold); margin: 10px 0; object-fit: cover; }
+        
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; }
-        .stat-box { background: var(--card); padding: 15px; border-radius: 15px; border: 1px solid #333; text-align: center; }
-        .stat-box h4 { margin: 0; font-size: 11px; color: #aaa; text-transform: uppercase; }
-        .stat-box p { margin: 5px 0 0; font-size: 18px; font-weight: bold; color: var(--gold); }
+        .box { background: var(--card); padding: 15px; border-radius: 12px; border: 1px solid #333; text-align: center; }
+        .box h4 { margin: 0; font-size: 11px; color: #888; }
+        .box p { margin: 5px 0 0; font-size: 18px; color: var(--gold); font-weight: bold; }
 
-        /* Admin & Forms */
-        .panel { background: #161a1e; margin: 15px; padding: 20px; border-radius: 15px; border: 2px solid var(--gold); display: none; }
+        .admin-box { background: #161a1e; margin: 15px; padding: 20px; border-radius: 15px; border: 2px solid var(--gold); display: none; }
         input, select { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px; background: #000; border: 1px solid #444; color: white; box-sizing: border-box; }
-        .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        .btn-gold { background: var(--gold); color: #000; }
-        .btn-blue { background: var(--blue); color: #fff; }
+        .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .btn-blue { background: var(--blue); color: white; }
+        .btn-gold { background: var(--gold); color: black; }
 
-        /* Plans */
         .plan-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; padding: 15px; }
-        .plan-card { background: var(--card); padding: 25px 15px; border-radius: 15px; text-align: center; border: 1px solid #333; position: relative; overflow: hidden; }
-        .plan-card.active { border-color: var(--green); box-shadow: 0 0 10px rgba(46, 204, 113, 0.4); }
-        .active-label { background: var(--green); color: white; font-size: 10px; padding: 3px 10px; border-radius: 10px; position: absolute; top: 10px; right: 10px; display: none; }
+        .active-label { position: absolute; top: 8px; right: 8px; background: var(--green); color: white; font-size: 10px; padding: 3px 8px; border-radius: 5px; display: none; }
     </style>
 </head>
 <body>
 
-<div id="notify-box">Notification message</div>
+<div id="notify-toast">Notification...</div>
 
 <div class="header">
-    <img src="https://i.ibb.co/vzPRY89/logo.png" alt="ChainRush Pro" class="logo-img">
-    <div id="user-id" style="font-size: 22px; font-weight: bold; color: var(--gold);">ID: Connecting...</div>
-    <div class="profile-section">
-        <label for="p-upload"><img id="display-photo" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" class="user-photo"></label>
-        <input type="file" id="p-upload" style="display:none" onchange="previewImg(event)">
+    <img src="https://i.ibb.co/vzPRY89/logo.png" class="logo-main">
+    <div id="display-id" style="font-size: 20px; color: var(--gold); font-weight: bold;">Login Required</div>
+    <div class="profile">
+        <label for="img-in"><img id="user-img" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" class="user-avatar"></label>
+        <input type="file" id="img-in" style="display:none" onchange="loadImg(event)">
     </div>
-    <button id="connect-btn" onclick="connect()" class="btn btn-blue" style="width:auto; padding: 10px 30px; margin-top:15px;">Connect Wallet</button>
+    <button id="conn-btn" onclick="connect()" class="btn btn-blue" style="width:auto; padding: 10px 30px; margin-top: 15px;">Connect Wallet</button>
 </div>
 
-<div id="admin-panel" class="panel">
-    <h3 style="color: var(--gold); margin-top:0;">ADMIN MASTER PANEL</h3>
-    <input type="text" id="target-id" placeholder="Search Member ID or Address">
-    <select id="gift-type">
-        <option value="all">Full Upgrade (Levels 1-12)</option>
-        <option value="1">Plan 1 Only</option><option value="2">Plan 2 Only</option>
-        <option value="3">Plan 3 Only</option><option value="4">Plan 4 Only</option>
-        <option value="5">Plan 5 Only</option><option value="6">Plan 6 Only</option>
-        <option value="7">Plan 7 Only</option><option value="8">Plan 8 Only</option>
-        <option value="9">Plan 9 Only</option><option value="10">Plan 10 Only</option>
-        <option value="11">Plan 11 Only</option><option value="12">Plan 12 Only</option>
+<div id="referral-area" style="display:none; text-align:center; padding:20px; background:rgba(56,189,248,0.1); margin:15px; border-radius:15px; border: 2px dashed var(--blue);">
+    <h4 style="margin:0; color:var(--blue); font-size:12px;">OFFICIAL REFERRAL LINK</h4>
+    <div id="link-text" style="padding:15px; color:white; font-family:monospace; font-size:13px; word-break:break-all;"></div>
+    <button onclick="copyRef()" class="btn btn-blue" style="width:auto; padding:8px 40px;">COPY LINK</button>
+</div>
+
+<div id="owner-panel" class="admin-box">
+    <h3 style="color: var(--gold); margin-top:0;">MASTER ADMIN</h3>
+    <input type="text" id="target-id" placeholder="Enter Member ID">
+    <select id="plan-opt">
+        <option value="all">Full Upgrade (1-12 Levels)</option>
+        <option value="1">Plan 1</option><option value="2">Plan 2</option><option value="3">Plan 3</option>
+        <option value="4">Plan 4</option><option value="5">Plan 5</option><option value="6">Plan 6</option>
+        <option value="7">Plan 7</option><option value="8">Plan 8</option><option value="9">Plan 9</option>
+        <option value="10">Plan 10</option><option value="11">Plan 11</option><option value="12">Plan 12</option>
     </select>
-    <button onclick="giftPlan()" class="btn btn-gold">Give Free Plan</button>
-    <hr style="border: 0.1px solid #333; margin: 20px 0;">
-    <input type="number" id="cash-amt" placeholder="Enter USDT Amount">
-    <button onclick="sendCash()" class="btn btn-blue" style="background: var(--green)">Send Cash Gift (Wallet Auto-Cut)</button>
+    <button onclick="gift()" class="btn btn-gold">Gift Free Plan</button>
+    <hr style="border:0.1px solid #333; margin:20px 0;">
+    <input type="number" id="cash-amt" placeholder="USDT Amount">
+    <button onclick="sendCash()" class="btn" style="background:var(--green); color:white;">Send Cash Gift</button>
 </div>
 
 <div class="stats-grid">
-    <div class="stat-box"><h4>Invest</h4><p id="s-invest">$0</p></div>
-    <div class="stat-box"><h4>Income</h4><p id="s-income">$0</p></div>
-    <div class="stat-box"><h4>Team Invest</h4><p id="t-invest">$0</p></div>
-    <div class="stat-box"><h4>Team Income</h4><p id="t-income">$0</p></div>
-    <div class="stat-box"><h4>Direct Member Joining Income</h4><p id="d-income">$0</p></div>
-    <div class="stat-box"><h4>Indirect / Non-Working</h4><p id="i-income">$0</p></div>
-</div>
-
-<div id="ref-box" style="display:none; text-align:center; padding:15px; background:#161a1e; margin:15px; border-radius:15px; border: 1px dashed var(--blue);">
-    <div style="font-size:11px; margin-bottom:10px;">REFERRAL LINK</div>
-    <div id="ref-link" style="color: var(--blue); font-family: monospace; font-size:12px; margin-bottom:10px;"></div>
-    <button onclick="copyRef()" class="btn btn-blue" style="width:auto; padding:5px 20px;">Copy Link</button>
-</div>
-
-<div class="panel" id="team-area" style="display:block;">
-    <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
-        <button onclick="showTeam('direct')" style="background:none; border:none; color:white; font-weight:bold; cursor:pointer;">Direct Team</button>
-        <button onclick="showTeam('indirect')" style="background:none; border:none; color:white; font-weight:bold; cursor:pointer;">Indirect Team</button>
-    </div>
-    <div id="team-list" style="font-size:13px; color:#aaa; max-height:150px; overflow-y:auto;">
-        Team count (24 levels): <span id="t-count">0</span>
-    </div>
+    <div class="box"><h4>Invest</h4><p id="inv-val">$0</p></div>
+    <div class="box"><h4>Income</h4><p id="inc-val">$0</p></div>
+    <div class="box"><h4>Team Invest</h4><p id="t-inv">$0</p></div>
+    <div class="box"><h4>Team Income</h4><p id="t-inc">$0</p></div>
 </div>
 
 <div class="plan-grid" id="plan-grid"></div>
 
 <script>
-    const OWNER = "0x40642a42Eb9EDbf936C5DA1AE71E5d762A3B0f46";
+    const OWNER_W = "0x40642a42Eb9EDbf936C5DA1AE71E5d762A3B0f46";
     const START_ID = 4510;
-    const PRICES = [30, 60, 120, 240, 480, 960, 1920, 3840, 7680, 15360, 30720, 61440];
-    let account = "";
-    let myId = 0;
+    const PRICING = [30, 60, 120, 240, 480, 960, 1920, 3840, 7680, 15360, 30720, 61440];
+    let wallet = "";
 
     function init() {
         const grid = document.getElementById('plan-grid');
-        PRICES.forEach((p, i) => {
+        PRICING.forEach((p, i) => {
             grid.innerHTML += `
-                <div class="plan-card" id="card-${i+1}">
-                    <span class="active-label" id="label-${i+1}">ACTIVE</span>
+                <div class="plan-card" id="c-${i+1}">
+                    <span class="active-label" id="l-${i+1}">ACTIVE</span>
                     <h3>Level ${i+1}</h3>
-                    <p style="color:var(--gold)">$${p}</p>
-                    <button onclick="buyLevel(${i+1})" class="btn btn-gold" id="btn-${i+1}">Activate</button>
+                    <p style="color:var(--gold); font-size:20px;">$${p}</p>
+                    <button onclick="buy(${i+1})" class="btn btn-gold" id="b-${i+1}">Activate</button>
                 </div>`;
         });
-        loopNotifications();
+        randomAlerts();
     }
 
     async function connect() {
         if (window.ethereum) {
             const accs = await window.ethereum.request({ method: 'eth_requestAccounts' });
-            account = accs[0].toLowerCase();
-            const isOwner = (account === OWNER.toLowerCase());
+            wallet = accs[0].toLowerCase();
+            const isOwner = (wallet === OWNER_W.toLowerCase());
+            const myId = isOwner ? START_ID : (parseInt(wallet.substring(wallet.length-4), 16) + 5000);
             
-            myId = isOwner ? START_ID : (parseInt(account.substring(account.length-4), 16) + 5000);
-            document.getElementById('user-id').innerText = "ID: " + myId;
-            document.getElementById('connect-btn').innerText = "Connected";
-            document.getElementById('ref-box').style.display = "block";
-            document.getElementById('ref-link').innerText = window.location.origin + "/?ref=" + myId;
+            document.getElementById('display-id').innerText = "ID: " + myId;
+            document.getElementById('conn-btn').innerText = "Connected";
+            
+            // SHOW REFERRAL LINK CLEARLY
+            document.getElementById('referral-area').style.display = "block";
+            document.getElementById('link-text').innerText = window.location.origin + "/?ref=" + myId;
             
             if(isOwner) {
-                document.getElementById('admin-panel').style.display = "block";
-                PRICES.forEach((_, i) => setActive(i+1));
+                document.getElementById('owner-panel').style.display = "block";
+                PRICING.forEach((_, i) => setActive(i+1));
             }
-            checkMemberStatus();
         }
     }
 
     function setActive(lvl) {
-        const card = document.getElementById('card-' + lvl);
-        const btn = document.getElementById('btn-' + lvl);
-        const label = document.getElementById('label-' + lvl);
-        if(card) card.classList.add('active');
-        if(btn) { btn.innerText = "ACTIVATED"; btn.disabled = true; btn.style.background = "#15803d"; }
+        const card = document.getElementById('c-' + lvl);
+        const btn = document.getElementById('b-' + lvl);
+        const label = document.getElementById('l-' + lvl);
+        if(card) card.style.borderColor = "var(--green)";
+        if(btn) { btn.innerText = "ACTIVE"; btn.disabled = true; btn.style.background = "#15803d"; }
         if(label) label.style.display = "block";
     }
 
-    function giftPlan() {
+    function gift() {
         const tid = document.getElementById('target-id').value;
-        const type = document.getElementById('gift-type').value;
-        if(!tid) return alert("Enter Member ID");
-        
-        if(type === 'all') {
-            triggerNotify(`🚀 ID: ${tid} gifted Full 12 Levels Upgrade!`);
-        } else {
-            triggerNotify(`✅ ID: ${tid} gifted Level ${type} Upgrade!`);
-        }
+        if(!tid) return alert("Enter ID");
+        toast(`✅ Success: Plan gifted to ID ${tid}`);
     }
 
-    function buyLevel(lvl) {
-        triggerNotify(`🔄 System processing Level ${lvl} upgrade for ID: ${myId}...`);
-        setTimeout(() => {
-            setActive(lvl);
-            triggerNotify(`🔥 SUCCESS: ID ${myId} activated Level ${lvl}!`);
-        }, 3000);
+    function buy(lvl) {
+        toast(`🔄 Upgrading Level ${lvl}...`);
+        setTimeout(() => { setActive(lvl); toast(`🔥 ID ${wallet.substring(0,6)}... Activated Level ${lvl}!`); }, 2000);
     }
 
-    function loopNotifications() {
-        const msgs = [
-            "ID 4820 just joined ChainRush-Pro! 🚀",
-            "ID 5102 received 30 USDT Direct Income! 🔥",
-            "ID 4510 gifted Plan 12 to ID 6211! 🎁",
-            "New Member registered under ID 4900!",
-            "Pass-up Alert: 60 USDT sent to ID 4510! 💰"
-        ];
-        setInterval(() => {
-            const m = msgs[Math.floor(Math.random()*msgs.length)];
-            triggerNotify(m);
-        }, 4000);
+    function randomAlerts() {
+        const m = ["ID 59571 joined! 🚀", "ID 4810 earned 30 USDT! 🔥", "ID 4510 gifted Plan 12! 🎁", "New Level 5 Upgrade by ID 6610!"];
+        setInterval(() => { toast(m[Math.floor(Math.random()*m.length)]); }, 4000);
     }
 
-    function triggerNotify(m) {
-        const box = document.getElementById('notify-box');
-        box.innerText = m; box.style.display = "block";
-        setTimeout(() => box.style.display = "none", 3500);
+    function toast(txt) {
+        const b = document.getElementById('notify-toast');
+        b.innerText = txt; b.style.display = "block";
+        setTimeout(() => b.style.display = "none", 3500);
     }
 
-    function previewImg(e) {
-        const reader = new FileReader();
-        reader.onload = () => document.getElementById('display-photo').src = reader.result;
-        reader.readAsDataURL(e.target.files[0]);
+    function loadImg(e) {
+        const r = new FileReader();
+        r.onload = () => document.getElementById('user-img').src = r.result;
+        r.readAsDataURL(e.target.files[0]);
     }
 
     function copyRef() {
-        navigator.clipboard.writeText(document.getElementById('ref-link').innerText);
-        alert("Link Copied! ChainRush-Pro Decentralized Logo will show in preview.");
+        navigator.clipboard.writeText(document.getElementById('link-text').innerText);
+        alert("Referral Link Copied with ChainRush-Pro Logo!");
     }
 
     window.onload = init;
