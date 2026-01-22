@@ -4,211 +4,46 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ChainRush Pro | Official Dashboard</title>
-    <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.8.1/web3.min.js"></script>
     <style>
-        :root {
-            --bg-deep: #0f172a;
-            --glass-blue: rgba(30, 64, 175, 0.4);
-            --neon-blue: #38bdf8;
-            --neon-purple: #818cf8;
-            --accent-gold: #fbbf24;
-            --text-light: #f1f5f9;
-        }
-
-        body {
-            background: radial-gradient(circle at top right, #1e293b, #0f172a);
-            color: var(--text-light);
-            font-family: 'Poppins', sans-serif;
-            margin: 0; padding: 0;
-            overflow-x: hidden;
-        }
-
-        /* Random Notification Engine */
-        #live-notify {
-            position: fixed; top: 15px; right: 15px; z-index: 9999;
-            background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
-            color: #fff; padding: 12px 25px; border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-            font-size: 0.85rem; font-weight: 600; display: none;
-            animation: slideIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        @keyframes slideIn { from { transform: translateX(120%); } to { transform: translateX(0); } }
-
-        /* Top Profile Header */
-        .profile-header {
-            background: linear-gradient(180deg, #1d4ed8 0%, #1e40af 100%);
-            height: 180px; border-radius: 0 0 50px 50px; position: relative;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        }
-
-        .user-avatar-wrap {
-            position: absolute; bottom: -50px; left: 50%; transform: translateX(-50%);
-            text-align: center; width: 100%;
-        }
-
-        .avatar-circle {
-            width: 100px; height: 100px; border-radius: 50%;
-            border: 4px solid var(--text-light); margin: 0 auto;
-            background: #cbd5e1; overflow: hidden;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-        }
-
-        .avatar-circle img { width: 100%; height: 100%; object-fit: cover; }
-
-        /* Wallet and ID Section */
-        .user-info-panel { margin-top: 60px; text-align: center; }
-        .id-badge { color: var(--accent-gold); font-weight: 800; font-size: 1.2rem; display: block; margin-bottom: 5px; }
-        .wallet-status { font-weight: 600; font-size: 1rem; color: var(--text-light); }
-
-        .connect-btn { background: var(--accent-gold); border: none; padding: 10px 30px; border-radius: 25px; font-weight: bold; margin-top: 15px; cursor: pointer; color: #000; }
-
-        /* Stats Cards */
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 20px; }
-        .glass-card {
-            background: var(--glass-blue); backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 20px; padding: 20px; text-align: center;
-        }
-        .glass-card small { color: var(--neon-blue); text-transform: uppercase; font-size: 0.7rem; letter-spacing: 1px; font-weight: bold; }
-        .glass-card div { font-size: 1.2rem; font-weight: 700; margin-top: 5px; }
-
-        /* Reports and Links */
-        .report-box { background: rgba(15, 23, 42, 0.6); margin: 0 20px 20px; border-radius: 25px; padding: 20px; border: 1px solid rgba(129, 140, 248, 0.2); }
-        .lvl-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
-
-        .ref-container { background: #000; border-radius: 12px; display: flex; align-items: center; border: 1px solid var(--neon-blue); padding: 5px; }
-        .ref-container input { background: transparent; border: none; color: #fff; padding: 10px; flex: 1; font-size: 0.8rem; }
-        .copy-btn { background: var(--neon-blue); color: #000; border: none; padding: 10px 20px; border-radius: 10px; font-weight: bold; cursor: pointer; }
-
-        /* Matrix Slots */
-        .matrix-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 20px; }
-        .slot { background: linear-gradient(135deg, #1e293b, #0f172a); border: 2px solid #1e40af; border-radius: 20px; padding: 30px 10px; text-align: center; position: relative; overflow: hidden; }
-        .slot::after { content: "ChainRush"; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg); opacity: 0.03; font-size: 1.2rem; font-weight: 900; }
-        .activate-btn { background: var(--neon-blue); color: #000; border: none; width: 85%; padding: 10px; border-radius: 10px; font-weight: bold; margin-top: 15px; cursor: pointer; }
-
-        /* Owner Secret Panel */
-        #owner-panel { display: none; background: #000; border: 2px dashed var(--accent-gold); margin: 20px; padding: 25px; border-radius: 25px; }
-        .admin-input { width: 90%; padding: 12px; border-radius: 10px; border: 1px solid #333; background: #111; color: #fff; margin-bottom: 10px; }
-        .admin-btn { width: 100%; padding: 12px; border: none; border-radius: 10px; font-weight: bold; color: #000; margin-bottom: 10px; cursor: pointer; }
+        body { background: radial-gradient(circle at top right, #1e293b, #0f172a); color: white; font-family: sans-serif; text-align: center; padding: 50px; }
+        .card { background: rgba(30, 64, 175, 0.2); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); padding: 30px; border-radius: 20px; display: inline-block; }
+        button { background: #fbbf24; color: black; border: none; padding: 12px 30px; border-radius: 25px; font-weight: bold; cursor: pointer; margin-top: 20px; }
+        #status { color: #fbbf24; margin-top: 15px; font-weight: bold; }
     </style>
 </head>
 <body>
-
-    <div id="live-notify">System Online...</div>
-
-    <div class="profile-header">
-        <div class="user-avatar-wrap">
-            <div class="avatar-circle" onclick="document.getElementById('pfp-input').click()">
-                <img id="user-pfp" src="https://via.placeholder.com/100" alt="Avatar">
-            </div>
-            <input type="file" id="pfp-input" style="display:none" onchange="previewImg(event)">
-        </div>
-    </div>
-
-    <div class="user-info-panel">
-        <span class="id-badge" id="id-display">ID: 3371</span>
-        <span class="wallet-status" id="wallet-display">Wallet: Not Connected</span>
-        <br>
-        <button class="connect-btn" id="conn-btn" onclick="connect()">Connect Wallet</button>
-    </div>
-
-    <div class="stats-grid">
-        <div class="glass-card"><small>Total Profit</small><div>0.00 USDT</div></div>
-        <div class="glass-grid-item glass-card"><small>Total Team</small><div>0</div></div>
-        <div class="glass-card"><small>Total Invest</small><div>0.00 USDT</div></div>
-        <div class="glass-card"><small>Total Partners</small><div>0</div></div>
-    </div>
-
-    <div class="report-box">
-        <h4 style="color:var(--neon-purple); border-left:4px solid var(--neon-blue); padding-left:10px;">5-Level Team Stats</h4>
-        <div class="lvl-row"><span>Level 1 (Directs)</span><b>0</b></div>
-        <div class="lvl-row"><span>Level 2</span><b>0</b></div>
-        <div class="lvl-row"><span>Level 3</span><b>0</b></div>
-        <div class="lvl-row"><span>Level 4</span><b>0</b></div>
-        <div class="lvl-row"><span>Level 5</span><b>0</b></div>
-    </div>
-
-    <div class="report-box">
-        <h4 style="color:var(--neon-purple); border-left:4px solid var(--neon-blue); padding-left:10px;">Referral Link</h4>
-        <div class="ref-container">
-            <input type="text" id="ref-url" readonly value="https://chainrush.sol/?ref=3371">
-            <button class="copy-btn" onclick="copyRef()">Copy</button>
-        </div>
-    </div>
-
-    <div class="matrix-grid" id="slots"></div>
-
-    <div id="owner-panel">
-        <h3 style="color:var(--accent-gold); margin-top:0;">Owner Control Center</h3>
-        <input type="text" id="target-addr" class="admin-input" placeholder="Member Wallet Address">
-        <input type="number" id="gift-amt" class="admin-input" placeholder="Gift Amount (USDT)">
-        <button onclick="sendGift()" class="admin-btn" style="background:var(--neon-blue);">Send Cash Gift & Notify</button>
-        <button onclick="ownerUpgrade()" class="admin-btn" style="background:var(--neon-purple); color: white;">Gift Full Plan (L1-L12)</button>
+    <div class="card">
+        <h1>ChainRush Pro</h1>
+        <p id="wallet">Wallet: Not Connected</p>
+        <button onclick="connect()">Connect Wallet</button>
+        <hr style="margin: 20px 0; opacity: 0.2;">
+        <h3>Registration (0.01 BNB)</h3>
+        <button onclick="register()">Activate ID Now</button>
+        <p id="status">Ready</p>
     </div>
 
     <script>
-        const ownerWallet = "0x40642a42Eb9EDbf936C5DA1AE71E5d762A3B0f46";
-
-        function initNotifications() {
-            const actions = ["joined!", "upgraded Level 5!", "received 50 USDT Gift!", "purchased Level 1!", "earned 200 USDT!"];
-            setInterval(() => {
-                const randomID = Math.floor(Math.random() * 90000) + 10000;
-                const randomAction = actions[Math.floor(Math.random() * actions.length)];
-                broadcast(`User ID ${randomID} ${randomAction}`);
-            }, 6000);
-        }
-
-        function broadcast(text) {
-            const bar = document.getElementById('live-notify');
-            bar.innerText = text; bar.style.display = 'block';
-            setTimeout(() => { bar.style.display = 'none'; }, 4000);
-        }
-
+        const ADDR = "0xC08fD42B0e02B6D41666687C5f7375a06E667E6c";
+        const ABI = [{"inputs":[],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"receiver","type":"address"},{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"level","type":"uint256"},{"indexed":false,"internalType":"string","name":"typeOfIncome","type":"string"}],"name":"IncomeSent","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"level","type":"uint256"}],"name":"LevelUpgrade","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":true,"internalType":"address","name":"referrer","type":"address"},{"indexed":false,"internalType":"uint256","name":"userId","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"referrerId","type":"uint256"}],"name":"Registration","type":"event"},{"inputs":[],"name":"DIRECT_INCOME_PERCENT","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"OWNER_FEE_PERCENT","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"UPLINE_INCOME_PERCENT","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"emergencyWithdraw","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"user","type":"address"},{"internalType":"uint256","name":"level","type":"uint256"}],"name":"findQualified","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"idToAddress","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"user","type":"address"}],"name":"isUserExists","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"lastUserId","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"levelPrices","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address payable","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"referrerAddress","type":"address"}],"name":"registration","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[{"internalType":"uint256","name":"level","type":"uint256"}],"name":"upgradeLevel","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"users","outputs":[{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"address","name":"referrer","type":"address"},{"internalType":"uint256","name":"partnersCount","type":"uint256"}],"stateMutability":"view","type":"function"}];
+        
+        let web3, account, contract;
         async function connect() {
             if (window.ethereum) {
-                const accs = await window.ethereum.request({ method: 'eth_requestAccounts' });
-                const user = accs[0];
-                document.getElementById('wallet-display').innerText = "Wallet: " + user.substring(0,10) + "...";
-                document.getElementById('id-display').innerText = "ID: " + Math.floor(Math.random() * 5000 + 1000);
-                document.getElementById('conn-btn').style.display = 'none';
-                
-                if (user.toLowerCase() === ownerWallet.toLowerCase()) {
-                    document.getElementById('owner-panel').style.display = 'block';
-                    broadcast("Admin Access Granted");
-                }
+                web3 = new Web3(window.ethereum);
+                const accs = await window.ethereum.request({method:'eth_requestAccounts'});
+                account = accs[0];
+                contract = new web3.eth.Contract(ABI, ADDR);
+                document.getElementById('wallet').innerText = "Connected: " + account.substring(0,6)+"...";
             }
         }
-
-        function previewImg(e) {
-            const r = new FileReader();
-            r.onload = () => { document.getElementById('user-pfp').src = r.result; };
-            r.readAsDataURL(e.target.files[0]);
+        async function register() {
+            if(!account) return alert("Connect Wallet!");
+            const ref = new URLSearchParams(window.location.search).get('ref') || "0x40642a42Eb9EDbf936C5DA1AE71E5d762A3B0f46";
+            document.getElementById('status').innerText = "Pending...";
+            await contract.methods.registration(ref).send({from:account, value: web3.utils.toWei('0.01','ether')});
+            document.getElementById('status').innerText = "Success!";
         }
-
-        function copyRef() {
-            const link = document.getElementById('ref-url');
-            link.select(); document.execCommand('copy');
-            broadcast("Link Copied!");
-        }
-
-        const prices = [30, 60, 120, 240, 480, 960, 1920, 3840, 7680, 15360, 30720, 61440];
-        const grid = document.getElementById('slots');
-        prices.forEach((p, i) => {
-            grid.innerHTML += `<div class="slot"><b>Level ${i+1}</b><br>${p} USDT<br><button class="activate-btn" onclick="broadcast('Activating Level...')">Activate</button></div>`;
-        });
-
-        function sendGift() {
-            broadcast(`Member received a cash gift from Owner!`);
-        }
-
-        function ownerUpgrade() {
-            broadcast("Account upgraded to L12 Successfully!");
-        }
-
-        window.onload = initNotifications;
     </script>
 </body>
-
 </html>
