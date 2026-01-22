@@ -11,21 +11,19 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.8.1/web3.min.js"></script>
     <style>
-        :root { --gold: #f3ba2f; --blue: #38bdf8; --bg: #0b0e11; --card: #1e2329; --green: #2ecc71; }
+        :root { --gold: #f3ba2f; --blue: #38bdf8; --bg: #0b0e11; --card: #161a1e; --green: #2ecc71; }
         body { background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding-bottom: 50px; }
 
-        /* Header Logo - Using Base64 to ensure it never fails */
         .logo-main { 
             width: 140px; 
             height: auto; 
-            margin-bottom: 15px; 
+            margin-bottom: 20px; 
             filter: drop-shadow(0 0 10px var(--gold));
             display: block;
             margin-left: auto;
             margin-right: auto;
         }
         
-        /* Avatar/Profile Logo */
         .user-avatar { 
             width: 100px; 
             height: 100px; 
@@ -33,37 +31,63 @@
             border: 3px solid var(--gold); 
             margin: 10px auto; 
             object-fit: cover; 
-            background: #000;
+            background: #1e2329;
             box-shadow: 0 0 20px rgba(243,186,47,0.5);
             display: block;
         }
 
         .header { background: linear-gradient(180deg, #1e40af, #0b0e11); padding: 40px 20px; text-align: center; border-bottom: 3px solid var(--gold); }
         
-        .plan-card { background: var(--card); padding: 30px 15px; border-radius: 15px; text-align: center; border: 1px solid #333; position: relative; overflow: hidden; margin-bottom: 15px; }
+        /* Updated Level Cards Styling */
+        .plan-card { 
+            background: linear-gradient(145deg, #232931, #111418);
+            padding: 25px 15px; 
+            border-radius: 20px; 
+            text-align: center; 
+            border: 1px solid rgba(243, 186, 47, 0.2); 
+            position: relative; 
+            overflow: hidden; 
+            margin-bottom: 5px;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        }
+
+        .plan-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--gold);
+            box-shadow: 0 15px 30px rgba(243, 186, 47, 0.15);
+        }
+
+        .plan-card h3 { margin: 0; font-size: 18px; color: #fff; letter-spacing: 1px; }
+
         .plan-card::before { 
-            content: "ChainRush-Pro"; position: absolute; font-size: 16px; font-weight: bold;
-            background: linear-gradient(45deg, var(--gold), var(--blue));
+            content: "LEVEL"; position: absolute; font-size: 40px; font-weight: 900;
+            background: linear-gradient(180deg, rgba(243,186,47,0.1), transparent);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            opacity: 0.1; transform: rotate(-30deg); top: 40%; left: -10%; width: 120%; pointer-events: none; 
+            top: 5px; left: 50%; transform: translateX(-50%); pointer-events: none; 
         }
 
         #notify-toast { position: fixed; top: 15px; left: 50%; transform: translateX(-50%); z-index: 10000; background: linear-gradient(135deg, #1e40af, #000); border: 1px solid var(--gold); padding: 12px 25px; border-radius: 30px; display: none; font-size: 13px; box-shadow: 0 0 15px var(--gold); width: 85%; max-width: 400px; text-align: center; }
+        
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; }
         .box { background: var(--card); padding: 15px; border-radius: 12px; border: 1px solid #333; text-align: center; }
         .box h4 { margin: 0; font-size: 11px; color: #888; text-transform: uppercase; }
         .box p { margin: 5px 0 0; font-size: 18px; color: var(--gold); font-weight: bold; }
 
         .report-panel { background: #161a1e; margin: 15px; padding: 20px; border-radius: 15px; border: 1px solid #333; }
-        .admin-box { border: 2px solid var(--gold); display: none; }
         .scroll-list { max-height: 250px; overflow-y: auto; font-size: 12px; background: #000; padding: 10px; border-radius: 8px; margin-top: 10px; color: #ddd; border: 1px solid #222; }
         
-        input, select { width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 8px; background: #000; border: 1px solid #444; color: white; }
-        .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 5px; }
+        .btn { width: 100%; padding: 12px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.3s; }
         .btn-blue { background: var(--blue); color: white; }
-        .btn-gold { background: var(--gold); color: black; }
-        .plan-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; padding: 15px; }
-        .active-label { position: absolute; top: 8px; right: 8px; background: var(--green); color: white; font-size: 10px; padding: 3px 8px; border-radius: 5px; display: none; }
+        .btn-gold { 
+            background: linear-gradient(90deg, #f3ba2f, #ffd700); 
+            color: black; 
+            box-shadow: 0 4px 10px rgba(243,186,47,0.3);
+        }
+        .btn-gold:active { transform: scale(0.95); }
+
+        .plan-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding: 15px; }
+        .active-label { position: absolute; top: 10px; right: 10px; background: var(--green); color: white; font-size: 9px; padding: 2px 8px; border-radius: 4px; display: none; font-weight: bold; box-shadow: 0 0 10px var(--green); }
     </style>
 </head>
 <body>
@@ -71,76 +95,47 @@
 <div id="notify-toast">Notification...</div>
 
 <div class="header">
-    <img src="https://i.ibb.co/vzPRY89/logo.png" class="logo-main" id="main-logo" alt="ChainRush Pro">
+    <img src="https://i.postimg.cc/mD838Yzf/logo.png" class="logo-main" id="main-logo" alt="ChainRush Pro">
     
-    <div id="display-id" style="font-size: 24px; color: var(--gold); font-weight: bold; margin-bottom: 10px;">Login Required</div>
+    <div id="display-id" style="font-size: 24px; color: var(--gold); font-weight: bold; margin-bottom: 10px;">ID: 4510</div>
     
     <div class="profile">
         <label for="img-in">
-            <img id="user-img" src="https://i.ibb.co/vzPRY89/logo.png" class="user-avatar" alt="ChainRush Logo">
+            <img id="user-img" src="https://www.w3schools.com/howto/img_avatar.png" class="user-avatar" alt="User">
         </label>
         <input type="file" id="img-in" style="display:none" onchange="loadImg(event)">
         <p style="font-size: 13px; color: var(--blue); margin-top: 5px; font-weight: bold;">ChainRush-Pro Official Member</p>
     </div>
     
-    <button id="conn-btn" onclick="connect()" class="btn btn-blue" style="width:auto; padding: 12px 40px; margin-top: 20px; font-size: 16px; border: 1px solid white;">Connect Wallet</button>
+    <button id="conn-btn" onclick="connect()" class="btn btn-blue" style="width:auto; padding: 12px 40px; margin-top: 20px; font-size: 16px; border: 1px solid white;">Wallet Connected</button>
 </div>
 
-<div id="referral-area" style="display:none; text-align:center; padding:20px; background:rgba(56,189,248,0.1); margin:15px; border-radius:15px; border: 2px dashed var(--blue);">
+<div id="referral-area" style="display:block; text-align:center; padding:20px; background:rgba(56,189,248,0.1); margin:15px; border-radius:15px; border: 2px dashed var(--blue);">
     <h4 style="margin:0; color:var(--blue); font-size:11px;">OFFICIAL REFERRAL LINK</h4>
-    <div id="link-text" style="padding:15px; color:white; font-family:monospace; font-size:12px; word-break:break-all;"></div>
+    <div id="link-text" style="padding:15px; color:white; font-family:monospace; font-size:12px; word-break:break-all;">https://chain-rush-pro.vercel.app/?ref=4510</div>
     <button onclick="copyRef()" class="btn btn-blue" style="width:auto; padding:8px 40px;">COPY LINK</button>
-</div>
-
-<div id="owner-panel" class="report-panel admin-box">
-    <h3 style="color: var(--gold); margin-top:0;">MASTER ADMIN PANEL</h3>
-    <input type="text" id="target-id" placeholder="Enter Member ID">
-    <select id="plan-opt">
-        <option value="all">Full Upgrade (1-12 Levels)</option>
-        <option value="1">Plan 1</option>
-        <option value="12">Plan 12</option>
-    </select>
-    <button onclick="gift()" class="btn btn-gold">Gift Free Plan</button>
-    <div id="admin-log" class="scroll-list" style="margin-top:20px;">Tracking system activity...</div>
-</div>
-
-<div class="report-panel">
-    <h4 style="margin-top:0; font-size:14px; color:var(--blue);">TEAM REPORT (LEVEL 1-24)</h4>
-    <div style="display:flex; gap:5px;">
-        <button onclick="viewTeam('direct')" class="btn btn-blue" style="flex:1;">Directs</button>
-        <button onclick="viewTeam('indirect')" class="btn btn-gold" style="flex:1;">Team (L24)</button>
-    </div>
-    <div id="team-list" class="scroll-list">Wallet not connected.</div>
 </div>
 
 <div class="stats-grid">
     <div class="box"><h4>Invest</h4><p id="inv-val">$0</p></div>
     <div class="box"><h4>Income</h4><p id="inc-val">$0</p></div>
-    <div class="box"><h4>Team Invest</h4><p id="t-inv">$0</p></div>
-    <div class="box"><h4>Team Income</h4><p id="t-inc">$0</p></div>
 </div>
 
 <div class="plan-grid" id="plan-grid"></div>
 
+<div class="report-panel">
+    <h4 style="margin-top:0; font-size:14px; color:var(--blue);">TEAM REPORT (24 LEVELS)</h4>
+    <div style="display:flex; gap:5px;">
+        <button onclick="viewTeam('direct')" class="btn btn-blue" style="flex:1;">Direct Team</button>
+        <button onclick="viewTeam('indirect')" class="btn btn-gold" style="flex:1;">Downline</button>
+    </div>
+    <div id="team-list" class="scroll-list">Connect wallet to view team.</div>
+</div>
+
 <script>
-    // To fix image error, let's use the actual image data if the link fails
-    // This is the logo image provided in your files
-    const LOGO_BASE64 = "https://i.postimg.cc/mD838Yzf/logo.png"; 
-
-    window.addEventListener('DOMContentLoaded', () => {
-        const images = document.querySelectorAll('img');
-        images.forEach(img => {
-            img.onerror = function() {
-                this.src = LOGO_BASE64; // If imgbb fails, use backup
-            };
-        });
-    });
-
-    const OWNER_W = "0x40642a42Eb9EDbf936C5DA1AE71E5d762A3B0f46";
     const START_ID = 4510;
     const PRICING = [30, 60, 120, 240, 480, 960, 1920, 3840, 7680, 15360, 30720, 61440];
     let wallet = "";
-    let myId = 0;
 
     function init() {
         const grid = document.getElementById('plan-grid');
@@ -148,82 +143,54 @@
             grid.innerHTML += `
                 <div class="plan-card" id="c-${i+1}">
                     <span class="active-label" id="l-${i+1}">ACTIVE</span>
-                    <h3>Level ${i+1}</h3>
-                    <p style="color:var(--gold); font-size:20px;">$${p}</p>
-                    <button onclick="buy(${i+1})" class="btn btn-gold" id="b-${i+1}">Activate</button>
+                    <h3>LEVEL ${i+1}</h3>
+                    <p style="color:var(--gold); font-size:22px; font-weight:bold; margin: 10px 0;">$${p}</p>
+                    <button onclick="buy(${i+1})" class="btn btn-gold" id="b-${i+1}">ACTIVATE</button>
                 </div>`;
         });
         randomAlerts();
     }
 
+    const DEFAULT_AVATAR = "https://www.w3schools.com/howto/img_avatar.png";
+
+    window.addEventListener('DOMContentLoaded', () => {
+        const userImg = document.getElementById('user-img');
+        userImg.onerror = function() { this.src = DEFAULT_AVATAR; };
+    });
+
     async function connect() {
         if (window.ethereum) {
-            const accs = await window.ethereum.request({ method: 'eth_requestAccounts' });
-            wallet = accs[0].toLowerCase();
-            const isOwner = (wallet === OWNER_W.toLowerCase());
-            myId = isOwner ? START_ID : (parseInt(wallet.substring(wallet.length-4), 16) + 5000);
-            
-            document.getElementById('display-id').innerText = "ID: " + myId;
-            document.getElementById('conn-btn').innerText = "Connected";
-            document.getElementById('referral-area').style.display = "block";
-            document.getElementById('link-text').innerText = window.location.origin + "/?ref=" + myId;
-            
-            if(isOwner) {
-                document.getElementById('owner-panel').style.display = "block";
-                PRICING.forEach((_, i) => setActive(i+1));
-                updateLog(`Admin Connected.`);
-            }
+            await window.ethereum.request({ method: 'eth_requestAccounts' });
+            toast("Wallet Connected Successfully!");
         }
-    }
-
-    function viewTeam(type) {
-        const list = document.getElementById('team-list');
-        if(!wallet) return alert("Connect Wallet First");
-        list.innerHTML = "Fetching 24 Levels...";
-        setTimeout(() => {
-            if(type === 'direct') {
-                list.innerHTML = `ID: 59571 | Status: Active<br>ID: 60211 | Status: Active`;
-            } else {
-                list.innerHTML = `Level 2: ID 61002<br>Level 24: ID 99999<br>Total Team: 1,245 Members`;
-            }
-        }, 800);
-    }
-
-    function updateLog(msg) {
-        const log = document.getElementById('admin-log');
-        const time = new Date().toLocaleTimeString();
-        log.innerHTML = `<div>[${time}] ${msg}</div>` + log.innerHTML;
-    }
-
-    function gift() {
-        const tid = document.getElementById('target-id').value;
-        const opt = document.getElementById('plan-opt').value;
-        if(!tid) return alert("Enter ID");
-        toast(`✅ Plan ${opt} Gifted to ID ${tid}`);
-        updateLog(`Gifted Plan ${opt} to ID ${tid}`);
     }
 
     function buy(lvl) {
         toast(`🔄 Processing Level ${lvl}...`);
-        setTimeout(() => { 
-            setActive(lvl); 
-            toast(`🔥 ID ${myId} Activated Level ${lvl}`);
-            updateLog(`ID ${myId} Upgraded Level ${lvl}`);
-        }, 2000);
+        setTimeout(() => { setActive(lvl); toast(`🔥 Level ${lvl} Activated!`); }, 2000);
     }
 
     function setActive(lvl) {
         const card = document.getElementById('c-' + lvl);
         const btn = document.getElementById('b-' + lvl);
         const label = document.getElementById('l-' + lvl);
-        if(card) card.style.borderColor = "var(--green)";
-        if(btn) { btn.innerText = "ACTIVE"; btn.disabled = true; btn.style.background = "#15803d"; }
+        if(card) {
+            card.style.borderColor = "var(--green)";
+            card.style.background = "linear-gradient(145deg, #112d1a, #0b0e11)";
+            card.style.boxShadow = "0 0 20px rgba(46, 204, 113, 0.2)";
+        }
+        if(btn) { 
+            btn.innerText = "ACTIVE"; 
+            btn.disabled = true; 
+            btn.style.background = "var(--green)"; 
+            btn.style.color = "white";
+        }
         if(label) label.style.display = "block";
     }
 
     function randomAlerts() {
-        const m = ["ID 59571 joined! 🚀", "ID 4810 earned 30 USDT! 🔥"];
-        setInterval(() => { if(wallet) toast(m[Math.floor(Math.random()*m.length)]); }, 4000);
+        const m = ["ID 59571 joined! 🚀", "ID 4810 earned 30 USDT! 🔥", "ID 4510 upgraded Level 5! 💎"];
+        setInterval(() => { toast(m[Math.floor(Math.random()*m.length)]); }, 5000);
     }
 
     function toast(txt) {
