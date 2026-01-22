@@ -3,42 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChainRush Pro | Global USDT Ecosystem</title>
+    <title>ChainRush Pro | USDT BEP20</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.8.1/web3.min.js"></script>
     <style>
         :root { --neon-gold: #f3ba2f; --neon-blue: #38bdf8; --bg-deep: #0b0e11; --card-bg: #1e2329; }
         body { background: var(--bg-deep); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; overflow-x: hidden; }
         
-        /* Notifications */
         #live-notify {
             position: fixed; top: 15px; left: 50%; transform: translateX(-50%); z-index: 10000;
             background: linear-gradient(135deg, #1e40af, #000); border: 1px solid var(--neon-gold);
-            padding: 12px 25px; border-radius: 30px; box-shadow: 0 0 20px rgba(243,186,47,0.4);
+            padding: 10px 20px; border-radius: 30px; box-shadow: 0 0 15px var(--neon-gold);
             display: none; font-size: 12px; font-weight: bold; white-space: nowrap;
         }
 
-        .header-card { background: linear-gradient(180deg, #1e40af, #0b0e11); padding: 40px 20px; text-align: center; border-bottom: 2px solid var(--neon-gold); }
-        .user-img { width: 90px; height: 90px; border-radius: 50%; border: 3px solid var(--neon-gold); margin-bottom: 10px; box-shadow: 0 0 15px var(--neon-gold); }
+        .header-card { background: linear-gradient(180deg, #1e40af, #0b0e11); padding: 35px 20px; text-align: center; border-bottom: 2px solid var(--neon-gold); }
+        .user-img { width: 85px; height: 85px; border-radius: 50%; border: 3px solid var(--neon-gold); margin-bottom: 10px; }
         
-        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 15px; }
-        .stat-box { background: var(--card-bg); padding: 15px; border-radius: 15px; border-left: 4px solid var(--neon-gold); }
-        .stat-box small { color: #848e9c; font-size: 10px; text-transform: uppercase; }
-        .stat-box div { color: var(--neon-gold); font-size: 14px; font-weight: bold; margin-top: 5px; }
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; }
+        .stat-box { background: var(--card-bg); padding: 12px; border-radius: 12px; border-left: 4px solid var(--neon-gold); }
+        .stat-box div { color: var(--neon-gold); font-size: 14px; font-weight: bold; }
 
-        /* Advanced Team Section */
-        .team-container { background: var(--card-bg); margin: 15px; padding: 15px; border-radius: 20px; border: 1px solid #333; }
-        .team-tabs { display: flex; gap: 10px; margin-bottom: 15px; }
-        .tab-btn { flex: 1; padding: 10px; border-radius: 8px; border: 1px solid var(--neon-blue); background: transparent; color: var(--neon-blue); font-size: 12px; cursor: pointer; font-weight: bold; }
+        .ref-area { background: rgba(56, 189, 248, 0.1); border: 1px dashed var(--neon-blue); margin: 15px; padding: 15px; border-radius: 15px; text-align: center; }
+        .ref-link { color: var(--neon-blue); font-size: 11px; word-break: break-all; margin: 10px 0; display: block; }
+
+        .team-box { background: var(--card-bg); margin: 0 15px; padding: 15px; border-radius: 15px; border: 1px solid #333; }
+        .tab-btn { padding: 8px; border-radius: 5px; border: 1px solid var(--neon-blue); background: transparent; color: var(--neon-blue); cursor: pointer; font-size: 11px; margin-right: 5px; }
         .tab-btn.active { background: var(--neon-blue); color: white; }
-        
-        .team-display { display: none; margin-top: 10px; max-height: 300px; overflow-y: auto; }
-        .member-row { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #222; font-size: 13px; background: rgba(255,255,255,0.02); margin-bottom: 5px; border-radius: 8px; }
-        .member-id { color: var(--neon-gold); font-weight: bold; }
-        .member-plan { background: rgba(56, 189, 248, 0.2); color: var(--neon-blue); padding: 4px 8px; border-radius: 5px; font-size: 11px; border: 1px solid var(--neon-blue); }
+        .member-list { display: none; margin-top: 10px; font-size: 12px; }
 
-        .btn-main { background: var(--neon-gold); color: black; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px; }
-        .plan-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; padding: 15px; }
-        .plan-card { background: var(--card-bg); border: 1px solid #333; padding: 18px; border-radius: 18px; text-align: center; }
+        .plan-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; padding: 15px; }
+        .plan-card { background: var(--card-bg); border: 1px solid #333; padding: 15px; border-radius: 15px; text-align: center; }
+        button { background: var(--neon-gold); color: black; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 8px; }
     </style>
 </head>
 <body>
@@ -48,8 +43,14 @@
     <div class="header-card">
         <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" class="user-img">
         <h2 style="margin:5px 0;">ChainRush Pro</h2>
-        <div id="userId" style="font-size: 18px; color: var(--neon-gold); font-weight: bold;">ID: 3370</div>
-        <button onclick="connect()" style="width:auto; padding: 8px 25px; margin-top: 15px; background:var(--neon-gold); border-radius:10px; border:none; font-weight:bold;">Connect Wallet</button>
+        <div id="userId" style="font-size: 18px; color: var(--neon-gold);">ID: 3370</div>
+        <button onclick="connect()" style="width:auto; padding: 8px 20px; margin-top: 10px;">Connect Wallet</button>
+    </div>
+
+    <div class="ref-area">
+        <small style="color:#848e9c">YOUR REFERRAL LINK</small>
+        <span class="ref-link" id="myRef">Connect Wallet to generate link</span>
+        <button onclick="copyRef()" style="background:var(--neon-blue); color:white; width:auto; padding: 5px 15px;">COPY LINK</button>
     </div>
 
     <div class="stat-grid">
@@ -59,76 +60,41 @@
         <div class="stat-box"><small>5-Level Team Income</small><div id="s4">0.00 USDT</div></div>
     </div>
 
-    <div class="team-container">
-        <button class="btn-main" style="background:var(--neon-blue); color:white; margin-bottom:15px;" onclick="toggleTeamPanel()">View Team Detailed Structure</button>
-        
-        <div id="teamPanel" style="display:none;">
-            <div class="team-tabs">
-                <button class="tab-btn active" id="btnDirect" onclick="switchTab('direct')">Direct Team</button>
-                <button class="tab-btn" id="btnIndirect" onclick="switchTab('indirect')">Indirect Team</button>
-            </div>
-
-            <div id="directList" class="team-display" style="display:block;">
-                </div>
-            
-            <div id="indirectList" class="team-display">
-                </div>
-        </div>
+    <div class="team-box">
+        <button class="tab-btn active" onclick="showTeam('direct')">Direct Team</button>
+        <button class="tab-btn" onclick="showTeam('indirect')">Indirect Team</button>
+        <div id="dList" class="member-list" style="display:block;"></div>
+        <div id="iList" class="member-list"></div>
     </div>
 
     <div class="plan-grid" id="planGrid"></div>
 
     <script>
         const OWNER = "0x40642a42Eb9EDbf936C5DA1AE71E5d762A3B0f46";
-        const prices = [10, 20, 40, 80, 160, 320, 640, 1280, 2560, 5120, 10240, 20480];
+        // Starting from 30 USDT and doubling each level
+        const prices = [30, 60, 120, 240, 480, 960, 1920, 3840, 7680, 15360, 30720, 61440];
 
-        // Decenteralized Notification Logic
         setInterval(() => {
             const notify = document.getElementById('live-notify');
-            const ids = Math.floor(Math.random() * 200) + 3350;
-            const msgs = [
-                `🔔 ID ${ids} joined via ChainRush Decentralized System!`,
-                `🔔 User ${ids} just upgraded to a new Plan!`,
-                `🔔 ID ${ids} received Team Spillover Income!`
-            ];
-            notify.innerText = msgs[Math.floor(Math.random() * msgs.length)];
+            const ids = Math.floor(Math.random() * 100) + 3350;
+            notify.innerText = `🔔 ID ${ids} received a gift from ChainRush Decentralized System!`;
             notify.style.display = 'block';
             setTimeout(() => { notify.style.display = 'none'; }, 3000);
-        }, 5000);
+        }, 4000);
 
         function init() {
             const grid = document.getElementById('planGrid');
             prices.forEach((p, i) => {
-                grid.innerHTML += `<div class="plan-card"><h3>Lvl ${i+1}</h3><p>${p} USDT</p><button id="lvl-btn-${i}" class="btn-main" style="font-size:12px;">Activate</button></div>`;
+                grid.innerHTML += `<div class="plan-card"><h3>Level ${i+1}</h3><p>${p} USDT</p><button id="btn-${i}" onclick="buy(${i+1})">Activate</button></div>`;
             });
-            loadDummyTeam();
+            // Dummy data for team
+            document.getElementById('dList').innerHTML = "ID: 3375 (Plan: Level 2)<br>ID: 3380 (Plan: Level 1)";
+            document.getElementById('iList').innerHTML = "ID: 3392 (Plan: Level 1)<br>ID: 3405 (Plan: Level 3)";
         }
 
-        function toggleTeamPanel() {
-            const panel = document.getElementById('teamPanel');
-            panel.style.display = (panel.style.display === 'none') ? 'block' : 'none';
-        }
-
-        function switchTab(type) {
-            document.getElementById('directList').style.display = (type === 'direct') ? 'block' : 'none';
-            document.getElementById('indirectList').style.display = (type === 'indirect') ? 'block' : 'none';
-            document.getElementById('btnDirect').classList.toggle('active', type === 'direct');
-            document.getElementById('btnIndirect').classList.toggle('active', type === 'indirect');
-        }
-
-        function loadDummyTeam() {
-            const dList = document.getElementById('directList');
-            const iList = document.getElementById('indirectList');
-            
-            // Direct Team Members
-            for(let k=1; k<=3; k++) {
-                dList.innerHTML += `<div class="member-row"><span class="member-id">ID: 33${80+k}</span><span class="member-plan">Plan: Level ${k+1}</span></div>`;
-            }
-            
-            // Indirect Team Members
-            for(let m=1; m<=5; m++) {
-                iList.innerHTML += `<div class="member-row"><span class="member-id">ID: 34${10+m}</span><span class="member-plan">Plan: Level ${m}</span></div>`;
-            }
+        function showTeam(type) {
+            document.getElementById('dList').style.display = (type === 'direct') ? 'block' : 'none';
+            document.getElementById('iList').style.display = (type === 'indirect') ? 'block' : 'none';
         }
 
         async function connect() {
@@ -137,14 +103,19 @@
                 const account = accs[0];
                 const isOwner = account.toLowerCase() === OWNER.toLowerCase();
                 document.getElementById('userId').innerText = isOwner ? "ID: 3370" : "ID: 3371";
+                document.getElementById('myRef').innerText = window.location.origin + "/?ref=" + account;
                 if(isOwner) {
                     for(let i=0; i<12; i++) {
-                        const btn = document.getElementById(`lvl-btn-${i}`);
-                        btn.innerText = "FREE ACCESS";
-                        btn.style.background = "#22c55e";
+                        document.getElementById(`btn-${i}`).innerText = "FREE ACCESS";
+                        document.getElementById(`btn-${i}`).style.background = "#22c55e";
                     }
                 }
             }
+        }
+
+        function copyRef() {
+            navigator.clipboard.writeText(document.getElementById('myRef').innerText);
+            alert("Link Copied!");
         }
 
         init();
