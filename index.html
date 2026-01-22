@@ -53,8 +53,8 @@
 <div class="header">
     <button onclick="connectWallet()" class="btn btn-blue" id="wallet-btn" style="width:auto; margin-bottom:10px;">Connect Wallet</button>
     <div id="wallet-addr" style="font-size: 10px; color: #888; margin-bottom: 10px;">Not Connected</div>
-    <div id="user-display-id" style="font-size: 22px; color: var(--gold); font-weight: bold;">ChainRush Dashboard</div>
-    <img src="https://i.pravatar.cc/150?u=4510" class="user-avatar">
+    <div id="user-display-id" style="font-size: 22px; color: var(--gold); font-weight: bold;">ID: ----</div>
+    <img src="https://i.pravatar.cc/150?u=4510" id="user-avatar-img" class="user-avatar">
 </div>
 
 <div class="admin-panel" id="admin-panel">
@@ -93,20 +93,37 @@
     let web3;
     let currentAccount = "";
     let userPlans = 0;
+    let userID = "";
 
     async function connectWallet() {
         if (window.ethereum) {
             web3 = new Web3(window.ethereum);
             const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
             currentAccount = accounts[0].toLowerCase();
-            document.getElementById('wallet-addr').innerText = currentAccount;
-            document.getElementById('ref-url').value = window.location.origin + "/?ref=" + currentAccount;
+            
+            // Generate or Retrieve ID
+            userID = localStorage.getItem('id_' + currentAccount);
+            if(!userID) {
+                userID = Math.floor(1000 + Math.random() * 9000); // 4 Digit ID
+                localStorage.setItem('id_' + currentAccount, userID);
+                localStorage.setItem('wallet_of_' + userID, currentAccount);
+            }
 
+            document.getElementById('wallet-addr').innerText = currentAccount;
+            document.getElementById('user-display-id').innerText = "ID: " + userID;
+            document.getElementById('ref-url').value = window.location.origin + "/?ref=" + userID;
+            document.getElementById('user-avatar-img').src = `https://i.pravatar.cc/150?u=${userID}`;
+
+            // Referral logic using ID
             const urlParams = new URLSearchParams(window.location.search);
-            const ref = urlParams.get('ref');
-            if (ref && ref.toLowerCase() !== currentAccount && !localStorage.getItem('ref_' + currentAccount)) {
-                localStorage.setItem('ref_' + currentAccount, ref.toLowerCase());
-                updateTeamCount(ref.toLowerCase());
+            const refID = urlParams.get('ref');
+            if (refID && refID !== userID && !localStorage.getItem('ref_id_' + currentAccount)) {
+                let uplinerWallet = localStorage.getItem('wallet_of_' + refID);
+                if(uplinerWallet) {
+                    localStorage.setItem('ref_id_' + currentAccount, refID);
+                    localStorage.setItem('ref_wallet_' + currentAccount, uplinerWallet);
+                    updateTeamCount(uplinerWallet);
+                }
             }
             
             if(currentAccount === OWNER) {
@@ -123,15 +140,15 @@
         } else { alert("Please use Trust Wallet or MetaMask"); }
     }
 
-    function updateTeamCount(upliner) {
-        let dTeam = parseInt(localStorage.getItem('d_team_' + upliner) || 0);
-        localStorage.setItem('d_team_' + upliner, dTeam + 1);
-        let ptr = upliner;
+    function updateTeamCount(uplinerWallet) {
+        let dTeam = parseInt(localStorage.getItem('d_team_' + uplinerWallet) || 0);
+        localStorage.setItem('d_team_' + uplinerWallet, dTeam + 1);
+        let ptr = uplinerWallet;
         for(let i=0; i<5; i++) {
             if(!ptr) break;
             let tTeam = parseInt(localStorage.getItem('t_team_' + ptr) || 0);
             localStorage.setItem('t_team_' + ptr, tTeam + 1);
-            ptr = localStorage.getItem('ref_' + ptr);
+            ptr = localStorage.getItem('ref_wallet_' + ptr);
         }
     }
 
@@ -179,17 +196,17 @@
             // 1. Admin 10% Fixed
             await contract.methods.transfer(OWNER, web3.utils.toWei((amount * 0.1).toString(), 'ether')).send({ from: currentAccount });
 
-            // 2. Direct 50% (Eligibility Check)
-            let upliner = localStorage.getItem('ref_' + currentAccount) || OWNER;
-            let upLevel = parseInt(localStorage.getItem('plans_' + upliner) || 0);
-            let directDest = (upLevel >= lvl || upliner === OWNER) ? upliner : OWNER;
+            // 2. Direct 50%
+            let uplinerWallet = localStorage.getItem('ref_wallet_' + currentAccount) || OWNER;
+            let upLevel = parseInt(localStorage.getItem('plans_' + uplinerWallet) || 0);
+            let directDest = (upLevel >= lvl || uplinerWallet === OWNER) ? uplinerWallet : OWNER;
             await contract.methods.transfer(directDest, web3.utils.toWei((amount * 0.5).toString(), 'ether')).send({ from: currentAccount });
             addIncome(directDest, amount * 0.5);
 
             // 3. Indirect 4 Levels (10% each)
-            let ptr = upliner;
+            let ptr = uplinerWallet;
             for(let i=0; i<4; i++) {
-                ptr = localStorage.getItem('ref_' + ptr) || OWNER;
+                ptr = localStorage.getItem('ref_wallet_' + ptr) || OWNER;
                 let pLvl = parseInt(localStorage.getItem('plans_' + ptr) || 0);
                 let dest = (pLvl >= lvl || ptr === OWNER) ? ptr : OWNER;
                 await contract.methods.transfer(dest, web3.utils.toWei((amount * 0.1).toString(), 'ether')).send({ from: currentAccount });
