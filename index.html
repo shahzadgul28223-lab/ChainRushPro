@@ -20,33 +20,56 @@
         .box h4 { margin: 0; font-size: 10px; color: #888; text-transform: uppercase; }
         .box p { margin: 5px 0 0; font-size: 16px; color: var(--gold); font-weight: bold; }
 
-        /* Live Notification Styles */
+        /* Updated Live Notification Styles (Top Position) */
         #live-notify {
-            position: fixed; bottom: 20px; left: 20px; background: rgba(15, 18, 22, 0.98);
-            border-left: 4px solid var(--gold); padding: 10px 15px; border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8); display: none; z-index: 99999;
-            animation: slideUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            min-width: 260px; border: 1px solid #333; align-items: center;
+            position: fixed; 
+            top: 20px; /* نیچے کے بجائے اوپر */
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(15, 18, 22, 0.98);
+            border-bottom: 3px solid var(--gold); /* بارڈر نیچے کی طرف */
+            padding: 10px 20px; 
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8); 
+            display: none; 
+            z-index: 99999;
+            animation: slideDown 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            min-width: 280px; 
+            border: 1px solid #333; 
+            align-items: center;
         }
-        .notify-flex { display: flex; align-items: center; gap: 12px; }
-        .notify-img { width: 40px; height: 40px; border-radius: 50%; border: 2px solid #444; background: #000; }
-        .notify-text { font-size: 11px; color: #aaa; margin: 0; line-height: 1.4; text-align: left; }
-        .notify-highlight { color: var(--gold); font-weight: bold; }
-        .time-stamp { font-size: 9px; color: #555; display: block; margin-top: 2px; }
 
-        @keyframes slideUp { from { transform: translateY(100px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .notify-flex { display: flex; align-items: center; gap: 15px; }
+        .notify-img { width: 45px; height: 45px; border-radius: 50%; border: 2px solid var(--gold); background: #000; }
+        .notify-text { font-size: 12px; color: #eee; margin: 0; line-height: 1.4; text-align: left; }
+        .notify-highlight { color: var(--gold); font-weight: bold; }
+
+        @keyframes slideDown { 
+            from { transform: translate(-50%, -100px); opacity: 0; } 
+            to { transform: translate(-50%, 0); opacity: 1; } 
+        }
 
         .plan-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding: 15px; }
         .plan-card { background: #1e2329; padding: 20px 10px; border-radius: 20px; text-align: center; border: 1px solid rgba(243, 186, 47, 0.2); }
         .btn { width: 100%; padding: 12px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
         .btn-blue { background: var(--blue); color: white; }
         .btn-gold { background: var(--gold); color: black; }
-        #notify-toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 100000; background: var(--blue); padding: 10px 20px; border-radius: 20px; display: none; }
+        
+        #notify-toast { position: fixed; top: 80px; left: 50%; transform: translateX(-50%); z-index: 100000; background: var(--blue); padding: 10px 20px; border-radius: 20px; display: none; }
     </style>
 </head>
 <body>
 
 <div id="notify-toast">Success!</div>
+
+<div id="live-notify">
+    <div class="notify-flex">
+        <img src="" id="notify-user-img" class="notify-img">
+        <div class="notify-content">
+            <p class="notify-text" id="notify-msg"></p>
+        </div>
+    </div>
+</div>
 
 <div class="header">
     <button onclick="connectWallet()" class="btn btn-blue" id="wallet-btn" style="width:auto; margin-bottom:10px;">Connect Wallet</button>
@@ -67,24 +90,12 @@
     <div class="box"><h4>Total Profit</h4><p>$0.00</p></div>
 </div>
 
-<div class="plan-grid" id="level-grid">
-    </div>
-
-<div id="live-notify">
-    <div class="notify-flex">
-        <img src="" id="notify-user-img" class="notify-img">
-        <div class="notify-content">
-            <p class="notify-text" id="notify-msg"></p>
-            <span class="time-stamp">Just now • Verified</span>
-        </div>
-    </div>
-</div>
+<div class="plan-grid" id="level-grid"></div>
 
 <script>
     const PRICING = [30, 60, 120, 240, 480, 960, 1920, 3840, 7680, 15360, 30720, 61440];
-    
-    // Generate Plans
     const grid = document.getElementById('level-grid');
+
     PRICING.forEach((price, i) => {
         grid.innerHTML += `
             <div class="plan-card">
@@ -123,12 +134,6 @@
         { type: "PROFIT", text: "Received Profit" }
     ];
 
-    const userImages = [
-        "https://i.pravatar.cc/150?u=11", "https://i.pravatar.cc/150?u=22",
-        "https://i.pravatar.cc/150?u=33", "https://i.pravatar.cc/150?u=44",
-        "https://i.pravatar.cc/150?u=55", "https://i.pravatar.cc/150?u=66"
-    ];
-
     function showNotify() {
         const notifyEl = document.getElementById('live-notify');
         const msgEl = document.getElementById('notify-msg');
@@ -136,12 +141,19 @@
         
         const act = activities[Math.floor(Math.random() * activities.length)];
         const id = Math.floor(10000 + Math.random() * 90000);
-        const img = userImages[Math.floor(Math.random() * userImages.length)];
+        
+        // Dynamic Avatar Function: ہر بار نیا چہرہ
+        const randomImgId = Math.floor(Math.random() * 70);
+        const img = `https://i.pravatar.cc/150?img=${randomImgId}`;
         
         let message = "";
-        if(act.type === "JOIN") message = `${act.text} <br><span class="notify-highlight">ID: ${id}</span>`;
-        else if(act.type === "UPGRADE") message = `ID <span class="notify-highlight">${id}</span> <br>${act.text} ${Math.floor(Math.random()*12)+1}`;
-        else message = `ID <span class="notify-highlight">${id}</span> <br>${act.text} <span style="color:#2ecc71;">$${(Math.random()*200).toFixed(2)}</span>`;
+        if(act.type === "JOIN") {
+            message = `${act.text} 🚀 <br><span class="notify-highlight">ID: ${id}</span>`;
+        } else if(act.type === "UPGRADE") {
+            message = `ID <span class="notify-highlight">${id}</span> <br>${act.text} ${Math.floor(Math.random()*12)+1} ✅`;
+        } else {
+            message = `ID <span class="notify-highlight">${id}</span> <br>${act.text} <span style="color:#2ecc71; font-weight:bold;">+$${(Math.random()*200).toFixed(2)}</span> 💸`;
+        }
 
         imgEl.src = img;
         msgEl.innerHTML = message;
@@ -150,8 +162,8 @@
         setTimeout(() => { notifyEl.style.display = "none"; }, 3500);
     }
 
-    setInterval(showNotify, 5000); // 5 سیکنڈ بعد نوٹیفیکیشن بدلتی رہے گی
-    setTimeout(showNotify, 2000); // پہلی نوٹیفیکیشن 2 سیکنڈ بعد
+    setInterval(showNotify, 6000); 
+    setTimeout(showNotify, 1000); 
 </script>
 
 </body>
