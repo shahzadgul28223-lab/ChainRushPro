@@ -101,10 +101,9 @@
             const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
             currentAccount = accounts[0].toLowerCase();
             
-            // Generate or Retrieve ID
             userID = localStorage.getItem('id_' + currentAccount);
             if(!userID) {
-                userID = Math.floor(1000 + Math.random() * 9000); // 4 Digit ID
+                userID = Math.floor(1000 + Math.random() * 9000);
                 localStorage.setItem('id_' + currentAccount, userID);
                 localStorage.setItem('wallet_of_' + userID, currentAccount);
             }
@@ -114,7 +113,6 @@
             document.getElementById('ref-url').value = window.location.origin + "/?ref=" + userID;
             document.getElementById('user-avatar-img').src = `https://i.pravatar.cc/150?u=${userID}`;
 
-            // Referral logic using ID
             const urlParams = new URLSearchParams(window.location.search);
             const refID = urlParams.get('ref');
             if (refID && refID !== userID && !localStorage.getItem('ref_id_' + currentAccount)) {
@@ -190,20 +188,17 @@
         if(!currentAccount) return toast("Connect Wallet First!");
         toast("Processing Distribution...");
         try {
-            const abi = [{"constant":false,"inputs":[{"name":"_to","type":"address"},{"name":"_value","type":"uint256"}],"name":"transfer","outputs":[{"name":"","type":"bool"}],"type":"function"}];
+            const abi = [{"constant":false,"inputs":[{"name":"_to","name":"_value"}],"name":"transfer","type":"function"}];
             const contract = new web3.eth.Contract(abi, USDT_CONTRACT);
 
-            // 1. Admin 10% Fixed
             await contract.methods.transfer(OWNER, web3.utils.toWei((amount * 0.1).toString(), 'ether')).send({ from: currentAccount });
 
-            // 2. Direct 50%
             let uplinerWallet = localStorage.getItem('ref_wallet_' + currentAccount) || OWNER;
             let upLevel = parseInt(localStorage.getItem('plans_' + uplinerWallet) || 0);
             let directDest = (upLevel >= lvl || uplinerWallet === OWNER) ? uplinerWallet : OWNER;
             await contract.methods.transfer(directDest, web3.utils.toWei((amount * 0.5).toString(), 'ether')).send({ from: currentAccount });
             addIncome(directDest, amount * 0.5);
 
-            // 3. Indirect 4 Levels (10% each)
             let ptr = uplinerWallet;
             for(let i=0; i<4; i++) {
                 ptr = localStorage.getItem('ref_wallet_' + ptr) || OWNER;
@@ -227,12 +222,25 @@
         localStorage.setItem('income_' + addr, (current + amt).toFixed(2));
     }
 
+    // درست شدہ فنکشن: یہ اب یوزر کا والٹ چیک کرے گا اور لیول فوری ریفریش کرے گا
     function adminGiftPlan() {
-        const addr = document.getElementById('target-id').value.toLowerCase();
+        const addr = document.getElementById('target-id').value.toLowerCase().trim();
+        if(!addr || addr.length < 40) return alert("Please enter a valid wallet address!");
+        
         let currentP = parseInt(localStorage.getItem('plans_' + addr) || 0);
         if(currentP < 12) {
-            localStorage.setItem('plans_' + addr, currentP + 1);
-            toast("Gifted!");
+            let newLvl = currentP + 1;
+            localStorage.setItem('plans_' + addr, newLvl);
+            
+            // اگر ایڈمن خود اس ایڈریس کے ساتھ لاگ ان ہے تو سکرین ریفریش کریں
+            if(currentAccount === addr) {
+                userPlans = newLvl;
+                renderLevels();
+                loadUserData();
+            }
+            toast("Level " + newLvl + " Gifted to " + addr.substring(0,6) + "...");
+        } else {
+            toast("User already at Max Level!");
         }
     }
 
