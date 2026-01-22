@@ -4,8 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ChainRush Pro | Decentralized System</title>
+    
     <meta property="og:title" content="ChainRush Pro | Official">
+    <meta property="og:description" content="Decentralized Financial Growth System">
     <meta property="og:image" content="https://i.ibb.co/vzPRY89/logo.png">
+    <meta property="og:type" content="website">
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.8.1/web3.min.js"></script>
     <style>
         :root { --gold: #f3ba2f; --blue: #38bdf8; --bg: #0b0e11; --card: #1e2329; --green: #2ecc71; }
@@ -51,6 +55,7 @@
 
 <div class="header">
     <img src="https://i.ibb.co/vzPRY89/logo.png" class="logo-main" alt="ChainRush-Pro Logo">
+    
     <div id="display-id" style="font-size: 24px; color: var(--gold); font-weight: bold; text-shadow: 0 0 10px rgba(243,186,47,0.5);">Login Required</div>
     
     <div class="profile">
@@ -58,7 +63,7 @@
             <img id="user-img" src="https://i.ibb.co/vzPRY89/logo.png" class="user-avatar" title="Click to change photo">
         </label>
         <input type="file" id="img-in" style="display:none" onchange="loadImg(event)">
-        <p style="font-size: 12px; color: var(--blue); margin: 0;">ChainRush-Pro Member</p>
+        <p style="font-size: 12px; color: var(--blue); margin: 0;">ChainRush-Pro Official</p>
     </div>
     
     <button id="conn-btn" onclick="connect()" class="btn btn-blue" style="width:auto; padding: 12px 40px; margin-top: 20px; font-size: 16px; border: 1px solid white;">Connect Wallet</button>
@@ -142,29 +147,20 @@
             if(isOwner) {
                 document.getElementById('owner-panel').style.display = "block";
                 PRICING.forEach((_, i) => setActive(i+1));
-                updateLog(`Master Admin (ID: ${myId}) connected to Dashboard.`);
+                updateLog(`Master Admin (ID: ${myId}) connected.`);
             }
         }
     }
 
-    // Team Report Logic (Up to 24 Levels)
     function viewTeam(type) {
         const list = document.getElementById('team-list');
         if(!wallet) return alert("Connect Wallet First");
-        
         list.innerHTML = "Fetching real-time team data...";
-        
         setTimeout(() => {
             if(type === 'direct') {
-                list.innerHTML = `<strong>Direct Partners (Level 1):</strong><br>
-                ID: 59571 | Status: <span style="color:var(--green)">Active</span><br>
-                ID: 60211 | Status: <span style="color:var(--green)">Active</span><br>
-                ID: 60350 | Status: <span style="color:red)">Inactive</span>`;
+                list.innerHTML = `<strong>Direct Partners (Level 1):</strong><br>ID: 59571 | Status: Active<br>ID: 60211 | Status: Active`;
             } else {
-                list.innerHTML = `<strong>Downline (Levels 2-24):</strong><br>
-                Lvl 2: ID 61002 | Lvl 5: ID 62550<br>
-                Lvl 12: ID 75000 | Lvl 24: ID 99999<br>
-                Total Team Members across 24 Levels: 1,245`;
+                list.innerHTML = `<strong>Downline (Levels 2-24):</strong><br>Lvl 2: ID 61002 | Lvl 24: ID 99999<br>Total Team Members: 1,245`;
             }
         }, 800);
     }
@@ -172,7 +168,6 @@
     function updateLog(msg) {
         const log = document.getElementById('admin-log');
         const time = new Date().toLocaleTimeString();
-        // This will keep all joinings visible
         log.innerHTML = `<div style="border-bottom:1px solid #222; padding:3px;">[${time}] ${msg}</div>` + log.innerHTML;
     }
 
@@ -180,14 +175,14 @@
         const tid = document.getElementById('target-id').value;
         const opt = document.getElementById('plan-opt').value;
         if(!tid) return alert("Enter ID");
-        const msg = `Master Admin gifted Plan ${opt} to ID: ${tid}`;
+        const msg = `Admin gifted Plan ${opt} to ID: ${tid}`;
         toast(`✅ ${msg}`);
         updateLog(msg);
     }
 
     function buy(lvl) {
-        const msg = `ID: ${myId} upgraded to Level ${lvl} manually.`;
-        toast(`🔄 Processing Payment for Level ${lvl}...`);
+        const msg = `ID: ${myId} upgraded to Level ${lvl}`;
+        toast(`🔄 Processing Level ${lvl}...`);
         setTimeout(() => { 
             setActive(lvl); 
             toast(`🔥 SUCCESS: ${msg}`);
@@ -208,13 +203,13 @@
         const tid = document.getElementById('target-id').value;
         const amt = document.getElementById('cash-amt').value;
         if(!tid || !amt) return alert("Fill ID and Amount");
-        const msg = `Admin sent ${amt} USDT to Member ID: ${tid}`;
+        const msg = `Admin sent ${amt} USDT to ID: ${tid}`;
         toast(`🎁 ${msg}`);
         updateLog(msg);
     }
 
     function randomAlerts() {
-        const m = ["ID 59571 just joined! 🚀", "ID 4810 earned 30 USDT Direct! 🔥", "Admin gifted Plan 12 to a lucky member! 🎁", "New Upgrade: ID 60211 moved to Level 5!"];
+        const m = ["ID 59571 just joined! 🚀", "ID 4810 earned 30 USDT! 🔥", "Admin gifted Plan 12! 🎁"];
         setInterval(() => { if(wallet) toast(m[Math.floor(Math.random()*m.length)]); }, 4000);
     }
 
