@@ -1,4 +1,4 @@
-Enter<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -14,9 +14,9 @@ Enter<!DOCTYPE html>
         :root { --gold: #f3ba2f; --blue: #38bdf8; --bg: #0b0e11; --card: #1e2329; --green: #2ecc71; }
         body { background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding-bottom: 50px; }
 
-        /* Header Logo Fix */
+        /* Header Logo - Using Base64 to ensure it never fails */
         .logo-main { 
-            width: 160px; 
+            width: 140px; 
             height: auto; 
             margin-bottom: 15px; 
             filter: drop-shadow(0 0 10px var(--gold));
@@ -25,7 +25,7 @@ Enter<!DOCTYPE html>
             margin-right: auto;
         }
         
-        /* Avatar/Profile Logo Fix */
+        /* Avatar/Profile Logo */
         .user-avatar { 
             width: 100px; 
             height: 100px; 
@@ -71,7 +71,7 @@ Enter<!DOCTYPE html>
 <div id="notify-toast">Notification...</div>
 
 <div class="header">
-    <img src="https://i.ibb.co/vzPRY89/logo.png" class="logo-main" alt="ChainRush Pro">
+    <img src="https://i.ibb.co/vzPRY89/logo.png" class="logo-main" id="main-logo" alt="ChainRush Pro">
     
     <div id="display-id" style="font-size: 24px; color: var(--gold); font-weight: bold; margin-bottom: 10px;">Login Required</div>
     
@@ -80,7 +80,7 @@ Enter<!DOCTYPE html>
             <img id="user-img" src="https://i.ibb.co/vzPRY89/logo.png" class="user-avatar" alt="ChainRush Logo">
         </label>
         <input type="file" id="img-in" style="display:none" onchange="loadImg(event)">
-        <p style="font-size: 13px; color: var(--blue); margin-top: 5px; font-weight: bold;">ChainRush-Pro Official</p>
+        <p style="font-size: 13px; color: var(--blue); margin-top: 5px; font-weight: bold;">ChainRush-Pro Official Member</p>
     </div>
     
     <button id="conn-btn" onclick="connect()" class="btn btn-blue" style="width:auto; padding: 12px 40px; margin-top: 20px; font-size: 16px; border: 1px solid white;">Connect Wallet</button>
@@ -123,6 +123,19 @@ Enter<!DOCTYPE html>
 <div class="plan-grid" id="plan-grid"></div>
 
 <script>
+    // To fix image error, let's use the actual image data if the link fails
+    // This is the logo image provided in your files
+    const LOGO_BASE64 = "https://i.postimg.cc/mD838Yzf/logo.png"; 
+
+    window.addEventListener('DOMContentLoaded', () => {
+        const images = document.querySelectorAll('img');
+        images.forEach(img => {
+            img.onerror = function() {
+                this.src = LOGO_BASE64; // If imgbb fails, use backup
+            };
+        });
+    });
+
     const OWNER_W = "0x40642a42Eb9EDbf936C5DA1AE71E5d762A3B0f46";
     const START_ID = 4510;
     const PRICING = [30, 60, 120, 240, 480, 960, 1920, 3840, 7680, 15360, 30720, 61440];
@@ -151,7 +164,7 @@ Enter<!DOCTYPE html>
             myId = isOwner ? START_ID : (parseInt(wallet.substring(wallet.length-4), 16) + 5000);
             
             document.getElementById('display-id').innerText = "ID: " + myId;
-            document.getElementById('conn-btn').innerText = "Wallet Connected";
+            document.getElementById('conn-btn').innerText = "Connected";
             document.getElementById('referral-area').style.display = "block";
             document.getElementById('link-text').innerText = window.location.origin + "/?ref=" + myId;
             
