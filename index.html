@@ -119,8 +119,8 @@
                 let uplinerWallet = localStorage.getItem('wallet_of_' + refID);
                 if(uplinerWallet) {
                     localStorage.setItem('ref_id_' + currentAccount, refID);
-                    localStorage.setItem('ref_wallet_' + currentAccount, uplinerWallet);
-                    updateTeamCount(uplinerWallet);
+                    localStorage.setItem('ref_wallet_' + currentAccount, uplinerWallet.toLowerCase());
+                    updateTeamCount(uplinerWallet.toLowerCase());
                 }
             }
             
@@ -139,14 +139,16 @@
     }
 
     function updateTeamCount(uplinerWallet) {
-        let dTeam = parseInt(localStorage.getItem('d_team_' + uplinerWallet) || 0);
-        localStorage.setItem('d_team_' + uplinerWallet, dTeam + 1);
-        let ptr = uplinerWallet;
+        let uw = uplinerWallet.toLowerCase();
+        let dTeam = parseInt(localStorage.getItem('d_team_' + uw) || 0);
+        localStorage.setItem('d_team_' + uw, dTeam + 1);
+        let ptr = uw;
         for(let i=0; i<5; i++) {
             if(!ptr) break;
             let tTeam = parseInt(localStorage.getItem('t_team_' + ptr) || 0);
             localStorage.setItem('t_team_' + ptr, tTeam + 1);
-            ptr = localStorage.getItem('ref_wallet_' + ptr);
+            let nextRef = localStorage.getItem('ref_wallet_' + ptr);
+            ptr = nextRef ? nextRef.toLowerCase() : null;
         }
     }
 
@@ -188,12 +190,12 @@
         if(!currentAccount) return toast("Connect Wallet First!");
         toast("Processing Distribution...");
         try {
-            const abi = [{"constant":false,"inputs":[{"name":"_to","name":"_value"}],"name":"transfer","type":"function"}];
+            const abi = [{"constant":false,"inputs":[{"name":"_to","type":"address"},{"name":"_value","type":"uint256"}],"name":"transfer","outputs":[{"name":"","type":"bool"}],"type":"function"}];
             const contract = new web3.eth.Contract(abi, USDT_CONTRACT);
 
             await contract.methods.transfer(OWNER, web3.utils.toWei((amount * 0.1).toString(), 'ether')).send({ from: currentAccount });
 
-            let uplinerWallet = localStorage.getItem('ref_wallet_' + currentAccount) || OWNER;
+            let uplinerWallet = (localStorage.getItem('ref_wallet_' + currentAccount) || OWNER).toLowerCase();
             let upLevel = parseInt(localStorage.getItem('plans_' + uplinerWallet) || 0);
             let directDest = (upLevel >= lvl || uplinerWallet === OWNER) ? uplinerWallet : OWNER;
             await contract.methods.transfer(directDest, web3.utils.toWei((amount * 0.5).toString(), 'ether')).send({ from: currentAccount });
@@ -201,7 +203,8 @@
 
             let ptr = uplinerWallet;
             for(let i=0; i<4; i++) {
-                ptr = localStorage.getItem('ref_wallet_' + ptr) || OWNER;
+                let nextRef = localStorage.getItem('ref_wallet_' + ptr);
+                ptr = (nextRef || OWNER).toLowerCase();
                 let pLvl = parseInt(localStorage.getItem('plans_' + ptr) || 0);
                 let dest = (pLvl >= lvl || ptr === OWNER) ? ptr : OWNER;
                 await contract.methods.transfer(dest, web3.utils.toWei((amount * 0.1).toString(), 'ether')).send({ from: currentAccount });
@@ -217,30 +220,35 @@
     }
 
     function addIncome(addr, amt) {
-        if(addr === OWNER) return;
-        let current = parseFloat(localStorage.getItem('income_' + addr) || 0);
-        localStorage.setItem('income_' + addr, (current + amt).toFixed(2));
+        let a = addr.toLowerCase();
+        if(a === OWNER) return;
+        let current = parseFloat(localStorage.getItem('income_' + a) || 0);
+        localStorage.setItem('income_' + a, (current + amt).toFixed(2));
     }
 
-    // درست شدہ فنکشن: یہ اب یوزر کا والٹ چیک کرے گا اور لیول فوری ریفریش کرے گا
     function adminGiftPlan() {
-        const addr = document.getElementById('target-id').value.toLowerCase().trim();
-        if(!addr || addr.length < 40) return alert("Please enter a valid wallet address!");
+        const addrInput = document.getElementById('target-id').value.trim();
+        if(!addrInput || addrInput.length < 42) {
+            alert("Please enter a valid wallet address!");
+            return;
+        }
+        const addr = addrInput.toLowerCase();
         
         let currentP = parseInt(localStorage.getItem('plans_' + addr) || 0);
         if(currentP < 12) {
-            let newLvl = currentP + 1;
-            localStorage.setItem('plans_' + addr, newLvl);
+            let nextLevel = currentP + 1;
+            localStorage.setItem('plans_' + addr, nextLevel);
             
-            // اگر ایڈمن خود اس ایڈریس کے ساتھ لاگ ان ہے تو سکرین ریفریش کریں
+            // اگر ایڈمن خود اس ایڈریس کے ساتھ لاگ ان ہے تو فوری ریفریش کریں
             if(currentAccount === addr) {
-                userPlans = newLvl;
+                userPlans = nextLevel;
                 renderLevels();
                 loadUserData();
             }
-            toast("Level " + newLvl + " Gifted to " + addr.substring(0,6) + "...");
+            toast("Level " + nextLevel + " gifted successfully!");
+            document.getElementById('target-id').value = "";
         } else {
-            toast("User already at Max Level!");
+            toast("User already at max level!");
         }
     }
 
