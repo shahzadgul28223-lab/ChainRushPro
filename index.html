@@ -1,140 +1,108 @@
-Enter<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChainRush Pro | Lifetime Admin Dashboard</title>
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.8.1/web3.min.js"></script>
-    <style>
-        :root { --gold: #f3ba2f; --blue: #38bdf8; --bg: #0b0e11; --card: #161a1e; --green: #2ecc71; --red: #e74c3c; }
-        body { background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding-bottom: 50px; }
+<style>
+    /* نوٹیفیکیشن کنٹینر کو فلیکس باکس بنایا گیا ہے */
+    #live-notify {
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        background: rgba(15, 18, 22, 0.98);
+        border-left: 4px solid var(--gold);
+        padding: 10px 15px;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        display: none;
+        z-index: 99999;
+        animation: slideUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        min-width: 280px;
+        border: 1px solid #333;
+        align-items: center;
+    }
 
-        .header { background: linear-gradient(180deg, #1e40af, #0b0e11); padding: 30px 20px; text-align: center; border-bottom: 3px solid var(--gold); }
-        .user-avatar { width: 90px; height: 90px; border-radius: 50%; border: 3px solid var(--gold); margin: 10px auto; display: block; }
-        
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; }
-        .box { background: var(--card); padding: 15px; border-radius: 12px; border: 1px solid #333; text-align: center; }
-        .box h4 { margin: 0; font-size: 10px; color: #888; text-transform: uppercase; }
-        .box p { margin: 5px 0 0; font-size: 16px; color: var(--gold); font-weight: bold; }
+    .notify-flex {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
 
-        .admin-section { background: #1a1d21; margin: 15px; padding: 20px; border-radius: 15px; border: 2px solid var(--red); }
-        input, select { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; background: #000; border: 1px solid #444; color: white; box-sizing: border-box; }
+    .notify-img {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        border: 2px solid #444;
+        background: #000;
+    }
 
-        .plan-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding: 15px; }
-        .plan-card { background: #1e2329; padding: 20px 10px; border-radius: 20px; text-align: center; border: 1px solid rgba(243, 186, 47, 0.2); position: relative; transition: 0.3s; }
-        .active-label { position: absolute; top: 10px; right: 10px; background: var(--green); color: white; font-size: 7px; padding: 2px 6px; border-radius: 4px; display: none; font-weight: bold; }
+    @keyframes slideUp {
+        from { transform: translateY(100px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
 
-        .btn { width: 100%; padding: 12px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        .btn-gold { background: var(--gold); color: black; }
-        .btn-red { background: var(--red); color: white; }
-        
-        #notify-toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 10000; background: var(--blue); border: 1px solid var(--gold); padding: 12px 25px; border-radius: 30px; display: none; font-size: 13px; }
-    </style>
-</head>
-<body>
+    .notify-content { flex: 1; }
+    .notify-text { font-size: 11px; color: #aaa; margin: 0; line-height: 1.4; }
+    .notify-highlight { color: var(--gold); font-weight: bold; font-size: 13px; }
+    .notify-green { color: var(--green); font-weight: bold; }
+    .time-stamp { font-size: 9px; color: #555; display: block; margin-top: 2px; }
+</style>
 
-<div id="notify-toast">Success!</div>
-
-<div class="header">
-    <div id="display-id" style="font-size: 24px; color: var(--gold); font-weight: bold;">ID: 4510</div>
-    <img src="https://www.w3schools.com/howto/img_avatar.png" class="user-avatar">
-    <p id="current-active-plan" style="color:var(--green); font-weight:bold;">Max Status: Level 0</p>
+<div id="live-notify">
+    <div class="notify-flex">
+        <img src="" id="notify-user-img" class="notify-img" alt="user">
+        <div class="notify-content">
+            <p class="notify-text" id="notify-msg"></p>
+            <span class="time-stamp">Just now • Verified</span>
+        </div>
+    </div>
 </div>
-
-<div class="admin-section">
-    <h3 style="margin:0 0 10px 0; color:var(--red); font-size:16px; text-align:center;">MASTER ADMIN CONTROL</h3>
-    <input type="number" id="search-id" placeholder="Enter Member ID to Grant Plan">
-    <select id="select-level">
-        <option value="1">Grant Level 1 ($30)</option>
-        <option value="2">Grant Level 2 ($60)</option>
-        <option value="3">Grant Level 3 ($120)</option>
-        <option value="4">Grant Level 4 ($240)</option>
-        <option value="5">Grant Level 5 ($480)</option>
-        <option value="6">Grant Level 6 ($960)</option>
-        <option value="7">Grant Level 7 ($1920)</option>
-        <option value="8">Grant Level 8 ($3840)</option>
-        <option value="9">Grant Level 9 ($7680)</option>
-        <option value="10">Grant Level 10 ($15360)</option>
-        <option value="11">Grant Level 11 ($30720)</option>
-        <option value="12">Grant Level 12 ($61440)</option>
-    </select>
-    <button onclick="adminAction()" class="btn btn-red">ACTIVATE FOR LIFETIME</button>
-</div>
-
-<div class="stats-grid">
-    <div class="box"><h4>Highest Level</h4><p id="dash-plan">0</p></div>
-    <div class="box"><h4>Status</h4><p id="dash-status" style="font-size: 12px; color: var(--green);">INACTIVE</p></div>
-</div>
-
-<div class="plan-grid" id="level-grid"></div>
 
 <script>
-    const PRICING = [30, 60, 120, 240, 480, 960, 1920, 3840, 7680, 15360, 30720, 61440];
-    
-    // Array to track lifetime status of 12 levels
-    let activeLevels = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    const activities = [
+        { type: "REGISTRATION", text: "New Member Joined", color: "var(--blue)" },
+        { type: "UPGRADE", text: "Upgraded Level", color: "var(--gold)" },
+        { type: "EARNING", text: "Received Profit", color: "var(--green)" },
+        { type: "WITHDRAW", text: "Withdrawal Success", color: "var(--red)" }
+    ];
 
-    function init() {
-        const grid = document.getElementById('level-grid');
-        grid.innerHTML = '';
-        PRICING.forEach((price, i) => {
-            const isActivated = activeLevels[i] === 1;
-            grid.innerHTML += `
-                <div class="plan-card" id="card-${i+1}" style="${isActivated ? 'border-color: var(--green); background: rgba(46, 220, 113, 0.05);' : ''}">
-                    <span class="active-label" id="label-${i+1}" style="display: ${isActivated ? 'block' : 'none'}">LIFETIME ACTIVE</span>
-                    <h3 style="font-size:14px; margin:0;">LEVEL ${i+1}</h3>
-                    <p style="color:var(--gold); font-size:20px; margin:10px 0;">$${price}</p>
-                    <button onclick="activateLevel(${i+1})" class="btn" id="btn-${i+1}" 
-                        style="background: ${isActivated ? 'var(--green)' : 'var(--gold)'}; color: ${isActivated ? 'white' : 'black'};"
-                        ${isActivated ? 'disabled' : ''}>
-                        ${isActivated ? 'LIFETIME ACTIVE' : 'Activate Now'}
-                    </button>
-                </div>`;
-        });
-    }
+    // رینڈم امیجز کے لیے لنکس
+    const userImages = [
+        "https://i.pravatar.cc/150?u=1",
+        "https://i.pravatar.cc/150?u=2",
+        "https://i.pravatar.cc/150?u=8",
+        "https://i.pravatar.cc/150?u=15",
+        "https://i.pravatar.cc/150?u=20",
+        "https://i.pravatar.cc/150?u=33"
+    ];
 
-    // Admin function to grant plan to any member
-    function adminAction() {
-        const id = document.getElementById('search-id').value;
-        const lvl = parseInt(document.getElementById('select-level').value);
-        if(!id) { alert("Please Enter Member ID!"); return; }
+    function showRandomNotification() {
+        const notifyEl = document.getElementById('live-notify');
+        const msgEl = document.getElementById('notify-msg');
+        const imgEl = document.getElementById('notify-user-img');
         
-        // In a real system, you'd send this to a database. 
-        // Here we apply it to the current view as requested.
-        unlockLifetimeLevels(lvl);
-        toast(`Admin: Level ${lvl} granted to ID ${id} for Lifetime!`);
-    }
+        const activity = activities[Math.floor(Math.random() * activities.length)];
+        const randomID = Math.floor(1000 + Math.random() * 9000);
+        const randomImg = userImages[Math.floor(Math.random() * userImages.length)];
+        const randomLevel = Math.floor(1 + Math.random() * 12);
+        const randomAmount = (Math.random() * 500).toFixed(2);
 
-    function activateLevel(lvl) {
-        toast(`Processing Level ${lvl}... System Fee 10% Deducted.`);
-        setTimeout(() => {
-            unlockLifetimeLevels(lvl);
-            toast(`Success! Level ${lvl} Activated for Lifetime.`);
-        }, 1200);
-    }
+        let finalMsg = "";
 
-    function unlockLifetimeLevels(lvl) {
-        // Logic: When level X is granted, all levels from 1 to X become lifetime active
-        for(let i=0; i < lvl; i++) {
-            activeLevels[i] = 1;
+        if (activity.type === "REGISTRATION") {
+            finalMsg = `${activity.text} <br><span class="notify-highlight">ID: ${randomID}</span>`;
+        } else if (activity.type === "UPGRADE") {
+            finalMsg = `ID <span class="notify-highlight">${randomID}</span><br>${activity.text} <span class="notify-highlight">${randomLevel}</span>`;
+        } else {
+            finalMsg = `ID <span class="notify-highlight">${randomID}</span><br>${activity.text} <span class="notify-green">$${randomAmount}</span>`;
         }
+
+        imgEl.src = randomImg;
+        msgEl.innerHTML = finalMsg;
         
-        const maxActive = activeLevels.lastIndexOf(1) + 1;
-        document.getElementById('dash-plan').innerText = maxActive;
-        document.getElementById('dash-status').innerText = "LIFETIME ACTIVE";
-        document.getElementById('current-active-plan').innerText = "Max Status: Level " + maxActive;
-        
-        init(); // Re-render the grid to lock buttons
+        notifyEl.style.display = "flex";
+
+        setTimeout(() => {
+            notifyEl.style.display = "none";
+        }, 3200);
     }
 
-    function toast(msg) {
-        const t = document.getElementById('notify-toast');
-        t.innerText = msg; t.style.display = "block";
-        setTimeout(() => t.style.display = "none", 3000);
-    }
-
-    window.onload = init;
+    // 4 سیکنڈ کا وقفہ
+    setInterval(showRandomNotification, 4500);
+    setTimeout(showRandomNotification, 2000);
 </script>
-</body>
-</html>
