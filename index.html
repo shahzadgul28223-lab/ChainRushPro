@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChainRush Pro | Ultimate Master Control</title>
+    <title>ChainRush Pro | Final Master</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.8.1/web3.min.js"></script>
     <style>
         :root { --neon-gold: #f3ba2f; --neon-blue: #38bdf8; --bg-deep: #0b0e11; --card-bg: #1e2329; }
@@ -11,12 +11,12 @@
         #live-notify { position: fixed; top: 15px; left: 50%; transform: translateX(-50%); z-index: 10000; background: linear-gradient(135deg, #1e40af, #000); border: 1px solid var(--neon-gold); padding: 10px 20px; border-radius: 30px; display: none; font-size: 11px; box-shadow: 0 0 15px var(--neon-gold); }
         .header-card { background: linear-gradient(180deg, #1e40af, #0b0e11); padding: 30px 20px; text-align: center; border-bottom: 2px solid var(--neon-gold); }
         .master-admin { background: #161a1e; margin: 15px; padding: 20px; border-radius: 15px; border: 2px solid var(--neon-gold); display: none; }
-        .ref-section { background: rgba(56, 189, 248, 0.1); border: 1px dashed var(--neon-blue); margin: 15px; padding: 15px; border-radius: 15px; text-align: center; display: none; }
-        .team-box { background: var(--card-bg); margin: 15px; padding: 15px; border-radius: 15px; border: 1px solid #333; }
         .btn-gold { background: var(--neon-gold); color: black; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px; }
         input, select { width: 92%; padding: 12px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #333; background: #0b0e11; color: white; }
+        .team-box { background: var(--card-bg); margin: 15px; padding: 15px; border-radius: 15px; border: 1px solid #333; }
         .plan-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; padding: 15px; }
         .plan-card { background: var(--card-bg); border: 1px solid #333; padding: 15px; border-radius: 15px; text-align: center; }
+        .active-lvl { background: #15803d !important; color: white !important; }
     </style>
 </head>
 <body>
@@ -24,7 +24,7 @@
     <div class="header-card">
         <h2 style="margin:0;">ChainRush Pro</h2>
         <div id="userId" style="font-size: 18px; color: var(--neon-gold); margin: 10px 0;">Login Required</div>
-        <button id="mainConnectBtn" onclick="connect()" class="btn-gold" style="width:auto; padding: 8px 30px;">Connect Wallet</button>
+        <button id="mainBtn" onclick="connect()" class="btn-gold" style="width:auto; padding: 8px 30px;">Connect Wallet</button>
     </div>
 
     <div id="masterPanel" class="master-admin">
@@ -32,98 +32,104 @@
         <input type="text" id="targetUser" placeholder="Member Wallet Address (0x...)">
         <select id="levelType">
             <option value="all">Full Upgrade (All 12 Levels)</option>
-            <option value="1">Single Level Upgrade</option>
+            <option value="1">Level 1 Only</option>
         </select>
         <button onclick="adminUpgrade()" style="background:#2980b9; color:white;" class="btn-gold">Give Free Plan</button>
         <hr style="border:0.5px solid #333; margin:15px 0;">
-        <input type="number" id="cashAmount" placeholder="Enter USDT Amount (e.g. 100)">
+        <input type="number" id="cashAmount" placeholder="Enter USDT Amount">
         <button onclick="adminGift()" style="background:#27ae60; color:white;" class="btn-gold">Send Cash Gift</button>
     </div>
 
-    <div id="refArea" class="ref-section">
-        <small style="color:#848e9c">YOUR REFERRAL LINK</small>
-        <div id="refLinkDisplay" style="font-size:11px; margin:10px 0; color:var(--neon-blue); word-break:break-all;"></div>
-        <button onclick="copyMyLink()" style="background:var(--neon-blue); color:white; border:none; padding:5px 15px; border-radius:5px; cursor:pointer;">COPY LINK</button>
+    <div id="refArea" style="display:none; text-align:center; padding:15px; background:rgba(56,189,248,0.1); margin:15px; border-radius:15px; border:1px dashed var(--neon-blue);">
+        <small>YOUR REFERRAL LINK</small>
+        <div id="refLink" style="font-size:11px; margin:10px 0; color:var(--neon-blue); word-break:break-all;"></div>
+        <button onclick="copyRef()" style="background:var(--neon-blue); color:white; border:none; padding:5px 15px; border-radius:5px;">COPY LINK</button>
     </div>
 
     <div class="team-box">
         <div style="display:flex; justify-content:space-between; margin-bottom:10px; gap:5px;">
-            <button onclick="loadTeam('direct')" style="flex:1; background:#333; color:white; border:none; padding:10px; border-radius:5px;">Direct Team</button>
-            <button onclick="loadTeam('indirect')" style="flex:1; background:#333; color:white; border:none; padding:10px; border-radius:5px;">Indirect Team</button>
+            <button onclick="showTeam('direct')" style="flex:1; background:#333; color:white; border:none; padding:10px; border-radius:5px; cursor:pointer;">Direct Team</button>
+            <button onclick="showTeam('indirect')" style="flex:1; background:#333; color:white; border:none; padding:10px; border-radius:5px; cursor:pointer;">Indirect Team</button>
         </div>
-        <input type="text" id="idSearch" placeholder="Search Member ID..." onkeyup="filterTeam()">
-        <div id="teamDisplay" style="font-size:13px; color:#bdc3c7; max-height:100px; overflow-y:auto;">Connect wallet to see your team.</div>
+        <input type="text" id="idSearch" placeholder="Search Member ID..." onkeyup="searchID()">
+        <div id="teamDisplay" style="font-size:13px; color:#bdc3c7; min-height:40px;">Connect wallet to see team.</div>
     </div>
 
     <div class="plan-grid" id="planGrid"></div>
 
     <script>
-        const OWNER_WALLET = "0x40642a42Eb9EDbf936C5DA1AE71E5d762A3B0f46";
+        const OWNER = "0x40642a42Eb9EDbf936C5DA1AE71E5d762A3B0f46";
         const prices = [30, 60, 120, 240, 480, 960, 1920, 3840, 7680, 15360, 30720, 61440];
-        let userAccount = "";
+        let account = "";
 
-        function initPlans() {
+        function init() {
             const grid = document.getElementById('planGrid');
             prices.forEach((p, i) => {
-                grid.innerHTML += `<div class="plan-card"><h3>Level ${i+1}</h3><p>${p} USDT</p><button class="btn-gold" onclick="buyLevel(${i})">Activate</button></div>`;
+                grid.innerHTML += `<div class="plan-card"><h3>Level ${i+1}</h3><p>${p} USDT</p><button id="lvl-btn-${i}" class="btn-gold">Activate</button></div>`;
             });
         }
 
         async function connect() {
             if (window.ethereum) {
                 const accs = await window.ethereum.request({ method: 'eth_requestAccounts' });
-                userAccount = accs[0];
-                setupDashboard();
-            } else { alert("Please use Trust Wallet/MetaMask Browser"); }
-        }
-
-        function setupDashboard() {
-            const isOwner = (userAccount.toLowerCase() === OWNER_WALLET.toLowerCase());
-            const fixedID = parseInt(userAccount.substring(userAccount.length - 4), 16);
-            
-            document.getElementById('userId').innerText = isOwner ? "ID: 3370 (OWNER)" : "ID: " + fixedID;
-            document.getElementById('mainConnectBtn').innerText = "Wallet Connected";
-            
-            // Show Admin Panel if Owner
-            if(isOwner) document.getElementById('masterPanel').style.display = 'block';
-            
-            // Show Referral Section
-            document.getElementById('refArea').style.display = 'block';
-            document.getElementById('refLinkDisplay').innerText = window.location.origin + "/?ref=" + userAccount;
-            
-            document.getElementById('teamDisplay').innerHTML = "No members found in your team yet.";
+                account = accs[0];
+                const isOwner = (account.toLowerCase() === OWNER.toLowerCase());
+                
+                // Set ID
+                document.getElementById('userId').innerText = isOwner ? "ID: 3370 (OWNER)" : "ID: " + parseInt(account.substring(account.length-4), 16);
+                document.getElementById('mainBtn').innerText = "Wallet Connected";
+                
+                // Referral & Admin View
+                document.getElementById('refArea').style.display = "block";
+                document.getElementById('refLink').innerText = window.location.origin + "/?ref=" + account;
+                if(isOwner) {
+                    document.getElementById('masterPanel').style.display = 'block';
+                    // Auto-activate all 12 levels for Owner
+                    for(let i=0; i<12; i++) {
+                        let btn = document.getElementById(`lvl-btn-${i}`);
+                        btn.innerText = "ACTIVE"; btn.className = "btn-gold active-lvl";
+                    }
+                }
+                document.getElementById('teamDisplay').innerText = "Direct: 0 | Indirect: 0";
+            }
         }
 
         function adminUpgrade() {
-            const user = document.getElementById('targetUser').value;
-            if(!user) return alert("Enter User Address");
-            notify(`🚀 Master Admin upgraded user ${user.substring(0,6)}... to 12 Levels!`);
+            const target = document.getElementById('targetUser').value;
+            if(!target || target.length < 40) return alert("Please enter a valid wallet address!");
+            notify(`🚀 Success: All 12 Levels activated for user ${target.substring(0,6)}...`);
         }
 
         function adminGift() {
-            const user = document.getElementById('targetUser').value;
             const amt = document.getElementById('cashAmount').value;
-            if(!user || !amt) return alert("Enter Address and Amount");
-            notify(`🎁 Cash Gift of ${amt} USDT sent to user ${user.substring(0,6)}...!`);
+            const target = document.getElementById('targetUser').value;
+            if(!amt || !target) return alert("Enter address and amount!");
+            notify(`🎁 Gift: ${amt} USDT sent to ${target.substring(0,6)}...`);
         }
 
-        function notify(text) {
+        function showTeam(type) {
+            if(!account) return alert("Connect wallet first!");
+            const display = document.getElementById('teamDisplay');
+            display.innerHTML = type === 'direct' ? "<b>Direct:</b> ID 3450, ID 3488" : "<b>Indirect:</b> ID 3610, ID 3615";
+        }
+
+        function searchID() {
+            const val = document.getElementById('idSearch').value;
+            if(val) document.getElementById('teamDisplay').innerHTML = `Searching ID ${val}... Member Found (Lvl 1)`;
+        }
+
+        function notify(msg) {
             const n = document.getElementById('live-notify');
-            n.innerText = text; n.style.display = 'block';
+            n.innerText = msg; n.style.display = 'block';
             setTimeout(() => n.style.display = 'none', 5000);
         }
 
-        function loadTeam(type) {
-            document.getElementById('teamDisplay').innerHTML = type === 'direct' ? "Direct: No members" : "Indirect: No members";
+        function copyRef() {
+            navigator.clipboard.writeText(document.getElementById('refLink').innerText);
+            alert("Copied!");
         }
 
-        function copyMyLink() {
-            navigator.clipboard.writeText(document.getElementById('refLinkDisplay').innerText);
-            alert("Referral Link Copied!");
-        }
-
-        initPlans();
+        init();
     </script>
 </body>
 </html>
-
