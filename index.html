@@ -14,19 +14,10 @@
         :root { --gold: #f3ba2f; --blue: #38bdf8; --bg: #0b0e11; --card: #161a1e; --green: #2ecc71; }
         body { background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding-bottom: 50px; }
 
-        .logo-main { 
-            width: 140px; 
-            height: auto; 
-            margin-bottom: 20px; 
-            filter: drop-shadow(0 0 10px var(--gold));
-            display: block;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        
+        /* User Profile Avatar Styling */
         .user-avatar { 
-            width: 100px; 
-            height: 100px; 
+            width: 110px; 
+            height: 110px; 
             border-radius: 50%; 
             border: 3px solid var(--gold); 
             margin: 10px auto; 
@@ -36,9 +27,8 @@
             display: block;
         }
 
-        .header { background: linear-gradient(180deg, #1e40af, #0b0e11); padding: 40px 20px; text-align: center; border-bottom: 3px solid var(--gold); }
+        .header { background: linear-gradient(180deg, #1e40af, #0b0e11); padding: 50px 20px; text-align: center; border-bottom: 3px solid var(--gold); }
         
-        /* Updated Level Cards Styling */
         .plan-card { 
             background: linear-gradient(145deg, #232931, #111418);
             padding: 25px 15px; 
@@ -84,7 +74,6 @@
             color: black; 
             box-shadow: 0 4px 10px rgba(243,186,47,0.3);
         }
-        .btn-gold:active { transform: scale(0.95); }
 
         .plan-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding: 15px; }
         .active-label { position: absolute; top: 10px; right: 10px; background: var(--green); color: white; font-size: 9px; padding: 2px 8px; border-radius: 4px; display: none; font-weight: bold; box-shadow: 0 0 10px var(--green); }
@@ -95,25 +84,23 @@
 <div id="notify-toast">Notification...</div>
 
 <div class="header">
-    <img src="https://i.postimg.cc/mD838Yzf/logo.png" class="logo-main" id="main-logo" alt="ChainRush Pro">
-    
-    <div id="display-id" style="font-size: 24px; color: var(--gold); font-weight: bold; margin-bottom: 10px;">ID: 4510</div>
+    <div id="display-id" style="font-size: 28px; color: var(--gold); font-weight: bold; margin-bottom: 15px; text-shadow: 0 0 10px rgba(243,186,47,0.3);">ID: 4510</div>
     
     <div class="profile">
         <label for="img-in">
             <img id="user-img" src="https://www.w3schools.com/howto/img_avatar.png" class="user-avatar" alt="User">
         </label>
         <input type="file" id="img-in" style="display:none" onchange="loadImg(event)">
-        <p style="font-size: 13px; color: var(--blue); margin-top: 5px; font-weight: bold;">ChainRush-Pro Official Member</p>
+        <p style="font-size: 14px; color: var(--blue); margin-top: 8px; font-weight: bold;">ChainRush-Pro Official Member</p>
     </div>
     
-    <button id="conn-btn" onclick="connect()" class="btn btn-blue" style="width:auto; padding: 12px 40px; margin-top: 20px; font-size: 16px; border: 1px solid white;">Wallet Connected</button>
+    <button id="conn-btn" onclick="connect()" class="btn btn-blue" style="width:auto; padding: 12px 40px; margin-top: 25px; font-size: 16px; border: 1px solid white; border-radius: 30px;">Wallet Connected</button>
 </div>
 
 <div id="referral-area" style="display:block; text-align:center; padding:20px; background:rgba(56,189,248,0.1); margin:15px; border-radius:15px; border: 2px dashed var(--blue);">
     <h4 style="margin:0; color:var(--blue); font-size:11px;">OFFICIAL REFERRAL LINK</h4>
     <div id="link-text" style="padding:15px; color:white; font-family:monospace; font-size:12px; word-break:break-all;">https://chain-rush-pro.vercel.app/?ref=4510</div>
-    <button onclick="copyRef()" class="btn btn-blue" style="width:auto; padding:8px 40px;">COPY LINK</button>
+    <button onclick="copyRef()" class="btn btn-blue" style="width:auto; padding:8px 40px; border-radius: 20px;">COPY LINK</button>
 </div>
 
 <div class="stats-grid">
@@ -133,9 +120,7 @@
 </div>
 
 <script>
-    const START_ID = 4510;
     const PRICING = [30, 60, 120, 240, 480, 960, 1920, 3840, 7680, 15360, 30720, 61440];
-    let wallet = "";
 
     function init() {
         const grid = document.getElementById('plan-grid');
@@ -151,20 +136,6 @@
         randomAlerts();
     }
 
-    const DEFAULT_AVATAR = "https://www.w3schools.com/howto/img_avatar.png";
-
-    window.addEventListener('DOMContentLoaded', () => {
-        const userImg = document.getElementById('user-img');
-        userImg.onerror = function() { this.src = DEFAULT_AVATAR; };
-    });
-
-    async function connect() {
-        if (window.ethereum) {
-            await window.ethereum.request({ method: 'eth_requestAccounts' });
-            toast("Wallet Connected Successfully!");
-        }
-    }
-
     function buy(lvl) {
         toast(`🔄 Processing Level ${lvl}...`);
         setTimeout(() => { setActive(lvl); toast(`🔥 Level ${lvl} Activated!`); }, 2000);
@@ -177,7 +148,6 @@
         if(card) {
             card.style.borderColor = "var(--green)";
             card.style.background = "linear-gradient(145deg, #112d1a, #0b0e11)";
-            card.style.boxShadow = "0 0 20px rgba(46, 204, 113, 0.2)";
         }
         if(btn) { 
             btn.innerText = "ACTIVE"; 
@@ -188,15 +158,15 @@
         if(label) label.style.display = "block";
     }
 
-    function randomAlerts() {
-        const m = ["ID 59571 joined! 🚀", "ID 4810 earned 30 USDT! 🔥", "ID 4510 upgraded Level 5! 💎"];
-        setInterval(() => { toast(m[Math.floor(Math.random()*m.length)]); }, 5000);
-    }
-
     function toast(txt) {
         const b = document.getElementById('notify-toast');
         b.innerText = txt; b.style.display = "block";
         setTimeout(() => b.style.display = "none", 3500);
+    }
+
+    function randomAlerts() {
+        const m = ["ID 59571 joined! 🚀", "ID 4810 earned 30 USDT! 🔥"];
+        setInterval(() => { toast(m[Math.floor(Math.random()*m.length)]); }, 5000);
     }
 
     function loadImg(e) {
