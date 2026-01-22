@@ -1,14 +1,13 @@
-der<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChainRush Pro | Final Fixed</title>
+    <title>ChainRush Pro | Live System</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.8.1/web3.min.js"></script>
     <style>
-        :root { --neon-gold: #f3ba2f; --neon-blue: #38bdf8; --bg-deep: #0b0e11; --card-bg: #1e2329; }
+        :root { --neon-gold: #f3ba2f; --bg-deep: #0b0e11; --card-bg: #1e2329; --neon-blue: #38bdf8; }
         body { background: var(--bg-deep); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding-bottom: 50px; }
-        #live-notify { position: fixed; top: 15px; left: 50%; transform: translateX(-50%); z-index: 10000; background: linear-gradient(135deg, #1e40af, #000); border: 1px solid var(--neon-gold); padding: 10px 20px; border-radius: 30px; display: none; font-size: 11px; box-shadow: 0 0 15px var(--neon-gold); }
         .header-card { background: linear-gradient(180deg, #1e40af, #0b0e11); padding: 30px 20px; text-align: center; border-bottom: 2px solid var(--neon-gold); }
         .master-admin { background: #161a1e; margin: 15px; padding: 20px; border-radius: 15px; border: 2px solid var(--neon-gold); display: none; }
         .btn-gold { background: var(--neon-gold); color: black; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px; }
@@ -20,10 +19,9 @@ der<!DOCTYPE html>
     </style>
 </head>
 <body>
-    <div id="live-notify"></div>
     <div class="header-card">
         <h2>ChainRush Pro</h2>
-        <div id="userId" style="font-size: 18px; color: var(--neon-gold); margin: 10px 0;">Login Required</div>
+        <div id="userId" style="font-size: 18px; color: var(--neon-gold); margin: 10px 0;">Connect Wallet First</div>
         <button id="mainBtn" onclick="connect()" class="btn-gold" style="width:auto; padding: 8px 30px;">Connect Wallet</button>
     </div>
 
@@ -32,29 +30,39 @@ der<!DOCTYPE html>
         <input type="text" id="targetUser" placeholder="Member Wallet Address (0x...)">
         <select id="levelType">
             <option value="all">Full Upgrade (All 12 Levels)</option>
-            <option value="1">Level 1</option><option value="2">Level 2</option><option value="3">Level 3</option>
-            <option value="4">Level 4</option><option value="5">Level 5</option><option value="6">Level 6</option>
-            <option value="7">Level 7</option><option value="8">Level 8</option><option value="9">Level 9</option>
-            <option value="10">Level 10</option><option value="11">Level 11</option><option value="12">Level 12</option>
+            <option value="1">Level 1 Only</option>
+            <option value="2">Level 2 Only</option>
+            <option value="3">Level 3 Only</option>
+            <option value="4">Level 4 Only</option>
+            <option value="5">Level 5 Only</option>
+            <option value="6">Level 6 Only</option>
+            <option value="7">Level 7 Only</option>
+            <option value="8">Level 8 Only</option>
+            <option value="9">Level 9 Only</option>
+            <option value="10">Level 10 Only</option>
+            <option value="11">Level 11 Only</option>
+            <option value="12">Level 12 Only</option>
         </select>
         <button onclick="adminUpgrade()" class="btn-gold" style="background:#2980b9; color:white;">Give Free Plan</button>
         <hr style="border:0.5px solid #333; margin:15px 0;">
         <input type="number" id="cashAmount" placeholder="Enter USDT Amount">
-        <button onclick="adminGift()" class="btn-gold" style="background:#27ae60; color:white;">Send Cash Gift</button>
+        <button onclick="alert('Cash Gift Sent!')" class="btn-gold" style="background:#27ae60; color:white;">Send Cash Gift</button>
     </div>
 
-    <div id="refArea" style="display:none; text-align:center; padding:15px; background:rgba(56,189,248,0.1); margin:15px; border-radius:15px; border:1px dashed var(--neon-blue);">
-        <small>YOUR REFERRAL LINK</small>
-        <div id="refLink" style="font-size:10px; margin:10px 0; color:var(--neon-blue); word-break:break-all;"></div>
-        <button onclick="copyRef()" style="background:var(--neon-blue); color:white; border:none; padding:5px 15px; border-radius:5px; cursor:pointer;">COPY LINK</button>
-    </div>
-
-    <div class="team-box">
-        <div style="display:flex; gap:5px; margin-bottom:10px;">
-            <button onclick="showTeam('direct')" style="flex:1; background:#333; color:white; border:none; padding:10px; border-radius:5px;">Direct Team</button>
-            <button onclick="showTeam('indirect')" style="flex:1; background:#333; color:white; border:none; padding:10px; border-radius:5px;">Indirect Team</button>
+    <div id="userStats" style="display:none;">
+        <div style="text-align:center; padding:15px; background:rgba(56,189,248,0.1); margin:15px; border-radius:15px; border:1px dashed var(--neon-blue);">
+            <small>YOUR REFERRAL LINK</small>
+            <div id="refLink" style="font-size:10px; margin:10px 0; color:var(--neon-blue); word-break:break-all;"></div>
+            <button onclick="copyRef()" class="btn-gold" style="width:auto; padding:5px 15px;">COPY LINK</button>
         </div>
-        <div id="teamDisplay" style="font-size:13px; color:#bdc3c7; min-height:40px;">Connect wallet to see team.</div>
+
+        <div class="team-box">
+            <div style="display:flex; gap:5px; margin-bottom:10px;">
+                <button onclick="renderTeam('direct')" style="flex:1; background:#333; color:white; border:none; padding:10px; border-radius:5px;">Direct Team</button>
+                <button onclick="renderTeam('indirect')" style="flex:1; background:#333; color:white; border:none; padding:10px; border-radius:5px;">Indirect Team</button>
+            </div>
+            <div id="teamDisplay" style="font-size:13px; color:#bdc3c7;">Click to view members</div>
+        </div>
     </div>
 
     <div class="plan-grid" id="planGrid"></div>
@@ -67,7 +75,7 @@ der<!DOCTYPE html>
         function init() {
             const grid = document.getElementById('planGrid');
             prices.forEach((p, i) => {
-                grid.innerHTML += `<div class="plan-card"><h3>Level ${i+1}</h3><p>${p} USDT</p><button id="lvl-btn-${i}" class="btn-gold">Activate</button></div>`;
+                grid.innerHTML += `<div class="plan-card"><h3>Level ${i+1}</h3><p>${p} USDT</p><button id="lvl-btn-${i}" onclick="buyPlan(${i})" class="btn-gold">Activate</button></div>`;
             });
         }
 
@@ -79,63 +87,62 @@ der<!DOCTYPE html>
                 
                 document.getElementById('userId').innerText = isOwner ? "ID: 3370 (OWNER)" : "ID: " + parseInt(account.substring(account.length-4), 16);
                 document.getElementById('mainBtn').innerText = "Wallet Connected";
-                document.getElementById('refArea').style.display = "block";
+                document.getElementById('userStats').style.display = "block";
                 document.getElementById('refLink').innerText = window.location.origin + "/?ref=" + account;
                 
-                if(isOwner) {
-                    document.getElementById('masterPanel').style.display = 'block';
-                    for(let i=0; i<12; i++) activateLevelUI(i);
-                } else {
-                    checkUserLevels();
-                }
+                if(isOwner) document.getElementById('masterPanel').style.display = 'block';
+                checkStatus();
             }
-        }
-
-        function activateLevelUI(index) {
-            let btn = document.getElementById(`lvl-btn-${index}`);
-            if(btn) { btn.innerText = "ACTIVE"; btn.className = "btn-gold active-lvl"; }
         }
 
         function adminUpgrade() {
             const target = document.getElementById('targetUser').value.toLowerCase();
-            const selection = document.getElementById('levelType').value;
-            if(!target || target.length < 40) return alert("درست ایڈریس لکھیں!");
+            const lvl = document.getElementById('levelType').value;
+            if(!target) return alert("Enter Address!");
             
-            // ڈیٹا محفوظ کریں
-            localStorage.setItem(`user_lvl_${target}`, selection);
-            notify(`✅ کامیابی: یوزر ${target.substring(0,6)} کے لیے پلان ایکٹو کر دیا گیا!`);
+            localStorage.setItem(`plan_${target}`, lvl);
+            saveToTeam(target, lvl);
+            alert("Plan Gifted Successfully!");
         }
 
-        function checkUserLevels() {
-            const saved = localStorage.getItem(`user_lvl_${account}`);
-            if(saved === 'all') {
-                for(let i=0; i<12; i++) activateLevelUI(i);
-            } else if(saved) {
-                activateLevelUI(parseInt(saved)-1);
+        function buyPlan(index) {
+            if(!account) return alert("Connect Wallet!");
+            localStorage.setItem(`plan_${account}`, index + 1);
+            checkStatus();
+            alert("Level " + (index+1) + " Activated!");
+        }
+
+        function checkStatus() {
+            const myPlan = localStorage.getItem(`plan_${account}`);
+            if(myPlan === 'all') {
+                for(let i=0; i<12; i++) setUIActive(i);
+            } else if(myPlan) {
+                setUIActive(parseInt(myPlan)-1);
             }
+            if(account === OWNER.toLowerCase()) for(let i=0; i<12; i++) setUIActive(i);
         }
 
-        function showTeam(type) {
+        function setUIActive(i) {
+            let b = document.getElementById(`lvl-btn-${i}`);
+            if(b) { b.innerText = "ACTIVE"; b.className = "btn-gold active-lvl"; }
+        }
+
+        function saveToTeam(addr, lvl) {
+            let team = JSON.parse(localStorage.getItem('myTeam') || "[]");
+            team.push({ id: parseInt(addr.substring(addr.length-4), 16), address: addr, level: lvl });
+            localStorage.setItem('myTeam', JSON.stringify(team));
+        }
+
+        function renderTeam(type) {
             const display = document.getElementById('teamDisplay');
-            if(type === 'direct') display.innerHTML = "ID: 59571 | Level: 1 | Active";
-            else display.innerHTML = "No indirect members.";
-        }
-
-        function adminGift() {
-            const amt = document.getElementById('cashAmount').value;
-            if(!amt) return alert("رقم لکھیں!");
-            notify(`🎁 تحفہ: ${amt} USDT بھیج دیے گئے!`);
-        }
-
-        function notify(msg) {
-            const n = document.getElementById('live-notify');
-            n.innerText = msg; n.style.display = 'block';
-            setTimeout(() => n.style.display = 'none', 5000);
+            let team = JSON.parse(localStorage.getItem('myTeam') || "[]");
+            if(team.length === 0) display.innerHTML = "No members found.";
+            else display.innerHTML = team.map(m => `ID: ${m.id} | Level: ${m.level}`).join('<br>');
         }
 
         function copyRef() {
             navigator.clipboard.writeText(document.getElementById('refLink').innerText);
-            alert("کاپی ہو گیا!");
+            alert("Link Copied!");
         }
 
         init();
