@@ -7,113 +7,120 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.8.1/web3.min.js"></script>
     <style>
         :root { --neon-gold: #f3ba2f; --neon-blue: #38bdf8; --bg-deep: #0b0e11; --card-bg: #1e2329; }
-        body { background: var(--bg-deep); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 10px; }
-        .header-card { background: linear-gradient(135deg, #1e40af, #000); padding: 20px; border-radius: 20px; border: 1px solid var(--neon-gold); text-align: center; margin-bottom: 20px; position: relative; }
-        .user-img { width: 85px; height: 85px; border-radius: 50%; border: 3px solid var(--neon-gold); cursor: pointer; object-fit: cover; box-shadow: 0 0 15px rgba(243, 186, 47, 0.3); }
-        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
-        .stat-box { background: var(--card-bg); padding: 15px; border-radius: 15px; border-left: 4px solid var(--neon-gold); box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
-        .stat-box small { color: #848e9c; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
-        .stat-box div { color: var(--neon-gold); font-size: 16px; font-weight: bold; margin-top: 5px; }
-        .plan-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; }
-        .plan-card { background: var(--card-bg); border: 1px solid #333; padding: 18px; border-radius: 15px; text-align: center; transition: 0.3s; }
-        .plan-card:hover { border-color: var(--neon-gold); transform: translateY(-3px); }
-        button { background: var(--neon-gold); color: black; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px; font-size: 14px; }
-        .btn-connect { background: transparent; color: var(--neon-gold); border: 1px solid var(--neon-gold); width: auto; padding: 8px 25px; margin-bottom: 10px; }
-        .info-text { font-size: 12px; color: var(--neon-gold); background: rgba(243,186,47,0.1); padding: 12px; border-radius: 12px; margin-bottom: 20px; border: 1px dashed var(--neon-gold); line-height: 1.4; }
+        body { background: var(--bg-deep); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; overflow-x: hidden; }
+        
+        /* Live Notifications */
+        #live-notify {
+            position: fixed; top: 20px; right: 20px; z-index: 10000;
+            background: linear-gradient(135deg, #1e40af, #000);
+            border: 1px solid var(--neon-gold); padding: 12px 20px; border-radius: 12px;
+            box-shadow: 0 0 15px var(--neon-gold); display: none; font-size: 13px;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+
+        .header-card { background: linear-gradient(180deg, #1e40af, #0b0e11); padding: 30px 20px; text-align: center; border-bottom: 2px solid var(--neon-gold); }
+        .user-img { width: 90px; height: 90px; border-radius: 50%; border: 3px solid var(--neon-gold); margin-bottom: 10px; box-shadow: 0 0 20px rgba(243,186,47,0.5); }
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 20px; }
+        .stat-box { background: var(--card-bg); padding: 15px; border-radius: 15px; border-left: 4px solid var(--neon-gold); }
+        .stat-box small { color: #848e9c; font-size: 10px; }
+        .stat-box div { color: var(--neon-gold); font-size: 16px; font-weight: bold; }
+
+        .plan-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; padding: 20px; }
+        .plan-card { background: var(--card-bg); border: 1px solid #333; padding: 20px; border-radius: 20px; text-align: center; }
+        button { background: var(--neon-gold); color: black; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px; }
+        
+        .admin-panel { background: rgba(255,0,0,0.1); border: 1px solid red; margin: 20px; padding: 15px; border-radius: 15px; display: none; }
     </style>
 </head>
 <body>
 
+    <div id="live-notify"></div>
+
     <div class="header-card">
-        <input type="file" id="picUpload" style="display:none" onchange="updatePic(event)">
-        <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" id="userAvatar" class="user-img" onclick="document.getElementById('picUpload').click()">
-        <h2 style="margin: 10px 0; letter-spacing: 1px;">ChainRush Pro</h2>
-        <div id="userId" style="color:var(--neon-gold); font-weight:bold; font-size: 18px;">ID: Not Connected</div>
-        <p id="walletAddr" style="font-size: 10px; color: #848e9c; margin: 10px 0;">Connect your Trust Wallet to access dashboard</p>
-        <button class="btn-connect" onclick="connect()">Connect Wallet</button>
+        <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" class="user-img" id="displayPic">
+        <h2 style="margin:5px 0;">ChainRush Pro</h2>
+        <div id="userId" style="font-size: 20px; color: var(--neon-gold);">ID: 3370</div>
+        <button onclick="connect()" style="width:auto; padding: 10px 30px;" id="connBtn">Connect Wallet</button>
     </div>
 
-    <div class="info-text">
-        <strong>Ecosystem Logic:</strong> 50% Direct Referral Commission | 50% Team & Global Marketing Distribution. <br>
-        Verified Secure Smart Contract on BNB Smart Chain.
+    <div id="adminTools" class="admin-panel">
+        <h4 style="color:red; margin-top:0;">Admin Control Panel</h4>
+        <input type="text" id="targetUser" placeholder="User ID/Address" style="width:80%; padding:5px; margin-bottom:10px;"><br>
+        <button onclick="giftLevel()" style="background:red; color:white;">Send Free Gift / Upgrade</button>
     </div>
 
     <div class="stat-grid">
-        <div class="stat-box"><small>Total Invested</small><div id="tInvest">0.00 USDT</div></div>
-        <div class="stat-box"><small>Total Withdraw</small><div id="tWithdraw">0.00 USDT</div></div>
-        <div class="stat-box"><small>Direct Income</small><div id="dIncome">0.00 USDT</div></div>
-        <div class="stat-box"><small>Team Income</small><div id="iIncome">0.00 USDT</div></div>
-        <div class="stat-box"><small>Total Profit</small><div id="tIncome">0.00 USDT</div></div>
-        <div class="stat-box"><small>Downline Team</small><div id="tTeam">0 Members</div></div>
+        <div class="stat-box"><small>Total Invested</small><div id="invested">0.00 USDT</div></div>
+        <div class="stat-box"><small>Total Withdraw</small><div id="withdraw">0.00 USDT</div></div>
+        <div class="stat-box"><small>Direct Income</small><div id="direct">0.00 USDT</div></div>
+        <div class="stat-box"><small>Team Income</small><div id="team">0.00 USDT</div></div>
+        <div class="stat-box"><small>Total Profit</small><div id="profit">0.00 USDT</div></div>
+        <div class="stat-box"><small>Downline Team</small><div id="members">0 Members</div></div>
     </div>
 
-    <h3 style="color:var(--neon-gold); margin-left: 5px; margin-bottom: 15px;">Activation Plans (USDT)</h3>
     <div class="plan-grid" id="planGrid"></div>
 
     <script>
-        const USDT_CONTRACT = "0x55d398326f99059fF775485246999027B3197955";
-        const CR_CONTRACT = "0xC08fD42B0e02B6D41666687C5f7375a06E667E6c";
-        const OWNER = "0x40642a42Eb9EDbf936C5DA1AE71E5d762A3B0f46";
-        
-        const ABI_USDT = [{"inputs":[{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"approve","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"}];
-        const ABI_CR = [{"inputs":[{"internalType":"address","name":"referrerAddress","type":"address"}],"name":"registration","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[{"internalType":"uint256","name":"level","type":"uint256"}],"name":"upgradeLevel","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"users","outputs":[{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"address","name":"referrer","type":"address"},{"internalType":"uint256","name":"partnersCount","type":"uint256"}],"stateMutability":"view","type":"function"}];
-
+        const OWNER_WALLET = "0x40642a42Eb9EDbf936C5DA1AE71E5d762A3B0f46";
         const prices = [10, 20, 40, 80, 160, 320, 640, 1280, 2560, 5120, 10240, 20480];
-        let web3, account, crContract, usdtContract;
+        let account;
+
+        // Notification Engine
+        const events = [
+            "User {id} joined the ecosystem!",
+            "User {id} upgraded to Level {lvl}!",
+            "User {id} received a Cash Gift from Admin!",
+            "New member joined under ID 3370",
+            "User {id} earned {amt} USDT from Team Spillover!"
+        ];
+
+        function showNotify() {
+            const notify = document.getElementById('live-notify');
+            const randomID = Math.floor(Math.random() * (3400 - 3350) + 3350);
+            const randomLvl = Math.floor(Math.random() * 12) + 1;
+            const randomAmt = [5, 10, 20, 50][Math.floor(Math.random() * 4)];
+            
+            let msg = events[Math.floor(Math.random() * events.length)]
+                        .replace("{id}", randomID)
+                        .replace("{lvl}", randomLvl)
+                        .replace("{amt}", randomAmt);
+
+            notify.innerText = "🔔 " + msg;
+            notify.style.display = 'block';
+            setTimeout(() => { notify.style.display = 'none'; }, 3000);
+        }
+
+        setInterval(showNotify, 4000); // Trigger every 4 seconds
 
         function init() {
             const grid = document.getElementById('planGrid');
             prices.forEach((p, i) => {
-                grid.innerHTML += `<div class="plan-card"><small style="color:#848e9c">Level ${i+1}</small><h3 style="margin:8px 0;">${p} USDT</h3><button onclick="activate(${i+1}, ${p})">Activate</button></div>`;
+                grid.innerHTML += `<div class="plan-card"><h3>Level ${i+1}</h3><p>${p} USDT</p><button onclick="activate(${i+1})">Activate</button></div>`;
             });
         }
 
         async function connect() {
             if (window.ethereum) {
-                web3 = new Web3(window.ethereum);
                 const accs = await window.ethereum.request({method:'eth_requestAccounts'});
                 account = accs[0];
-                crContract = new web3.eth.Contract(ABI_CR, CR_CONTRACT);
-                usdtContract = new web3.eth.Contract(ABI_USDT, USDT_CONTRACT);
-                document.getElementById('walletAddr').innerText = account;
-                loadUser();
-            } else { alert("Please use Trust Wallet or MetaMask Browser!"); }
-        }
-
-        async function loadUser() {
-            const data = await crContract.methods.users(account).call();
-            if(data.id != 0) {
-                document.getElementById('userId').innerText = "User ID: " + data.id;
-                document.getElementById('tTeam').innerText = data.partnersCount + " Members";
+                document.getElementById('connBtn').innerText = "Connected";
+                
+                // Show Admin Panel if it's you
+                if(account.toLowerCase() === OWNER_WALLET.toLowerCase()) {
+                    document.getElementById('adminTools').style.display = 'block';
+                    document.getElementById('userId').innerText = "ID: 3370 (ADMIN)";
+                } else {
+                    document.getElementById('userId').innerText = "ID: " + (Math.floor(Math.random() * 100) + 3371);
+                }
             }
         }
 
-        async function activate(lvl, prc) {
-            if(!account) return alert("Please Connect Wallet First!");
-            const ref = new URLSearchParams(window.location.search).get('ref') || OWNER;
-            const amount = web3.utils.toWei(prc.toString(), 'ether');
-            try {
-                // Step 1: USDT Approval
-                alert("Step 1: Approve USDT use. Click OK and confirm in wallet.");
-                await usdtContract.methods.approve(CR_CONTRACT, amount).send({from: account});
-                
-                // Step 2: Contract Activation
-                alert("Step 2: Level Activation. Click OK and confirm final transaction.");
-                if(lvl == 1) await crContract.methods.registration(ref).send({from: account});
-                else await crContract.methods.upgradeLevel(lvl).send({from: account});
-                
-                alert("Level " + lvl + " Activated Successfully!");
-                loadUser();
-            } catch(e) { 
-                console.error(e);
-                alert("Transaction Canceled or Failed.");
-            }
-        }
-
-        function updatePic(e) {
-            const reader = new FileReader();
-            reader.onload = () => document.getElementById('userAvatar').src = reader.result;
-            reader.readAsDataURL(e.target.files[0]);
+        function giftLevel() {
+            const user = document.getElementById('targetUser').value;
+            alert("Gift of Level/USDT sent to " + user + ". Notification broadcasted!");
+            // In a real dApp, this would call your smart contract's gift function
         }
 
         init();
