@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+Enter<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChainRush Pro | Master Admin Dashboard</title>
+    <title>ChainRush Pro | Lifetime Admin Dashboard</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.8.1/web3.min.js"></script>
     <style>
@@ -13,31 +13,23 @@
         .header { background: linear-gradient(180deg, #1e40af, #0b0e11); padding: 30px 20px; text-align: center; border-bottom: 3px solid var(--gold); }
         .user-avatar { width: 90px; height: 90px; border-radius: 50%; border: 3px solid var(--gold); margin: 10px auto; display: block; }
         
-        /* Dashboard Stats */
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; }
         .box { background: var(--card); padding: 15px; border-radius: 12px; border: 1px solid #333; text-align: center; }
         .box h4 { margin: 0; font-size: 10px; color: #888; text-transform: uppercase; }
         .box p { margin: 5px 0 0; font-size: 16px; color: var(--gold); font-weight: bold; }
 
-        /* Income Stage UI */
-        .income-stages { background: rgba(56,189,248,0.05); margin: 15px; padding: 15px; border-radius: 15px; border: 1px solid var(--blue); }
-        .stage-label { font-size: 12px; font-weight: bold; display: flex; justify-content: space-between; margin-bottom: 8px; }
-        .tag-owner { background: var(--red); padding: 2px 8px; border-radius: 4px; font-size: 10px; color: white; }
-
-        /* Admin Controls */
-        .admin-section { background: #1a1d21; margin: 15px; padding: 20px; border-radius: 15px; border: 1px solid var(--red); }
+        .admin-section { background: #1a1d21; margin: 15px; padding: 20px; border-radius: 15px; border: 2px solid var(--red); }
         input, select { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; background: #000; border: 1px solid #444; color: white; box-sizing: border-box; }
 
         .plan-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding: 15px; }
-        .plan-card { background: #1e2329; padding: 20px 10px; border-radius: 20px; text-align: center; border: 1px solid rgba(243, 186, 47, 0.2); position: relative; }
-        .active-label { position: absolute; top: 10px; right: 10px; background: var(--green); color: white; font-size: 8px; padding: 2px 6px; border-radius: 4px; display: none; }
+        .plan-card { background: #1e2329; padding: 20px 10px; border-radius: 20px; text-align: center; border: 1px solid rgba(243, 186, 47, 0.2); position: relative; transition: 0.3s; }
+        .active-label { position: absolute; top: 10px; right: 10px; background: var(--green); color: white; font-size: 7px; padding: 2px 6px; border-radius: 4px; display: none; font-weight: bold; }
 
         .btn { width: 100%; padding: 12px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.3s; }
         .btn-gold { background: var(--gold); color: black; }
         .btn-red { background: var(--red); color: white; }
-        .btn-blue { background: var(--blue); color: white; }
-
-        #notify-toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 10000; background: var(--blue); border: 1px solid var(--gold); padding: 12px 25px; border-radius: 30px; display: none; box-shadow: 0 0 15px rgba(0,0,0,0.5); font-size: 13px; }
+        
+        #notify-toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 10000; background: var(--blue); border: 1px solid var(--gold); padding: 12px 25px; border-radius: 30px; display: none; font-size: 13px; }
     </style>
 </head>
 <body>
@@ -47,111 +39,99 @@
 <div class="header">
     <div id="display-id" style="font-size: 24px; color: var(--gold); font-weight: bold;">ID: 4510</div>
     <img src="https://www.w3schools.com/howto/img_avatar.png" class="user-avatar">
-    <p id="current-active-plan" style="color:var(--green); font-weight:bold;">Current Plan: Level 0</p>
+    <p id="current-active-plan" style="color:var(--green); font-weight:bold;">Max Status: Level 0</p>
 </div>
 
 <div class="admin-section">
-    <h3 style="margin:0 0 10px 0; color:var(--red); font-size:16px;">MASTER ADMIN CONTROL</h3>
-    <input type="number" id="search-id" placeholder="Enter Member ID to Search">
+    <h3 style="margin:0 0 10px 0; color:var(--red); font-size:16px; text-align:center;">MASTER ADMIN CONTROL</h3>
+    <input type="number" id="search-id" placeholder="Enter Member ID to Grant Plan">
     <select id="select-level">
-        <option value="1">Give Level 1 ($30)</option>
-        <option value="2">Give Level 2 ($60)</option>
-        <option value="3">Give Level 3 ($120)</option>
-        <option value="4">Give Level 4 ($240)</option>
-        <option value="5">Give Level 5 ($480)</option>
-        <option value="6">Give Level 6 ($960)</option>
-        <option value="12">Give Level 12 ($61440)</option>
+        <option value="1">Grant Level 1 ($30)</option>
+        <option value="2">Grant Level 2 ($60)</option>
+        <option value="3">Grant Level 3 ($120)</option>
+        <option value="4">Grant Level 4 ($240)</option>
+        <option value="5">Grant Level 5 ($480)</option>
+        <option value="6">Grant Level 6 ($960)</option>
+        <option value="7">Grant Level 7 ($1920)</option>
+        <option value="8">Grant Level 8 ($3840)</option>
+        <option value="9">Grant Level 9 ($7680)</option>
+        <option value="10">Grant Level 10 ($15360)</option>
+        <option value="11">Grant Level 11 ($30720)</option>
+        <option value="12">Grant Level 12 ($61440)</option>
     </select>
-    <button onclick="adminAction()" class="btn btn-red">GRANT ACTIVE STATUS</button>
-</div>
-
-<div class="income-stages">
-    <h4 style="margin:0 0 15px 0; color:var(--blue); text-align:center; font-size:14px;">SYSTEM PROFIT SHARING</h4>
-    <div class="stage-label" style="color:#2ecc71;"><span>Direct Sponsor Income</span> <span>50%</span></div>
-    <div class="stage-label"><span>L2-L5 Non-Working (10% each)</span> <span>40%</span></div>
-    <div class="stage-label" style="color:var(--red);">
-        <span>System Maintenance Fee (Owner)</span> 
-        <span>10% <span class="tag-owner">FIXED</span></span>
-    </div>
-    <p style="font-size:10px; color:#888; margin-top:10px; border-top:1px solid #333; padding-top:10px;">
-        *اگر کوئی ممبر اہل نہیں ہے تو اس کا حصہ خود بخود اونر والٹ میں جمع ہو جائے گا۔
-    </p>
+    <button onclick="adminAction()" class="btn btn-red">ACTIVATE FOR LIFETIME</button>
 </div>
 
 <div class="stats-grid">
-    <div class="box"><h4>Active Plan</h4><p id="dash-plan">None</p></div>
-    <div class="box"><h4>Direct Income</h4><p id="dash-direct">$0</p></div>
-    <div class="box"><h4>Non-Working</h4><p id="dash-indirect">$0</p></div>
-    <div class="box"><h4>Downline Team</h4><p id="dash-team">0</p></div>
+    <div class="box"><h4>Highest Level</h4><p id="dash-plan">0</p></div>
+    <div class="box"><h4>Status</h4><p id="dash-status" style="font-size: 12px; color: var(--green);">INACTIVE</p></div>
 </div>
 
 <div class="plan-grid" id="level-grid"></div>
 
 <script>
-    // Configuration
-    const OWNER_WALLET = "0x40642a42Eb9EDbf936C5DA1AE71E5d762A3B0f46"; // آپ کا والٹ ایڈریس
     const PRICING = [30, 60, 120, 240, 480, 960, 1920, 3840, 7680, 15360, 30720, 61440];
-    let userLevel = 0;
+    
+    // Array to track lifetime status of 12 levels
+    let activeLevels = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
     function init() {
         const grid = document.getElementById('level-grid');
+        grid.innerHTML = '';
         PRICING.forEach((price, i) => {
+            const isActivated = activeLevels[i] === 1;
             grid.innerHTML += `
-                <div class="plan-card" id="card-${i+1}">
-                    <span class="active-label" id="label-${i+1}">ACTIVE</span>
+                <div class="plan-card" id="card-${i+1}" style="${isActivated ? 'border-color: var(--green); background: rgba(46, 220, 113, 0.05);' : ''}">
+                    <span class="active-label" id="label-${i+1}" style="display: ${isActivated ? 'block' : 'none'}">LIFETIME ACTIVE</span>
                     <h3 style="font-size:14px; margin:0;">LEVEL ${i+1}</h3>
                     <p style="color:var(--gold); font-size:20px; margin:10px 0;">$${price}</p>
-                    <button onclick="activateLevel(${i+1})" class="btn btn-gold" id="btn-${i+1}">Activate</button>
+                    <button onclick="activateLevel(${i+1})" class="btn" id="btn-${i+1}" 
+                        style="background: ${isActivated ? 'var(--green)' : 'var(--gold)'}; color: ${isActivated ? 'white' : 'black'};"
+                        ${isActivated ? 'disabled' : ''}>
+                        ${isActivated ? 'LIFETIME ACTIVE' : 'Activate Now'}
+                    </button>
                 </div>`;
         });
     }
 
-    // Admin function to give plan
+    // Admin function to grant plan to any member
     function adminAction() {
         const id = document.getElementById('search-id').value;
         const lvl = parseInt(document.getElementById('select-level').value);
+        if(!id) { alert("Please Enter Member ID!"); return; }
         
-        if(!id) { alert("Enter Member ID first!"); return; }
-        
-        // Logic: Apply plan to UI
-        updateUI(lvl);
-        toast(`Admin: Level ${lvl} granted to ID ${id}`);
+        // In a real system, you'd send this to a database. 
+        // Here we apply it to the current view as requested.
+        unlockLifetimeLevels(lvl);
+        toast(`Admin: Level ${lvl} granted to ID ${id} for Lifetime!`);
     }
 
     function activateLevel(lvl) {
-        toast(`Activating Level ${lvl}... 10% Maintenance Fee Sent to Owner.`);
+        toast(`Processing Level ${lvl}... System Fee 10% Deducted.`);
         setTimeout(() => {
-            updateUI(lvl);
-        }, 1500);
+            unlockLifetimeLevels(lvl);
+            toast(`Success! Level ${lvl} Activated for Lifetime.`);
+        }, 1200);
     }
 
-    function updateUI(lvl) {
-        userLevel = lvl;
-        document.getElementById('dash-plan').innerText = "Level " + lvl;
-        document.getElementById('current-active-plan').innerText = "Current Plan: Level " + lvl;
-        
-        // Reset and Update Cards
-        for(let i=1; i<=12; i++) {
-            const b = document.getElementById('btn-'+i);
-            const l = document.getElementById('label-'+i);
-            const c = document.getElementById('card-'+i);
-            
-            if(i === lvl) {
-                b.innerText = "ACTIVE"; b.disabled = true; b.style.background = "var(--green)"; b.style.color = "white";
-                l.style.display = "block";
-                c.style.borderColor = "var(--green)";
-            } else {
-                b.innerText = "Activate"; b.disabled = false; b.style.background = "var(--gold)"; b.style.color = "black";
-                l.style.display = "none";
-                c.style.borderColor = "rgba(243, 186, 47, 0.2)";
-            }
+    function unlockLifetimeLevels(lvl) {
+        // Logic: When level X is granted, all levels from 1 to X become lifetime active
+        for(let i=0; i < lvl; i++) {
+            activeLevels[i] = 1;
         }
+        
+        const maxActive = activeLevels.lastIndexOf(1) + 1;
+        document.getElementById('dash-plan').innerText = maxActive;
+        document.getElementById('dash-status').innerText = "LIFETIME ACTIVE";
+        document.getElementById('current-active-plan').innerText = "Max Status: Level " + maxActive;
+        
+        init(); // Re-render the grid to lock buttons
     }
 
     function toast(msg) {
         const t = document.getElementById('notify-toast');
         t.innerText = msg; t.style.display = "block";
-        setTimeout(() => t.style.display = "none", 3500);
+        setTimeout(() => t.style.display = "none", 3000);
     }
 
     window.onload = init;
