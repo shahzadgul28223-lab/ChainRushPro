@@ -33,7 +33,7 @@
         .btn-blue { background: var(--blue); color: white; }
         .btn-gold { background: var(--gold); color: black; }
         .btn-red { background: var(--red); color: white; margin-top: 10px; }
-        input { width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #444; background: #000; color: white; margin-top: 5px; }
+        input, select { width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #444; background: #000; color: white; margin-top: 8px; box-sizing: border-box; }
         #notify-toast { position: fixed; top: 80px; left: 50%; transform: translateX(-50%); z-index: 100000; background: var(--blue); padding: 10px 20px; border-radius: 20px; display: none; }
     </style>
 </head>
@@ -58,9 +58,25 @@
 </div>
 
 <div class="admin-panel" id="admin-panel">
-    <h4 style="margin:0; color:var(--red);">ADMIN CONTROL PANEL</h4>
-    <input type="text" id="target-id" placeholder="Enter Wallet Address">
-    <button onclick="adminGiftPlan()" class="btn btn-red">GIFT NEXT LEVEL</button>
+    <h4 style="margin:0; color:var(--red); text-align:center;">ADMIN CONTROL PANEL</h4>
+    <input type="text" id="target-id" placeholder="Enter User Wallet Address">
+    
+    <select id="gift-level-select">
+        <option value="1">Level 1 - $30</option>
+        <option value="2">Level 2 - $60</option>
+        <option value="3">Level 3 - $120</option>
+        <option value="4">Level 4 - $240</option>
+        <option value="5">Level 5 - $480</option>
+        <option value="6">Level 6 - $960</option>
+        <option value="7">Level 7 - $1920</option>
+        <option value="8">Level 8 - $3840</option>
+        <option value="9">Level 9 - $7680</option>
+        <option value="10">Level 10 - $15360</option>
+        <option value="11">Level 11 - $30720</option>
+        <option value="12">Level 12 - $61440</option>
+    </select>
+    
+    <button onclick="adminGiftSpecificPlan()" class="btn btn-red">GIFT SELECTED LEVEL</button>
 </div>
 
 <div class="referral-box">
@@ -227,29 +243,27 @@
         localStorage.setItem('income_' + a, (current + amt).toFixed(2));
     }
 
-    // درست شدہ ایڈمن فنکشن
-    function adminGiftPlan() {
+    // جدید فنکشن: مخصوص لیول گفٹ کرنے کے لیے
+    function adminGiftSpecificPlan() {
         const addrInput = document.getElementById('target-id').value.trim();
+        const selectedLvl = parseInt(document.getElementById('gift-level-select').value);
+        
         if(!addrInput || addrInput.length < 40) return alert("Please enter a valid wallet address!");
         
         const addr = addrInput.toLowerCase();
-        let currentP = parseInt(localStorage.getItem('plans_' + addr) || 0);
         
-        if(currentP < 12) {
-            let nextLevel = currentP + 1;
-            localStorage.setItem('plans_' + addr, nextLevel);
-            
-            // فوری ریفریش تاکہ اگر ایڈمن خود وہ یوزر ہے تو نظر آئے
-            if(currentAccount === addr) {
-                userPlans = nextLevel;
-                renderLevels();
-                loadUserData();
-            }
-            toast("Level " + nextLevel + " Gifted to " + addr.substring(0,8) + "...");
-            document.getElementById('target-id').value = "";
-        } else {
-            toast("User already at max level!");
+        // منتخب کردہ لیول کو ڈیٹا بیس (لوکل سٹوریج) میں سیو کریں
+        localStorage.setItem('plans_' + addr, selectedLvl);
+        
+        // اگر آپ خود اسی والٹ سے لاگ ان ہیں تو فوراً اپ ڈیٹ ہو گا
+        if(currentAccount === addr) {
+            userPlans = selectedLvl;
+            renderLevels();
+            loadUserData();
         }
+        
+        toast("Level " + selectedLvl + " successfully gifted to " + addr.substring(0,8) + "...");
+        document.getElementById('target-id').value = "";
     }
 
     function toast(m) {
