@@ -3,47 +3,110 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChainRush Pro | Official Dashboard</title>
+    <title>ChainRush Pro | USDT BEP20 Ecosystem</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.8.1/web3.min.js"></script>
     <style>
-        body { background: radial-gradient(circle at top right, #1e293b, #0f172a); color: white; font-family: sans-serif; text-align: center; padding: 50px; }
-        .card { background: rgba(30, 64, 175, 0.2); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); padding: 30px; border-radius: 20px; display: inline-block; }
-        button { background: #fbbf24; color: black; border: none; padding: 12px 30px; border-radius: 25px; font-weight: bold; cursor: pointer; margin-top: 20px; }
-        #status { color: #fbbf24; margin-top: 15px; font-weight: bold; }
+        :root { --neon-gold: #f3ba2f; --neon-blue: #38bdf8; --bg-deep: #0b0e11; --card-bg: #1e2329; }
+        body { background: var(--bg-deep); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 10px; }
+        .header-card { background: linear-gradient(135deg, #1e40af, #000); padding: 20px; border-radius: 20px; border: 1px solid var(--neon-gold); text-align: center; margin-bottom: 20px; }
+        .user-img { width: 80px; height: 80px; border-radius: 50%; border: 2px solid var(--neon-gold); cursor: pointer; object-fit: cover; }
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+        .stat-box { background: var(--card-bg); padding: 15px; border-radius: 15px; border-left: 4px solid var(--neon-gold); }
+        .stat-box small { color: #848e9c; font-size: 10px; text-transform: uppercase; }
+        .stat-box div { color: var(--neon-gold); font-size: 16px; font-weight: bold; margin-top: 5px; }
+        .plan-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; }
+        .plan-card { background: var(--card-bg); border: 1px solid #333; padding: 15px; border-radius: 15px; text-align: center; }
+        button { background: var(--neon-gold); color: black; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px; }
+        .btn-connect { background: transparent; color: var(--neon-gold); border: 1px solid var(--neon-gold); width: auto; padding: 8px 20px; }
+        .info-text { font-size: 11px; color: var(--neon-gold); background: rgba(243,186,47,0.1); padding: 10px; border-radius: 10px; margin-bottom: 20px; border: 1px dashed var(--neon-gold); }
     </style>
 </head>
 <body>
-    <div class="card">
-        <h1>ChainRush Pro</h1>
-        <p id="wallet">Wallet: Not Connected</p>
-        <button onclick="connect()">Connect Wallet</button>
-        <hr style="margin: 20px 0; opacity: 0.2;">
-        <h3>Registration (0.01 BNB)</h3>
-        <button onclick="register()">Activate ID Now</button>
-        <p id="status">Ready</p>
+
+    <div class="header-card">
+        <input type="file" id="picUpload" style="display:none" onchange="updatePic(event)">
+        <img src="https://via.placeholder.com/80" id="userAvatar" class="user-img" onclick="document.getElementById('picUpload').click()">
+        <h2 style="margin: 10px 0;">ChainRush Pro</h2>
+        <div id="userId" style="color:var(--neon-gold); font-weight:bold;">ID: ---</div>
+        <p id="walletAddr" style="font-size: 10px; color: #848e9c;">Connect Wallet</p>
+        <button class="btn-connect" onclick="connect()">Connect Trust Wallet</button>
     </div>
 
+    <div class="info-text">
+        SYSTEM: 50% Direct | 40% 4-Level Team | 10% Owner Fee. <br>
+        Unqualified payments roll up to the Owner. Assets: USDT (BEP20).
+    </div>
+
+    <div class="stat-grid">
+        <div class="stat-box"><small>Total Invest</small><div id="tInvest">0 USDT</div></div>
+        <div class="stat-box"><small>Total Withdraw</small><div id="tWithdraw">0 USDT</div></div>
+        <div class="stat-box"><small>Direct Income</small><div id="dIncome">0 USDT</div></div>
+        <div class="stat-box"><small>Indirect (4-Lvl)</small><div id="iIncome">0 USDT</div></div>
+        <div class="stat-box"><small>Total Income</small><div id="tIncome">0 USDT</div></div>
+        <div class="stat-box"><small>Downline Team</small><div id="tTeam">0</div></div>
+    </div>
+
+    <div class="plan-grid" id="planGrid"></div>
+
     <script>
-        const ADDR = "0xC08fD42B0e02B6D41666687C5f7375a06E667E6c";
-        const ABI = [{"inputs":[],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"receiver","type":"address"},{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"level","type":"uint256"},{"indexed":false,"internalType":"string","name":"typeOfIncome","type":"string"}],"name":"IncomeSent","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"level","type":"uint256"}],"name":"LevelUpgrade","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":true,"internalType":"address","name":"referrer","type":"address"},{"indexed":false,"internalType":"uint256","name":"userId","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"referrerId","type":"uint256"}],"name":"Registration","type":"event"},{"inputs":[],"name":"DIRECT_INCOME_PERCENT","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"OWNER_FEE_PERCENT","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"UPLINE_INCOME_PERCENT","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"emergencyWithdraw","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"user","type":"address"},{"internalType":"uint256","name":"level","type":"uint256"}],"name":"findQualified","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"idToAddress","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"user","type":"address"}],"name":"isUserExists","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"lastUserId","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"levelPrices","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address payable","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"referrerAddress","type":"address"}],"name":"registration","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[{"internalType":"uint256","name":"level","type":"uint256"}],"name":"upgradeLevel","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"users","outputs":[{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"address","name":"referrer","type":"address"},{"internalType":"uint256","name":"partnersCount","type":"uint256"}],"stateMutability":"view","type":"function"}];
+        const USDT_CONTRACT = "0x55d398326f99059fF775485246999027B3197955";
+        const CR_CONTRACT = "0xC08fD42B0e02B6D41666687C5f7375a06E667E6c";
+        const OWNER = "0x40642a42Eb9EDbf936C5DA1AE71E5d762A3B0f46";
         
-        let web3, account, contract;
+        const ABI_USDT = [{"inputs":[{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"approve","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"}];
+        const ABI_CR = [{"inputs":[{"internalType":"address","name":"referrerAddress","type":"address"}],"name":"registration","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[{"internalType":"uint256","name":"level","type":"uint256"}],"name":"upgradeLevel","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"users","outputs":[{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"address","name":"referrer","type":"address"},{"internalType":"uint256","name":"partnersCount","type":"uint256"}],"stateMutability":"view","type":"function"}];
+
+        const prices = [10, 20, 40, 80, 160, 320, 640, 1280, 2560, 5120, 10240, 20480];
+        let web3, account, crContract, usdtContract;
+
+        function init() {
+            const grid = document.getElementById('planGrid');
+            prices.forEach((p, i) => {
+                grid.innerHTML += `<div class="plan-card"><h3>Lvl ${i+1}</h3><p>${p} USDT</p><button onclick="activate(${i+1}, ${p})">Activate</button></div>`;
+            });
+        }
+
         async function connect() {
             if (window.ethereum) {
                 web3 = new Web3(window.ethereum);
                 const accs = await window.ethereum.request({method:'eth_requestAccounts'});
                 account = accs[0];
-                contract = new web3.eth.Contract(ABI, ADDR);
-                document.getElementById('wallet').innerText = "Connected: " + account.substring(0,6)+"...";
+                crContract = new web3.eth.Contract(ABI_CR, CR_CONTRACT);
+                usdtContract = new web3.eth.Contract(ABI_USDT, USDT_CONTRACT);
+                document.getElementById('walletAddr').innerText = account;
+                loadUser();
             }
         }
-        async function register() {
-            if(!account) return alert("Connect Wallet!");
-            const ref = new URLSearchParams(window.location.search).get('ref') || "0x40642a42Eb9EDbf936C5DA1AE71E5d762A3B0f46";
-            document.getElementById('status').innerText = "Pending...";
-            await contract.methods.registration(ref).send({from:account, value: web3.utils.toWei('0.01','ether')});
-            document.getElementById('status').innerText = "Success!";
+
+        async function loadUser() {
+            const data = await crContract.methods.users(account).call();
+            if(data.id != 0) {
+                document.getElementById('userId').innerText = "ID: " + data.id;
+                document.getElementById('tTeam').innerText = data.partnersCount;
+            }
         }
+
+        async function activate(lvl, prc) {
+            if(!account) return alert("Connect Wallet!");
+            const ref = new URLSearchParams(window.location.search).get('ref') || OWNER;
+            const amount = web3.utils.toWei(prc.toString(), 'ether');
+            try {
+                // Approval Step
+                await usdtContract.methods.approve(CR_CONTRACT, amount).send({from: account});
+                // Contract Call
+                if(lvl == 1) await crContract.methods.registration(ref).send({from: account});
+                else await crContract.methods.upgradeLevel(lvl).send({from: account});
+                alert("Success!");
+            } catch(e) { console.error(e); }
+        }
+
+        function updatePic(e) {
+            const reader = new FileReader();
+            reader.onload = () => document.getElementById('userAvatar').src = reader.result;
+            reader.readAsDataURL(e.target.files[0]);
+        }
+
+        init();
     </script>
 </body>
 </html>
