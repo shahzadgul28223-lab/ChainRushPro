@@ -3,36 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChainRush Pro - Official</title>
+    <title>ChainRush Pro - Official Launch</title>
+    <meta property="og:title" content="ChainRush Pro">
+    <meta property="og:image" content="https://i.ibb.co/LzNfXFk/Chain-Rush-Logo.png">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
     <style>
-        :root { --primary: #00c6ff; --gold: #f39c12; --dark: #0a0a0a; }
+        :root { --primary: #00c6ff; --gold: #f39c12; --dark: #0a0a0a; --glass: rgba(255, 255, 255, 0.1); }
         body { background-color: var(--dark); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; text-align: center; }
         
-        /* Fixed Notifications */
         #notification-container { position: fixed; top: 10px; left: 10px; z-index: 10000; width: 260px; }
-        .noti-card { background: linear-gradient(90deg, #ff416c, #ff4b2b); padding: 12px; border-radius: 12px; margin-bottom: 8px; display: flex; align-items: center; animation: slideIn 0.5s ease; border: 1px solid rgba(255,255,255,0.2); text-align: left; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
-        .noti-img { width: 40px; height: 40px; border-radius: 50%; margin-right: 10px; border: 2px solid white; }
+        .noti-card { background: linear-gradient(90deg, #ff416c, #ff4b2b); padding: 12px; border-radius: 12px; margin-bottom: 8px; display: flex; align-items: center; border: 1px solid rgba(255,255,255,0.2); animation: slideIn 0.5s ease; }
+        .noti-img { width: 45px; height: 45px; border-radius: 50%; margin-right: 12px; border: 2px solid #fff; }
 
-        .header { background: linear-gradient(135deg, #1e3c72, #2a5298, #f39c12); padding: 30px 15px; border-bottom: 4px solid var(--gold); border-radius: 0 0 30px 30px; }
+        .header { background: linear-gradient(135deg, #1e3c72, #2a5298, #f39c12); padding: 40px 20px; border-bottom: 4px solid var(--gold); border-radius: 0 0 30px 30px; }
         .wallet-btn { background: #00c6ff; border: none; padding: 12px 25px; border-radius: 50px; color: white; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(0,198,255,0.4); }
-        .user-id { font-size: 26px; font-weight: bold; color: var(--gold); margin-top: 10px; }
-        .profile-img { width: 100px; height: 100px; border-radius: 50%; border: 3px solid var(--gold); margin-top: 10px; }
+        .profile-img { width: 110px; height: 110px; border-radius: 50%; border: 4px solid var(--gold); margin: 15px auto; display: block; }
+        .user-id { font-size: 28px; font-weight: bold; color: var(--gold); }
 
         .admin-panel { background: #151515; border: 2px solid #e74c3c; margin: 20px; padding: 20px; border-radius: 20px; }
-        input, select { width: 80%; padding: 12px; margin: 8px 0; border-radius: 10px; border: 1px solid #333; background: #000; color: white; }
+        input, select { width: 85%; padding: 12px; margin: 8px 0; border-radius: 10px; border: 1px solid #333; background: #000; color: white; }
 
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 20px; }
         .stat-card { background: #1e1e1e; padding: 15px; border-radius: 15px; border-left: 4px solid var(--primary); }
-        .stat-val { font-size: 20px; font-weight: bold; color: var(--gold); }
+        .stat-val { font-size: 18px; font-weight: bold; color: var(--gold); }
+
+        .report-box { background: #111; margin: 0 20px; border-radius: 15px; border: 1px solid var(--primary); padding: 15px; text-align: left; }
+        .report-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed #333; }
+
+        .copy-section { background: rgba(0,198,255,0.1); border: 1px dashed var(--primary); margin: 20px; padding: 15px; border-radius: 15px; }
+        .copy-btn { background: var(--gold); color: black; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; margin-top: 10px; cursor: pointer; }
 
         .level-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 20px; }
-        .level-card { background: #1a1a1a; padding: 20px; border-radius: 25px; border: 2px solid #333; position: relative; transition: 0.3s; }
-        .active-plan { border-color: #2ecc71; box-shadow: 0 0 15px rgba(46, 204, 113, 0.2); }
-        .locked-plan { opacity: 0.5; filter: grayscale(1); }
+        .level-card { background: #1a1a1a; padding: 20px; border-radius: 25px; border: 2px solid #333; position: relative; }
+        .active-lvl { border-color: #2ecc71; box-shadow: 0 0 10px rgba(46, 204, 113, 0.3); }
+        .buy-btn { width: 100%; padding: 12px; border-radius: 10px; border: none; font-weight: bold; margin-top: 10px; cursor: pointer; color: white; }
 
-        .buy-btn { width: 100%; padding: 12px; border-radius: 10px; border: none; font-weight: bold; margin-top: 10px; cursor: pointer; }
-
+        .footer { padding: 30px; background: #111; border-top: 2px solid var(--gold); margin-top: 40px; text-align: left; font-size: 13px; line-height: 1.6; color: #ccc; }
+        .policy-title { color: var(--gold); font-weight: bold; font-size: 16px; margin-bottom: 10px; display: block; text-align: center; }
         @keyframes slideIn { from { transform: translateX(-100%); } to { transform: translateX(0); } }
     </style>
 </head>
@@ -41,30 +48,50 @@
     <div id="notification-container"></div>
 
     <div class="header">
-        <button class="wallet-btn" id="conBtn" onclick="connect()">Connect Wallet</button>
-        <div class="user-id">ID: 4970</div>
+        <button class="wallet-btn" onclick="connectWallet()" id="wallBtn">Connect Wallet</button>
+        <div id="usdtBal" style="margin-top:10px; color:#2ecc71; font-weight:bold;">USDT: $0.00</div>
+        <div class="user-id">ID: <span id="displayId">4970</span></div>
         <img src="https://i.pravatar.cc/150?u=4970" class="profile-img">
     </div>
 
-    <div id="admBox" class="admin-panel" style="display:none;">
-        <h3 style="color:#e74c3c;">ADMIN GIFT PANEL</h3>
-        <input type="text" id="targetId" placeholder="User ID">
-        <select id="targetLvl">
-            <script>for(let i=1;i<=12;i++) document.write(`<option value="${i}">Level ${i} ($${30 * Math.pow(2, i-1)})</option>`);</script>
+    <div id="adminPanel" class="admin-panel" style="display:none;">
+        <h3 style="color:#e74c3c;">ADMIN: GIFT LEVEL</h3>
+        <input type="text" id="giftTarget" placeholder="Target User ID">
+        <select id="giftLevel">
+            <script>for(let i=1;i<=12;i++) document.write(`<option value="${i}">Level ${i}</option>`);</script>
         </select>
-        <button class="buy-btn" style="background:#e74c3c; color:white;" onclick="gift()">ACTIVATE PLAN</button>
+        <button class="buy-btn" style="background:#e74c3c;" onclick="processGift()">ACTIVATE NOW</button>
     </div>
 
     <div class="stats-grid">
-        <div class="stat-card"><div>Active Plans</div><div class="stat-val" id="lvlShow">0</div></div>
-        <div class="stat-card"><div>Direct Team</div><div class="stat-val" id="tmShow">0</div></div>
+        <div class="stat-card"><div>Active Level</div><div class="stat-val" id="userLvl">0</div></div>
+        <div class="stat-card"><div>Team Income</div><div class="stat-val" id="teamInc">$0.00</div></div>
+        <div class="stat-card"><div>Total Income</div><div class="stat-val" id="totInc">$0.00</div></div>
+        <div class="stat-card"><div>Total Team</div><div class="stat-val" id="totTeam">0</div></div>
     </div>
 
-    <div class="level-grid" id="planBox"></div>
+    <div class="report-box">
+        <b style="color:var(--primary)">TEAM REPORT LIVE</b>
+        <div class="report-row"><span>Direct Members</span> <span id="dirTeam">0</span></div>
+        <div class="report-row"><span>Total Network</span> <span id="repTot">0</span></div>
+    </div>
+
+    <div class="copy-section">
+        <div id="refUrl" style="font-size: 12px; word-break: break-all;">https://chain-rush-pro.vercel.app/?ref=4970</div>
+        <button class="copy-btn" onclick="copyRef()">COPY REFERRAL LINK</button>
+    </div>
+
+    <div class="level-grid" id="levelsContainer"></div>
+
+    <div class="footer">
+        <span class="policy-title">COMPANY POLICY & SYSTEM TRUST</span>
+        ChainRush Pro ایک مکمل طور پر <b>Decentralized</b> بلاک چین سسٹم ہے۔ یہ 100% رقم ممبرز میں <b>Distribute</b> کرتا ہے۔ یہ ایک سو فیصد ٹرسٹڈ بلاک چین سسٹم ہے جو کبھی بھی بند نہیں ہوسکتا جب تک بلاک چین ٹیکنالوجی دنیا میں موجود ہے یہ سسٹم چلتا رہے گا۔ اس سسٹم کو لائیو جرمنی کے شہر <b>برلن</b> سے لانچ کیا گیا ہے۔
+        <p style="font-size: 10px; color: #555; margin-top: 20px; text-align: center;">© 2026 ChainRush Pro Germany. All Rights Reserved.</p>
+    </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, onValue, update, get, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, onValue, update, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyDxzfp_f2Y0tStBsYNLx9xjWb6EgXFnXqg",
@@ -80,82 +107,109 @@
     const db = getDatabase(app);
 
     const myId = "4970"; 
-    const isAdmin = (myId === "4970");
+    const ownerWallet = "0x40642a42Eb9EDbf936C5DA1AE71E5d762A3B0f46";
+    const usdtAddress = "0x55d398326f99059fF775485246999027B3197955";
 
-    if(isAdmin) document.getElementById('admBox').style.display = 'block';
+    // Referral Security
+    const urlParams = new URLSearchParams(window.location.search);
+    const refBy = urlParams.get('ref');
+    if(!refBy && myId !== "4970") {
+        document.body.innerHTML = "<h2 style='margin-top:100px;'>ChainRush Pro: Please use a valid referral link to join.</h2>";
+    }
 
-    // Wallet Function
-    window.connect = async () => {
-        if (window.ethereum) {
-            const acc = await window.ethereum.request({ method: 'eth_requestAccounts' });
-            document.getElementById('conBtn').innerText = acc[0].substring(0,6) + "...";
-            alert("Connected!");
-        } else { alert("Please use DApp Browser"); }
-    };
+    if(myId === "4970") document.getElementById('adminPanel').style.display = 'block';
 
-    // Data Listeners
     onValue(ref(db, 'users/' + myId), (snap) => {
-        const data = snap.val() || { purchased: [] };
-        let active = isAdmin ? [1,2,3,4,5,6,7,8,9,10,11,12] : (data.purchased || []);
-        document.getElementById('lvlShow').innerText = active.length;
-        render(active);
+        const data = snap.val() || { level: 0, tIncome: 0, directs: 0, network: 0 };
+        let displayLevel = (myId === "4970") ? 12 : (data.level || 0);
+        document.getElementById('userLvl').innerText = displayLevel;
+        document.getElementById('dirTeam').innerText = data.directs || 0;
+        document.getElementById('totTeam').innerText = data.network || 0;
+        document.getElementById('repTot').innerText = data.network || 0;
+        document.getElementById('teamInc').innerText = "$" + (data.tIncome || 0).toFixed(2);
+        document.getElementById('totInc').innerText = "$" + (data.tIncome || 0).toFixed(2);
+        renderLevels(displayLevel);
     });
 
-    // Team Count
-    const tRef = query(ref(db, 'users'), orderByChild('inviter'), equalTo(myId));
-    onValue(tRef, (s) => {
-        let count = 0; s.forEach(() => { count++ });
-        document.getElementById('tmShow').innerText = count;
-    });
-
-    function render(activeList) {
-        const box = document.getElementById('planBox');
-        box.innerHTML = "";
+    function renderLevels(current) {
+        const cont = document.getElementById('levelsContainer');
+        cont.innerHTML = "";
         for (let i = 1; i <= 12; i++) {
-            const price = 30 * Math.pow(2, i - 1);
-            const isOk = activeList.includes(i);
-            box.innerHTML += `
-                <div class="level-card ${isOk ? 'active-plan' : 'locked-plan'}">
-                    <h3>PLAN ${i}</h3>
+            let price = 30 * Math.pow(2, i - 1);
+            let active = i <= current;
+            cont.innerHTML += `
+                <div class="level-card ${active ? 'active-lvl' : ''}">
+                    <h3>LEVEL ${i}</h3>
                     <p>$${price}</p>
-                    ${isOk ? '<button class="buy-btn" style="background:#2ecc71; color:white;">ACTIVE ✅</button>' : 
-                    `<button class="buy-btn" style="background:var(--primary); color:white;" onclick="buy(${i})">ACTIVATE</button>`}
+                    ${active ? '<button class="buy-btn" style="background:#2ecc71">PURCHASED</button>' : 
+                    `<button class="buy-btn" style="background:#00c6ff" onclick="handlePurchase(${i}, ${price})">UPGRADE NOW</button>`}
                 </div>`;
         }
     }
 
-    window.buy = async (n) => {
-        if(confirm(`Buy Plan ${n}?`)) {
-            const s = await get(ref(db, 'users/' + myId));
-            let cur = s.val()?.purchased || [];
-            if(!cur.includes(n)) cur.push(n);
-            await update(ref(db, 'users/' + myId), { purchased: cur });
-            noti(myId, n);
+    async function findReceiver(startId, lvl) {
+        let currentId = startId;
+        while(currentId) {
+            let s = await get(ref(db, 'users/' + currentId));
+            let u = s.val();
+            if(u && u.level >= lvl && u.wallet) return u.wallet;
+            currentId = u ? u.inviter : null;
         }
-    };
-
-    window.gift = async () => {
-        const tid = document.getElementById('targetId').value;
-        const tl = parseInt(document.getElementById('targetLvl').value);
-        if(!tid) return alert("Enter ID");
-        const s = await get(ref(db, 'users/' + tid));
-        let cur = s.val()?.purchased || [];
-        if(!cur.includes(tl)) cur.push(tl);
-        await update(ref(db, 'users/' + tid), { purchased: cur });
-        alert("Done!");
-    };
-
-    function noti(id, l) {
-        const d = document.createElement('div');
-        d.className = 'noti-card';
-        d.innerHTML = `<img src="https://i.pravatar.cc/50?u=${id}" class="noti-img">
-            <div><b>ID: ${id}</b> Active <b>Plan ${l}</b><br>Success!</div>`;
-        document.getElementById('notification-container').appendChild(d);
-        setTimeout(() => d.remove(), 4000);
+        return ownerWallet;
     }
 
-    setInterval(() => noti(Math.floor(1000+Math.random()*9000), Math.floor(1+Math.random()*12)), 5000);
+    window.handlePurchase = async (lvl, price) => {
+        if(!window.ethereum) return alert("Connect Wallet!");
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        const signer = provider.getSigner();
+        const userSnap = await get(ref(db, 'users/' + myId));
+        const recipient = await findReceiver(userSnap.val()?.inviter, lvl);
 
+        try {
+            const abi = ["function transfer(address to, uint256 amount) public returns (bool)"];
+            const contract = new ethers.Contract(usdtAddress, abi, signer);
+            const tx = await contract.transfer(recipient, ethers.utils.parseUnits(price.toString(), 18));
+            alert("Payment Sent to Blockchain. Please wait...");
+            await tx.wait();
+            await update(ref(db, 'users/' + myId), { level: lvl, wallet: await signer.getAddress() });
+            alert("Upgrade Success!");
+        } catch(e) { alert("Transaction Failed!"); }
+    };
+
+    window.connectWallet = async () => {
+        const accs = await window.ethereum.request({method:'eth_requestAccounts'});
+        document.getElementById('wallBtn').innerText = accs[0].substring(0,6)+"...";
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        const abi = ["function balanceOf(address) view returns (uint256)"];
+        const contract = new ethers.Contract(usdtAddress, abi, provider);
+        const bal = await contract.balanceOf(accs[0]);
+        document.getElementById('usdtBal').innerText = "USDT: $" + parseFloat(ethers.utils.formatUnits(bal, 18)).toFixed(2);
+        await update(ref(db, 'users/' + myId), { wallet: accs[0] });
+    };
+
+    window.copyRef = () => {
+        const link = "https://chain-rush-pro.vercel.app/?ref=" + myId;
+        navigator.clipboard.writeText(link);
+        alert("Referral Link Copied: " + link);
+    };
+
+    window.processGift = async () => {
+        const tid = document.getElementById('giftTarget').value;
+        const tlvl = parseInt(document.getElementById('giftLevel').value);
+        await update(ref(db, 'users/' + tid), { level: tlvl });
+        alert("Level Activated!");
+    };
+
+    setInterval(() => {
+        const id = Math.floor(1000 + Math.random() * 9000);
+        const l = Math.floor(1 + Math.random() * 12);
+        const div = document.createElement('div');
+        div.className = 'noti-card';
+        div.innerHTML = `<img src="https://i.pravatar.cc/50?u=${id}" class="noti-img">
+            <div><b>ID: ${id}</b> Active <b>Level ${l}</b> Success!</div>`;
+        document.getElementById('notification-container').appendChild(div);
+        setTimeout(() => div.remove(), 4000);
+    }, 6000);
 </script>
 </body>
 </html>
