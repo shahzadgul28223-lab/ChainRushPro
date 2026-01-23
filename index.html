@@ -4,55 +4,57 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ChainRush Pro - Official</title>
-    <meta property="og:title" content="ChainRush Pro">
-    <meta property="og:image" content="https://i.ibb.co/LzNfXFk/Chain-Rush-Logo.png">
     <style>
-        :root { --primary: #00c6ff; --gold: #f39c12; --dark: #0a0a0a; --glass: rgba(255, 255, 255, 0.1); }
+        :root { --primary: #00c6ff; --gold: #f39c12; --dark: #0a0a0a; }
         body { background-color: var(--dark); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; text-align: center; }
         
-        /* Notifications */
         #notification-container { position: fixed; top: 10px; left: 10px; z-index: 10000; width: 260px; }
         .noti-card { background: linear-gradient(90deg, #ff416c, #ff4b2b); padding: 12px; border-radius: 12px; margin-bottom: 8px; display: flex; align-items: center; animation: slideIn 0.5s ease; border: 1px solid rgba(255,255,255,0.2); }
         .noti-img { width: 45px; height: 45px; border-radius: 50%; margin-right: 12px; border: 2px solid #fff; }
 
-        /* Dashboard Header */
         .header { background: linear-gradient(135deg, #1e3c72, #2a5298, #f39c12); padding: 40px 20px; border-bottom: 4px solid var(--gold); border-radius: 0 0 30px 30px; }
         .wallet-btn { background: #00c6ff; border: none; padding: 12px 25px; border-radius: 50px; color: white; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(0,198,255,0.4); }
         .profile-img { width: 110px; height: 110px; border-radius: 50%; border: 4px solid var(--gold); margin: 15px auto; display: block; }
         .user-id { font-size: 28px; font-weight: bold; color: var(--gold); text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
 
-        /* Admin Gift Panel */
         .admin-panel { background: #151515; border: 2px solid #e74c3c; margin: 20px; padding: 20px; border-radius: 20px; }
-        .admin-panel h3 { color: #e74c3c; margin-top: 0; }
         input, select { width: 85%; padding: 12px; margin: 8px 0; border-radius: 10px; border: 1px solid #333; background: #000; color: white; }
 
-        /* Stats Grid */
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 20px; }
         .stat-card { background: #1e1e1e; padding: 15px; border-radius: 15px; border-left: 4px solid var(--primary); }
         .stat-val { font-size: 20px; font-weight: bold; color: var(--gold); }
 
-        /* Team Report */
-        .report-box { background: #111; margin: 0 20px; border-radius: 15px; border: 1px solid var(--primary); padding: 15px; text-align: left; }
-        .report-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px dashed #333; cursor: pointer; }
-
-        /* Copy Link */
-        .copy-section { background: rgba(0,198,255,0.1); border: 1px dashed var(--primary); margin: 20px; padding: 15px; border-radius: 15px; }
-        .copy-btn { background: var(--gold); color: black; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; margin-top: 10px; }
-
-        /* Levels */
+        /* Level Card Styling with Icon Background */
         .level-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 20px; }
-        .level-card { background: #1a1a1a; padding: 20px; border-radius: 25px; border: 2px solid #333; position: relative; overflow: hidden; }
-        .level-card.active { border-color: #2ecc71; box-shadow: 0 0 15px rgba(46, 204, 113, 0.3); }
-        .level-card.locked { opacity: 0.6; filter: grayscale(0.8); }
-        .level-badge { position: absolute; top: 10px; right: 10px; background: #2ecc71; color: black; font-size: 10px; padding: 3px 10px; border-radius: 5px; display: none; }
-        .active .level-badge { display: block; }
-        .buy-btn { width: 100%; padding: 12px; border-radius: 10px; border: none; font-weight: bold; margin-top: 10px; cursor: pointer; }
+        .level-card { 
+            border-radius: 25px; padding: 25px; position: relative; overflow: hidden; 
+            border: 2px solid rgba(255,255,255,0.1); transition: 0.3s; min-height: 160px;
+            display: flex; flex-direction: column; justify-content: center;
+        }
+        .level-card::before {
+            content: "ChainRush Pro"; position: absolute; font-size: 14px; font-weight: bold;
+            opacity: 0.1; transform: rotate(-45deg); top: 40%; left: 10%; z-index: 0; white-space: nowrap;
+        }
+        .level-card h3, .level-card p, .level-card button { position: relative; z-index: 1; }
+        
+        /* Vibrant Colors for 12 Levels */
+        .lvl-1 { background: linear-gradient(45deg, #4facfe, #00f2fe); }
+        .lvl-2 { background: linear-gradient(45deg, #43e97b, #38f9d7); }
+        .lvl-3 { background: linear-gradient(45deg, #fa709a, #fee140); }
+        .lvl-4 { background: linear-gradient(45deg, #667eea, #764ba2); }
+        .lvl-5 { background: linear-gradient(45deg, #ff9a9e, #fecfef); }
+        .lvl-6 { background: linear-gradient(45deg, #f093fb, #f5576c); }
+        .lvl-7 { background: linear-gradient(45deg, #5ee7df, #b490ca); }
+        .lvl-8 { background: linear-gradient(45deg, #c31432, #240b36); }
+        .lvl-9 { background: linear-gradient(45deg, #11998e, #38ef7d); }
+        .lvl-10 { background: linear-gradient(45deg, #ee0979, #ff6a00); }
+        .lvl-11 { background: linear-gradient(45deg, #00c6ff, #0072ff); }
+        .lvl-12 { background: linear-gradient(45deg, #f39c12, #d35400); }
 
-        /* Privacy Policy Section */
+        .buy-btn { width: 100%; padding: 10px; border-radius: 12px; border: none; font-weight: bold; margin-top: 10px; cursor: pointer; background: rgba(0,0,0,0.3); color: white; }
+        .locked { filter: grayscale(1); opacity: 0.5; }
+        
         .footer { padding: 30px; background: #111; border-top: 2px solid var(--gold); margin-top: 40px; }
-        .policy-content { text-align: left; font-size: 13px; color: #ccc; max-width: 500px; margin: auto; line-height: 1.6; }
-        .policy-title { color: var(--gold); font-weight: bold; font-size: 16px; margin-bottom: 10px; display: block; }
-
         @keyframes slideIn { from { transform: translateX(-100%); } to { transform: translateX(0); } }
     </style>
 </head>
@@ -61,8 +63,8 @@
     <div id="notification-container"></div>
 
     <div class="header">
-        <button class="wallet-btn" onclick="connectWallet()">Connect Wallet</button>
-        <p style="font-size: 10px; opacity: 0.7;">0x40642a42Eb9EDbf936C5DA1AE71E5d762A3B0f46</p>
+        <button class="wallet-btn" id="walletStatus">Connect Wallet</button>
+        <p id="adminAddrDisp" style="font-size: 10px; opacity: 0.7; display:none;">0x40642a42Eb9EDbf936C5DA1AE71E5d762A3B0f46</p>
         <div class="user-id">ID: <span id="displayId">4970</span></div>
         <img src="https://i.pravatar.cc/150?u=4970" class="profile-img">
     </div>
@@ -73,7 +75,7 @@
         <select id="giftLevel">
             <script>for(let i=1;i<=12;i++) document.write(`<option value="${i}">Level ${i}</option>`);</script>
         </select>
-        <button class="buy-btn" style="background:#e74c3c; color:white;" onclick="processGift()">GIFT NOW</button>
+        <button class="buy-btn" style="background:#e74c3c; opacity:1;" onclick="processGift()">GIFT NOW</button>
     </div>
 
     <div class="stats-grid">
@@ -83,28 +85,11 @@
         <div class="stat-card"><div>Total Team</div><div class="stat-val" id="totTeam">0</div></div>
     </div>
 
-    <div class="report-box">
-        <b style="color:var(--primary)">TEAM REPORT LIVE</b>
-        <div class="report-row" onclick="openPage('direct')"><span>Direct Members</span> <span id="repDir">0</span></div>
-        <div class="report-row" onclick="openPage('total')"><span>Total Network</span> <span id="repTot">0</span></div>
-    </div>
-
-    <div class="copy-section">
-        <div id="refUrl" style="font-size: 12px; word-break: break-all;">https://chain-rush-pro.vercel.app/?ref=4970</div>
-        <button class="copy-btn" onclick="copyRef()">COPY LINK</button>
-    </div>
-
     <div class="level-grid" id="levelsContainer"></div>
 
     <div class="footer">
-        <span class="policy-title">PRIVACY POLICY & TERMS</span>
-        <div class="policy-content">
-            ChainRush Pro is a decentralized network marketing platform. <br><br>
-            <b>Owner:</b> ChainRush Global Ltd. <br>
-            <b>Location:</b> Friedrichstraße 114, 10117 Berlin, Germany. <br><br>
-            We ensure 100% transparency. Funds are distributed through a secure dynamic compression algorithm. By using this platform, you agree to our smart contract rules and level-based commission structure. All transactions are final.
-        </div>
-        <p style="font-size: 10px; color: #555; margin-top: 20px;">© 2024 ChainRush Pro Germany. All Rights Reserved.</p>
+        <span style="color:var(--gold); font-weight:bold;">PRIVACY POLICY & TERMS</span>
+        <p style="font-size: 12px; color: #888;">Owner: ChainRush Global Ltd, Berlin, Germany.<br>© 2024 All Rights Reserved.</p>
     </div>
 
 <script type="module">
@@ -127,21 +112,19 @@
     const myId = "4970"; 
     const isAdmin = (myId === "4970");
 
-    if(isAdmin) document.getElementById('adminPanel').style.display = 'block';
+    // Hide/Show Admin Address
+    if(isAdmin) {
+        document.getElementById('adminPanel').style.display = 'block';
+        document.getElementById('adminAddrDisp').style.display = 'block';
+    }
 
     onValue(ref(db, 'users/' + myId), (snap) => {
         const data = snap.val() || { level: isAdmin ? 12 : 0 };
-        updateUI(data);
-    });
-
-    function updateUI(data) {
         document.getElementById('userLvl').innerText = data.level;
         document.getElementById('dirTeam').innerText = data.directs || 0;
         document.getElementById('totTeam').innerText = data.network || 0;
-        document.getElementById('repDir').innerText = data.directs || 0;
-        document.getElementById('repTot').innerText = data.network || 0;
         renderLevels(data.level);
-    }
+    });
 
     function renderLevels(current) {
         const cont = document.getElementById('levelsContainer');
@@ -149,62 +132,47 @@
         for (let i = 1; i <= 12; i++) {
             let active = i <= current || isAdmin;
             let isNext = i === (current + 1);
+            let price = i * 30;
+            
             cont.innerHTML += `
-                <div class="level-card ${active ? 'active' : (isNext ? '' : 'locked')}">
-                    <div class="level-badge">ACTIVE</div>
+                <div class="level-card lvl-${i} ${active ? '' : (isNext ? '' : 'locked')}">
                     <h3>LEVEL ${i}</h3>
-                    <p>$${i * 30}</p>
-                    ${active ? '<button class="buy-btn" style="background:#2ecc71">PURCHASED</button>' : 
-                     (isNext ? `<button class="buy-btn" style="background:#00c6ff" onclick="handlePurchase(${i})">UPGRADE NOW</button>` : '<button class="buy-btn" style="background:#444">LOCKED</button>')}
+                    <p><b>$${price}</b></p>
+                    ${active ? 
+                        '<button class="buy-btn">ACTIVE</button>' : 
+                        (isNext ? `<button class="buy-btn" onclick="handlePurchase(${i})">BUY PLAN</button>` : '<button class="buy-btn">LOCKED</button>')
+                    }
                 </div>
             `;
         }
     }
 
     window.handlePurchase = async (lvl) => {
-        const price = lvl * 30;
-        if(confirm(`Upgrade to Level ${lvl} for $${price}? (Required: USDT BEP20 + BNB Fee)`)) {
-            // Background distribution logic simulation
+        if(confirm(`Activate Level ${lvl}? (No Recycle - Lifetime Access)`)) {
             await update(ref(db, 'users/' + myId), { level: lvl });
-            showNoti(myId, lvl);
         }
     };
 
     window.processGift = async () => {
         const tid = document.getElementById('giftTarget').value;
         const targetLvl = parseInt(document.getElementById('giftLevel').value);
-        const snap = await get(ref(db, 'users/' + tid));
-        const current = snap.val() ? snap.val().level : 0;
-
-        if(targetLvl !== current + 1) {
-            alert("Next level must be " + (current + 1));
-            return;
+        if(tid) {
+            await update(ref(db, 'users/' + tid), { level: targetLvl });
+            alert("Level Gifted!");
         }
-        await update(ref(db, 'users/' + tid), { level: targetLvl });
-        alert("Level Gifted!");
-    };
-
-    window.copyRef = () => {
-        navigator.clipboard.writeText(document.getElementById('refUrl').innerText);
-        alert("Link Copied with ChainRush Pro Logo!");
     };
 
     setInterval(() => {
         const id = Math.floor(1000 + Math.random() * 9000);
         const l = Math.floor(1 + Math.random() * 12);
-        showNoti(id, l);
-    }, 4000);
-
-    function showNoti(id, l) {
-        const colors = ['#f39c12', '#00c6ff', '#9b59b6', '#2ecc71'];
         const div = document.createElement('div');
         div.className = 'noti-card';
-        div.style.background = colors[Math.floor(Math.random()*4)];
         div.innerHTML = `<img src="https://i.pravatar.cc/50?u=${id}" class="noti-img">
-            <div style="font-size:11px"><b>ID: ${id}</b> Upgraded to<br><b>Level ${l}</b> Successfully!</div>`;
+            <div style="font-size:11px"><b>ID: ${id}</b> Active <b>Level ${l}</b><br>Lifetime Access!</div>`;
         document.getElementById('notification-container').appendChild(div);
         setTimeout(() => div.remove(), 3500);
-    }
+    }, 4000);
+
 </script>
 </body>
 </html>
