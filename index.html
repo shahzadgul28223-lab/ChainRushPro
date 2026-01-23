@@ -11,9 +11,17 @@
         :root { --primary: #00c6ff; --gold: #f39c12; --dark: #0a0a0a; --glass: rgba(255, 255, 255, 0.1); }
         body { background-color: var(--dark); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; text-align: center; }
         
-        #notification-container { position: fixed; top: 10px; left: 10px; z-index: 10000; width: 260px; }
-        .noti-card { padding: 12px; border-radius: 12px; margin-bottom: 8px; display: flex; align-items: center; animation: slideIn 0.5s ease; transition: all 0.5s ease; }
-        .noti-img { width: 45px; height: 45px; border-radius: 50%; margin-right: 12px; border: 2px solid #fff; }
+        #notification-container { position: fixed; top: 15px; right: 15px; z-index: 10000; width: 280px; pointer-events: none; }
+        .noti-card { 
+            padding: 12px; border-radius: 15px; margin-bottom: 10px; 
+            display: flex; align-items: center; animation: slideIn 0.5s ease forwards; 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.2);
+            color: white; font-weight: 500;
+        }
+        .noti-img { width: 45px; height: 45px; border-radius: 50%; margin-right: 12px; border: 2px solid #fff; object-fit: cover; }
+        
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes fadeOut { from { opacity: 1; transform: scale(1); } to { opacity: 0; transform: scale(0.9); } }
 
         .header { background: linear-gradient(135deg, #1e3c72, #2a5298, #f39c12); padding: 40px 20px; border-bottom: 4px solid var(--gold); border-radius: 0 0 30px 30px; }
         .wallet-btn { background: #00c6ff; border: none; padding: 12px 25px; border-radius: 50px; color: white; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(0,198,255,0.4); }
@@ -37,7 +45,6 @@
         .buy-btn { width: 100%; padding: 12px; border-radius: 10px; border: none; font-weight: bold; margin-top: 10px; cursor: pointer; color: white; }
 
         .footer { padding: 30px; background: #111; border-top: 2px solid var(--gold); margin-top: 40px; text-align: left; font-size: 13px; line-height: 1.6; color: #ccc; }
-        @keyframes slideIn { from { transform: translateX(-100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
     </style>
 </head>
 <body>
@@ -88,7 +95,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, onValue, update, get, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, onValue, update, get, set, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyDxzfp_f2Y0tStBsYNLx9xjWb6EgXFnXqg",
@@ -111,23 +118,54 @@
     const urlParams = new URLSearchParams(window.location.search);
     const inviterId = urlParams.get('ref') || "4970";
 
+    // NOTIFICATION LOGIC
+    const colors = ['linear-gradient(90deg, #FF512F 0%, #DD2476 100%)', 'linear-gradient(90deg, #1D976C 0%, #93F9B9 100%)', 'linear-gradient(90deg, #00c6ff 0%, #0072ff 100%)', 'linear-gradient(90deg, #f39c12 0%, #e67e22 100%)', 'linear-gradient(90deg, #8E2DE2 0%, #4A00E0 100%)'];
+    function triggerLiveNotification() {
+        const id = Math.floor(10000 + Math.random() * 90000);
+        const lvl = Math.floor(1 + Math.random() * 12);
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        const types = ["Joined System", "Upgraded Level", "Received Income", "New Member"];
+        const type = types[Math.floor(Math.random() * types.length)];
+        const container = document.getElementById('notification-container');
+        const card = document.createElement('div');
+        card.className = 'noti-card';
+        card.style.background = color;
+        card.innerHTML = `<img src="https://i.pravatar.cc/100?u=${id}" class="noti-img"><div style="text-align:left;"><div style="font-size:12px; opacity:0.9;">ID: ${id}</div><div style="font-size:14px; font-weight:bold;">${type} ${lvl > 0 ? 'Lvl '+lvl : ''}</div><div style="font-size:10px; color:#fff;">Just Now</div></div>`;
+        container.appendChild(card);
+        setTimeout(() => { card.style.animation = "fadeOut 0.5s ease forwards"; setTimeout(() => card.remove(), 500); }, 3500);
+    }
+    setInterval(triggerLiveNotification, 4000);
+
     window.connectWallet = async () => {
         if (!window.ethereum) return alert("Install MetaMask!");
         const accs = await window.ethereum.request({method:'eth_requestAccounts'});
         const wallet = accs[0];
         document.getElementById('wallBtn').innerText = wallet.substring(0,6)+"...";
-
         const provider = new ethers.providers.Web3Provider(window.ethereum);
         const contract = new ethers.Contract(usdtAddress, usdtAbi, provider);
         const bal = await contract.balanceOf(wallet);
         document.getElementById('usdtBal').innerText = "USDT: $" + parseFloat(ethers.utils.formatUnits(bal, 18)).toFixed(2);
-
-        if (wallet.toLowerCase() === ownerWallet.toLowerCase()) {
-            document.getElementById('adminPanel').style.display = 'block';
-            loadFullTeam();
-        }
+        if (wallet.toLowerCase() === ownerWallet.toLowerCase()) { document.getElementById('adminPanel').style.display = 'block'; loadFullTeam(); }
         loadUser(wallet);
     };
+
+    async function updateTeamCounts(sponsorId) {
+        let currentSponsor = sponsorId;
+        let isFirst = true;
+        while(currentSponsor) {
+            const idSnap = await get(ref(db, 'users_by_id/' + currentSponsor));
+            if(!idSnap.exists()) break;
+            const sWallet = idSnap.val().wallet;
+            const sRef = ref(db, 'users_by_wallet/' + sWallet);
+            
+            const updates = { network: increment(1) };
+            if(isFirst) { updates.directs = increment(1); isFirst = false; }
+            
+            await update(sRef, updates);
+            const sData = (await get(sRef)).val();
+            currentSponsor = sData.inviter;
+        }
+    }
 
     async function loadUser(wallet) {
         const userRef = ref(db, 'users_by_wallet/' + wallet);
@@ -138,6 +176,7 @@
             data = { id: newId, level: 0, tIncome: 0, directs: 0, network: 0, inviter: inviterId, wallet: wallet };
             await set(userRef, data);
             await set(ref(db, 'users_by_id/' + newId), { wallet: wallet, inviter: inviterId });
+            await updateTeamCounts(inviterId);
         }
         currentUserData = data;
         updateUI(data);
@@ -145,12 +184,15 @@
     }
 
     function updateUI(data) {
-        document.getElementById('displayId').innerText = data.id;
-        document.getElementById('userLvl').innerText = data.level;
-        document.getElementById('totTeam').innerText = data.network;
-        document.getElementById('dirTeam').innerText = data.directs;
-        document.getElementById('repTot').innerText = data.network;
-        document.getElementById('refUrl').innerText = `https://chain-rush-pro.vercel.app/?ref=${data.id}`;
+        onValue(ref(db, 'users_by_wallet/' + data.wallet), (snapshot) => {
+            const updatedData = snapshot.val();
+            document.getElementById('displayId').innerText = updatedData.id;
+            document.getElementById('userLvl').innerText = updatedData.level;
+            document.getElementById('totTeam').innerText = updatedData.network;
+            document.getElementById('dirTeam').innerText = updatedData.directs;
+            document.getElementById('repTot').innerText = updatedData.network;
+            document.getElementById('refUrl').innerText = `https://chain-rush-pro.vercel.app/?ref=${updatedData.id}`;
+        });
     }
 
     function renderLevels(current) {
@@ -159,17 +201,10 @@
         for (let i = 1; i <= 12; i++) {
             let price = 30 * Math.pow(2, i - 1);
             let active = i <= current;
-            cont.innerHTML += `
-                <div class="level-card ${active ? 'active-lvl' : ''}">
-                    <h3>LEVEL ${i}</h3>
-                    <p>$${price}</p>
-                    <button class="buy-btn" style="background:${active ? '#2ecc71' : '#00c6ff'}" 
-                        onclick="handlePurchase(${i}, ${price})">${active ? 'ACTIVE (LIFE-TIME)' : 'UPGRADE NOW'}</button>
-                </div>`;
+            cont.innerHTML += `<div class="level-card ${active ? 'active-lvl' : ''}"><h3>LEVEL ${i}</h3><p>$${price}</p><button class="buy-btn" style="background:${active ? '#2ecc71' : '#00c6ff'}" onclick="handlePurchase(${i}, ${price})">${active ? 'ACTIVE (LIFE-TIME)' : 'UPGRADE NOW'}</button></div>`;
         }
     }
 
-    // --- SMART DISTRIBUTION LOGIC ---
     async function findQualifiedUpliner(startInviterId, lvl) {
         let currentInviter = startInviterId;
         while(currentInviter) {
@@ -178,7 +213,6 @@
             const userWall = snap.val().wallet;
             const userSnap = await get(ref(db, 'users_by_wallet/' + userWall));
             const userData = userSnap.val();
-            
             if(userData && userData.level >= lvl) return userData.wallet;
             currentInviter = userData.inviter;
         }
@@ -188,35 +222,17 @@
     window.handlePurchase = async (lvl, price) => {
         if (!currentUserData) return alert("Connect Wallet!");
         if (lvl <= currentUserData.level) return alert("Level already active!");
-        if (lvl !== currentUserData.level + 1 && currentUserData.wallet.toLowerCase() !== ownerWallet.toLowerCase()) {
-            return alert("Please upgrade levels step-by-step!");
-        }
-
-        if (currentUserData.wallet.toLowerCase() === ownerWallet.toLowerCase()) {
-            await update(ref(db, 'users_by_wallet/' + currentUserData.wallet), { level: lvl });
-            location.reload(); return;
-        }
-
+        if (lvl !== currentUserData.level + 1 && currentUserData.wallet.toLowerCase() !== ownerWallet.toLowerCase()) return alert("Please upgrade levels step-by-step!");
+        if (currentUserData.wallet.toLowerCase() === ownerWallet.toLowerCase()) { await update(ref(db, 'users_by_wallet/' + currentUserData.wallet), { level: lvl }); location.reload(); return; }
         try {
             const provider = new ethers.providers.Web3Provider(window.ethereum);
             const signer = provider.getSigner();
             const contract = new ethers.Contract(usdtAddress, usdtAbi, signer);
-            
-            // Payments
-            const feeAmt = price * 0.10;
-            const directAmt = price * 0.50;
-            const levelAmt = price * 0.10;
-
+            const feeAmt = price * 0.10; const directAmt = price * 0.50; const levelAmt = price * 0.10;
             alert("Processing Payment Distribution (90% to Team)...");
-            
-            // 1. Admin Fee (10%)
             await (await contract.transfer(ownerWallet, ethers.utils.parseUnits(feeAmt.toFixed(2), 18))).wait();
-            
-            // 2. Direct Sponsor (50%)
             const directWallet = await findQualifiedUpliner(currentUserData.inviter, lvl);
             await (await contract.transfer(directWallet, ethers.utils.parseUnits(directAmt.toFixed(2), 18))).wait();
-
-            // 3. 4-Level Upliners (10% each)
             let nextInviter = (await get(ref(db, 'users_by_id/' + currentUserData.inviter))).val()?.inviter;
             for(let i=0; i<4; i++) {
                 const upWallet = await findQualifiedUpliner(nextInviter, lvl);
@@ -224,7 +240,6 @@
                 const nextSnap = await get(ref(db, 'users_by_wallet/' + upWallet));
                 nextInviter = nextSnap.val()?.inviter;
             }
-
             await update(ref(db, 'users_by_wallet/' + currentUserData.wallet), { level: lvl });
             alert("Upgrade Successful! Lifetime Active.");
             location.reload();
@@ -235,12 +250,10 @@
         const tid = document.getElementById('giftTarget').value;
         const tlvl = parseInt(document.getElementById('giftLevel').value);
         const idSnap = await get(ref(db, 'users_by_id/' + tid));
-        
         if (idSnap.exists()) {
             const userWall = idSnap.val().wallet;
             const userSnap = await get(ref(db, 'users_by_wallet/' + userWall));
             if(tlvl !== userSnap.val().level + 1) return alert("Gift levels step-by-step!");
-            
             await update(ref(db, 'users_by_wallet/' + userWall), { level: tlvl });
             alert("Gifted Successfully!");
         } else { alert("User ID not found!"); }
@@ -250,16 +263,10 @@
         const snap = await get(ref(db, 'users_by_wallet'));
         const listDiv = document.getElementById('fullTeamIds');
         listDiv.innerHTML = "";
-        Object.values(snap.val()).forEach(u => {
-            listDiv.innerHTML += `ID: ${u.id} | Lvl: ${u.level} | Wallet: ${u.wallet.substring(0,6)}...<br>`;
-        });
+        Object.values(snap.val()).forEach(u => { listDiv.innerHTML += `ID: ${u.id} | Lvl: ${u.level} | Wallet: ${u.wallet.substring(0,6)}...<br>`; });
     }
 
-    window.copyRef = () => {
-        const link = document.getElementById('refUrl').innerText;
-        navigator.clipboard.writeText(link);
-        alert("Copied!");
-    };
+    window.copyRef = () => { const link = document.getElementById('refUrl').innerText; navigator.clipboard.writeText(link); alert("Copied!"); };
 </script>
 </body>
 </html>
