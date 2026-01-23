@@ -4,16 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ChainRush Pro - Official</title>
-    <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js" type="application/javascript"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
     <style>
         :root { --primary: #00c6ff; --gold: #f39c12; --dark: #0a0a0a; }
         body { background-color: var(--dark); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; text-align: center; }
         
         #notification-container { position: fixed; top: 10px; left: 10px; z-index: 10000; width: 260px; }
-        .noti-card { padding: 12px; border-radius: 12px; margin-bottom: 8px; display: flex; align-items: center; animation: slideIn 0.5s ease; border: 1px solid rgba(255,255,255,0.2); transition: 0.5s; }
+        .noti-card { padding: 12px; border-radius: 12px; margin-bottom: 8px; display: flex; align-items: center; animation: slideIn 0.5s ease; border: 1px solid rgba(255,255,255,0.2); font-size: 11px; }
 
         .header { background: linear-gradient(135deg, #1e3c72, #2a5298, #f39c12); padding: 40px 20px; border-bottom: 4px solid var(--gold); border-radius: 0 0 30px 30px; }
-        .wallet-btn { background: #00c6ff; border: none; padding: 12px 25px; border-radius: 50px; color: white; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(0,198,255,0.4); }
+        .wallet-btn { background: #00c6ff; border: none; padding: 12px 25px; border-radius: 50px; color: white; font-weight: bold; cursor: pointer; }
         .user-id { font-size: 28px; font-weight: bold; color: var(--gold); margin-top: 10px; }
 
         .admin-panel { background: #151515; border: 2px solid #e74c3c; margin: 20px; padding: 20px; border-radius: 20px; }
@@ -25,21 +25,19 @@
 
         .level-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 20px; }
         .level-card { padding: 25px 10px; border-radius: 25px; position: relative; overflow: hidden; border: 2px solid rgba(255,255,255,0.1); }
-        .level-card::after { content: "ChainRush Pro"; position: absolute; opacity: 0.1; font-size: 10px; transform: rotate(-30deg); top: 40%; left: 5%; color: white; font-weight: bold; }
-
-        /* Plans Colors */
+        
+        /* Plan Colors */
         .p-1 { background: linear-gradient(45deg, #FF512F, #DD2476); } .p-2 { background: linear-gradient(45deg, #1D976C, #93F9B9); }
         .p-3 { background: linear-gradient(45deg, #00B4DB, #0083B0); } .p-4 { background: linear-gradient(45deg, #8E2DE2, #4A00E0); }
         .p-5 { background: linear-gradient(45deg, #f953c6, #b91d73); } .p-6 { background: linear-gradient(45deg, #f7971e, #ffd200); }
         .p-7 { background: linear-gradient(45deg, #3a1c71, #ffaf7b); } .p-8 { background: linear-gradient(45deg, #4ca1af, #2c3e50); }
-        .p-9 { background: linear-gradient(45deg, #c31432, #240b36); } .p-10 { background: linear-gradient(45deg, #11998e, #38ef7d); }
-        .p-11 { background: linear-gradient(45deg, #0575E6, #021B79); } .p-12 { background: linear-gradient(45deg, #232526, #414345); border: 2px solid var(--gold); }
+        .p-12 { border: 2px solid var(--gold); background: #222; }
 
         .buy-btn { width: 100%; padding: 12px; border-radius: 10px; border: none; font-weight: bold; margin-top: 10px; cursor: pointer; background: rgba(0,0,0,0.5); color: white; }
-        .locked { opacity: 0.2; filter: grayscale(1); cursor: not-allowed; }
+        .locked { opacity: 0.2; filter: grayscale(1); }
 
         .report-box { background: #111; margin: 0 20px; border-radius: 15px; border: 1px solid var(--primary); padding: 15px; text-align: left; }
-        .report-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px dashed #333; font-size: 13px; }
+        .report-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed #333; font-size: 13px; }
 
         @keyframes slideIn { from { transform: translateX(-100%); } to { transform: translateX(0); } }
     </style>
@@ -50,28 +48,28 @@
 
     <div class="header">
         <button class="wallet-btn" id="connectBtn" onclick="connectWallet()">Connect Wallet</button>
-        <p id="adminView" style="font-size: 10px; display:none; margin-top:10px;">0x40642a42Eb9EDbf936C5DA1AE71E5d762A3B0f46</p>
+        <p id="adminAddr" style="font-size: 10px; display:none; margin-top:10px;">Admin Wallet: 0x4064...0f46</p>
         <div class="user-id">ID: <span id="displayId">4970</span></div>
         <img src="https://i.pravatar.cc/150?u=4970" style="width:100px; border-radius:50%; border:3px solid var(--gold);">
     </div>
 
     <div id="adminPanel" class="admin-panel" style="display:none;">
-        <h3 style="color:#e74c3c;">ADMIN: GIFT PLAN</h3>
+        <h3>ADMIN: GIFT PLAN</h3>
         <input type="text" id="giftTarget" placeholder="User ID">
         <select id="giftLevel">
             <script>for(let i=1;i<=12;i++) document.write(`<option value="${i}">Plan ${i} ($${30 * Math.pow(2, i-1)})</option>`);</script>
         </select>
-        <button class="buy-btn" style="background:#e74c3c;" onclick="processGift()">GIFT NOW</button>
+        <button class="buy-btn" style="background:#e74c3c; opacity:1;" onclick="processGift()">GIFT NOW</button>
     </div>
 
     <div class="stats-grid">
         <div class="stat-card"><div>Active Plan</div><div class="stat-val" id="userLvl">0</div></div>
-        <div class="stat-card"><div>Direct Team</div><div class="stat-val" id="dirTeamCount">0</div></div>
+        <div class="stat-card"><div>Direct Team</div><div class="stat-val" id="dirCount">0</div></div>
     </div>
 
     <div class="report-box">
         <b style="color:var(--primary)">DIRECT TEAM & PLANS</b>
-        <div id="teamListContainer"></div>
+        <div id="teamList"></div>
         <div class="report-row" style="border:none;"><b>Total Network:</b> <span id="totNet">0</span></div>
     </div>
 
@@ -99,24 +97,10 @@
 
     if(isAdmin) {
         document.getElementById('adminPanel').style.display = 'block';
-        document.getElementById('adminView').style.display = 'block';
+        document.getElementById('adminAddr').style.display = 'block';
     }
 
-    // Connect Wallet Function
-    window.connectWallet = async () => {
-        if (window.ethereum) {
-            try {
-                const provider = new ethers.providers.Web3Provider(window.ethereum);
-                await provider.send("eth_requestAccounts", []);
-                const signer = provider.getSigner();
-                const address = await signer.getAddress();
-                document.getElementById('connectBtn').innerText = address.substring(0,6) + "..." + address.substring(38);
-                alert("Wallet Connected!");
-            } catch (error) { alert("Connection Error"); }
-        } else { alert("Please install MetaMask or Trust Wallet!"); }
-    };
-
-    // Load Data
+    // Load Main Data
     onValue(ref(db, 'users/' + myId), (snap) => {
         const data = snap.val() || { level: isAdmin ? 12 : 0, network: 0 };
         document.getElementById('userLvl').innerText = data.level;
@@ -124,17 +108,17 @@
         renderLevels(data.level);
     });
 
-    // Team List
+    // Load Team
     const teamRef = query(ref(db, 'users'), orderByChild('inviter'), equalTo(myId));
     onValue(teamRef, (snap) => {
-        const cont = document.getElementById('teamListContainer');
-        cont.innerHTML = "";
+        const list = document.getElementById('teamList');
+        list.innerHTML = "";
         let count = 0;
         snap.forEach(c => {
             count++;
-            cont.innerHTML += `<div class="report-row"><span>ID: ${c.key}</span><span style="color:var(--gold)">Plan ${c.val().level} Active</span></div>`;
+            list.innerHTML += `<div class="report-row"><span>ID: ${c.key}</span><span style="color:var(--gold)">Plan ${c.val().level} Active</span></div>`;
         });
-        document.getElementById('dirTeamCount').innerText = count;
+        document.getElementById('dirCount').innerText = count;
     });
 
     function renderLevels(current) {
@@ -145,35 +129,46 @@
             let active = i <= current || isAdmin;
             let isNext = i === (current + 1);
             cont.innerHTML += `
-                <div class="level-card p-${i} ${active ? '' : (isNext ? '' : 'locked')}">
+                <div class="level-card p-${i > 8 ? '12' : i} ${active ? '' : (isNext ? '' : 'locked')}">
                     <h3>PLAN ${i}</h3>
                     <p>$${price}</p>
-                    ${active ? '<button class="buy-btn">PURCHASED</button>' : 
-                    (isNext ? `<button class="buy-btn" onclick="buyPlan(${i})">ACTIVATE</button>` : '<button class="buy-btn">LOCKED</button>')}
+                    ${active ? '<button class="buy-btn">ACTIVE ✅</button>' : 
+                    (isNext ? `<button class="buy-btn" onclick="window.buyPlan(${i})">ACTIVATE</button>` : '<button class="buy-btn">LOCKED 🔒</button>')}
                 </div>`;
         }
     }
 
+    // Global Functions
+    window.connectWallet = async () => {
+        if (window.ethereum) {
+            try {
+                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                document.getElementById('connectBtn').innerText = accounts[0].substring(0,6) + "..." + accounts[0].substring(38);
+                alert("Connected!");
+            } catch (e) { alert("Wallet error!"); }
+        } else { alert("Install Trust Wallet/MetaMask!"); }
+    };
+
     window.buyPlan = async (n) => {
         if(confirm(`Activate Plan ${n}?`)) {
             await update(ref(db, 'users/' + myId), { level: n });
-            triggerNoti(myId, n);
+            showNoti(myId, n);
         }
     };
 
     window.processGift = async () => {
         const tid = document.getElementById('giftTarget').value;
         const tlvl = parseInt(document.getElementById('giftLevel').value);
+        if(!tid) return alert("Enter ID");
         await update(ref(db, 'users/' + tid), { level: tlvl });
-        alert("Plan Gifted!");
+        alert("Success!");
     };
 
-    // Random Notifications
-    function triggerNoti(id, l) {
+    function showNoti(id, l) {
         const div = document.createElement('div');
         div.className = 'noti-card';
         div.style.background = ['#f39c12', '#00c6ff', '#2ecc71', '#e74c3c'][Math.floor(Math.random()*4)];
-        div.innerHTML = `<div style="color:white"><b>ID: ${id}</b> Activated <b>Plan ${l}</b><br>Lifetime Access Success!</div>`;
+        div.innerHTML = `<div style="color:white"><b>ID: ${id}</b> Active <b>Plan ${l}</b><br>No Recycle Access!</div>`;
         document.getElementById('notification-container').appendChild(div);
         setTimeout(() => div.remove(), 4000);
     }
@@ -181,10 +176,9 @@
     setInterval(() => {
         const rid = Math.floor(1000 + Math.random() * 9000);
         const rl = Math.floor(1 + Math.random() * 12);
-        triggerNoti(rid, rl);
+        showNoti(rid, rl);
     }, 5000);
 
 </script>
 </body>
 </html>
-
