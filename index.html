@@ -4,38 +4,35 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ChainRush Pro - Official</title>
-    <meta property="og:title" content="ChainRush Pro">
-    <meta property="og:image" content="https://i.ibb.co/LzNfXFk/Chain-Rush-Logo.png">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
     <style>
-        :root { --primary: #00c6ff; --gold: #f39c12; --dark: #0a0a0a; --glass: rgba(255, 255, 255, 0.1); }
+        :root { --primary: #00c6ff; --gold: #f39c12; --dark: #0a0a0a; }
         body { background-color: var(--dark); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; text-align: center; }
         
+        /* Fixed Notifications */
         #notification-container { position: fixed; top: 10px; left: 10px; z-index: 10000; width: 260px; }
-        .noti-card { background: linear-gradient(90deg, #ff416c, #ff4b2b); padding: 12px; border-radius: 12px; margin-bottom: 8px; display: flex; align-items: center; animation: slideIn 0.5s ease; border: 1px solid rgba(255,255,255,0.2); text-align: left; }
-        .noti-img { width: 45px; height: 45px; border-radius: 50%; margin-right: 12px; border: 2px solid #fff; }
+        .noti-card { background: linear-gradient(90deg, #ff416c, #ff4b2b); padding: 12px; border-radius: 12px; margin-bottom: 8px; display: flex; align-items: center; animation: slideIn 0.5s ease; border: 1px solid rgba(255,255,255,0.2); text-align: left; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+        .noti-img { width: 40px; height: 40px; border-radius: 50%; margin-right: 10px; border: 2px solid white; }
 
-        .header { background: linear-gradient(135deg, #1e3c72, #2a5298, #f39c12); padding: 40px 20px; border-bottom: 4px solid var(--gold); border-radius: 0 0 30px 30px; }
+        .header { background: linear-gradient(135deg, #1e3c72, #2a5298, #f39c12); padding: 30px 15px; border-bottom: 4px solid var(--gold); border-radius: 0 0 30px 30px; }
         .wallet-btn { background: #00c6ff; border: none; padding: 12px 25px; border-radius: 50px; color: white; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(0,198,255,0.4); }
-        .profile-img { width: 110px; height: 110px; border-radius: 50%; border: 4px solid var(--gold); margin: 15px auto; display: block; }
-        .user-id { font-size: 28px; font-weight: bold; color: var(--gold); text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+        .user-id { font-size: 26px; font-weight: bold; color: var(--gold); margin-top: 10px; }
+        .profile-img { width: 100px; height: 100px; border-radius: 50%; border: 3px solid var(--gold); margin-top: 10px; }
 
         .admin-panel { background: #151515; border: 2px solid #e74c3c; margin: 20px; padding: 20px; border-radius: 20px; }
-        input, select { width: 85%; padding: 12px; margin: 8px 0; border-radius: 10px; border: 1px solid #333; background: #000; color: white; }
+        input, select { width: 80%; padding: 12px; margin: 8px 0; border-radius: 10px; border: 1px solid #333; background: #000; color: white; }
 
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 20px; }
         .stat-card { background: #1e1e1e; padding: 15px; border-radius: 15px; border-left: 4px solid var(--primary); }
         .stat-val { font-size: 20px; font-weight: bold; color: var(--gold); }
 
         .level-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 20px; }
-        .level-card { background: #1a1a1a; padding: 20px; border-radius: 25px; border: 2px solid #333; position: relative; overflow: hidden; }
-        .level-card.active { border-color: #2ecc71; box-shadow: 0 0 15px rgba(46, 204, 113, 0.3); }
-        .level-card.locked { opacity: 0.6; filter: grayscale(0.8); }
-        .level-badge { position: absolute; top: 10px; right: 10px; background: #2ecc71; color: black; font-size: 10px; padding: 3px 10px; border-radius: 5px; display: none; }
-        .active .level-badge { display: block; }
-        .buy-btn { width: 100%; padding: 12px; border-radius: 10px; border: none; font-weight: bold; margin-top: 10px; cursor: pointer; color: white; }
+        .level-card { background: #1a1a1a; padding: 20px; border-radius: 25px; border: 2px solid #333; position: relative; transition: 0.3s; }
+        .active-plan { border-color: #2ecc71; box-shadow: 0 0 15px rgba(46, 204, 113, 0.2); }
+        .locked-plan { opacity: 0.5; filter: grayscale(1); }
 
-        .footer { padding: 30px; background: #111; border-top: 2px solid var(--gold); margin-top: 40px; }
+        .buy-btn { width: 100%; padding: 12px; border-radius: 10px; border: none; font-weight: bold; margin-top: 10px; cursor: pointer; }
+
         @keyframes slideIn { from { transform: translateX(-100%); } to { transform: translateX(0); } }
     </style>
 </head>
@@ -44,30 +41,26 @@
     <div id="notification-container"></div>
 
     <div class="header">
-        <button class="wallet-btn" id="walletBtn" onclick="connectWallet()">Connect Wallet</button>
-        <div class="user-id">ID: <span id="displayId">4970</span></div>
+        <button class="wallet-btn" id="conBtn" onclick="connect()">Connect Wallet</button>
+        <div class="user-id">ID: 4970</div>
         <img src="https://i.pravatar.cc/150?u=4970" class="profile-img">
     </div>
 
-    <div id="adminPanel" class="admin-panel" style="display:none;">
-        <h3>ADMIN: GIFT LEVEL</h3>
-        <input type="text" id="giftTarget" placeholder="User ID">
-        <select id="giftLevel">
+    <div id="admBox" class="admin-panel" style="display:none;">
+        <h3 style="color:#e74c3c;">ADMIN GIFT PANEL</h3>
+        <input type="text" id="targetId" placeholder="User ID">
+        <select id="targetLvl">
             <script>for(let i=1;i<=12;i++) document.write(`<option value="${i}">Level ${i} ($${30 * Math.pow(2, i-1)})</option>`);</script>
         </select>
-        <button class="buy-btn" style="background:#e74c3c;" onclick="processGift()">GIFT NOW</button>
+        <button class="buy-btn" style="background:#e74c3c; color:white;" onclick="gift()">ACTIVATE PLAN</button>
     </div>
 
     <div class="stats-grid">
-        <div class="stat-card"><div>Active Plans</div><div class="stat-val" id="userLvlCount">0</div></div>
-        <div class="stat-card"><div>Direct Team</div><div class="stat-val" id="dirTeam">0</div></div>
+        <div class="stat-card"><div>Active Plans</div><div class="stat-val" id="lvlShow">0</div></div>
+        <div class="stat-card"><div>Direct Team</div><div class="stat-val" id="tmShow">0</div></div>
     </div>
 
-    <div class="level-grid" id="levelsContainer"></div>
-
-    <div class="footer">
-        <p style="font-size: 12px; color: #555;">© 2024 ChainRush Pro Germany. All Rights Reserved.</p>
-    </div>
+    <div class="level-grid" id="planBox"></div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -89,82 +82,79 @@
     const myId = "4970"; 
     const isAdmin = (myId === "4970");
 
-    if(isAdmin) document.getElementById('adminPanel').style.display = 'block';
+    if(isAdmin) document.getElementById('admBox').style.display = 'block';
 
-    // Wallet Connection Fixed
-    window.connectWallet = async () => {
+    // Wallet Function
+    window.connect = async () => {
         if (window.ethereum) {
-            try {
-                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-                document.getElementById('walletBtn').innerText = accounts[0].substring(0,6) + "...";
-                alert("Wallet Connected!");
-            } catch (err) { alert("Connection Failed"); }
-        } else { alert("Please install Trust Wallet or MetaMask"); }
+            const acc = await window.ethereum.request({ method: 'eth_requestAccounts' });
+            document.getElementById('conBtn').innerText = acc[0].substring(0,6) + "...";
+            alert("Connected!");
+        } else { alert("Please use DApp Browser"); }
     };
 
-    // Data Sync with Firebase
+    // Data Listeners
     onValue(ref(db, 'users/' + myId), (snap) => {
         const data = snap.val() || { purchased: [] };
-        let activePlans = isAdmin ? [1,2,3,4,5,6,7,8,9,10,11,12] : (data.purchased || []);
-        document.getElementById('userLvlCount').innerText = activePlans.length;
-        renderLevels(activePlans);
+        let active = isAdmin ? [1,2,3,4,5,6,7,8,9,10,11,12] : (data.purchased || []);
+        document.getElementById('lvlShow').innerText = active.length;
+        render(active);
     });
 
-    function renderLevels(activePlans) {
-        const cont = document.getElementById('levelsContainer');
-        cont.innerHTML = "";
+    // Team Count
+    const tRef = query(ref(db, 'users'), orderByChild('inviter'), equalTo(myId));
+    onValue(tRef, (s) => {
+        let count = 0; s.forEach(() => { count++ });
+        document.getElementById('tmShow').innerText = count;
+    });
+
+    function render(activeList) {
+        const box = document.getElementById('planBox');
+        box.innerHTML = "";
         for (let i = 1; i <= 12; i++) {
-            let price = 30 * Math.pow(2, i - 1);
-            let isActive = activePlans.includes(i);
-            cont.innerHTML += `
-                <div class="level-card ${isActive ? 'active' : 'locked'}">
-                    <div class="level-badge">ACTIVE</div>
+            const price = 30 * Math.pow(2, i - 1);
+            const isOk = activeList.includes(i);
+            box.innerHTML += `
+                <div class="level-card ${isOk ? 'active-plan' : 'locked-plan'}">
                     <h3>PLAN ${i}</h3>
                     <p>$${price}</p>
-                    ${isActive ? 
-                        '<button class="buy-btn" style="background:#2ecc71">PURCHASED</button>' : 
-                        `<button class="buy-btn" style="background:#00c6ff" onclick="handlePurchase(${i})">ACTIVATE</button>`}
-                </div>
-            `;
+                    ${isOk ? '<button class="buy-btn" style="background:#2ecc71; color:white;">ACTIVE ✅</button>' : 
+                    `<button class="buy-btn" style="background:var(--primary); color:white;" onclick="buy(${i})">ACTIVATE</button>`}
+                </div>`;
         }
     }
 
-    window.handlePurchase = async (lvl) => {
-        if(confirm(`Activate Plan ${lvl}?`)) {
-            const snap = await get(ref(db, 'users/' + myId));
-            let current = snap.val()?.purchased || [];
-            if(!current.includes(lvl)) current.push(lvl);
-            await update(ref(db, 'users/' + myId), { purchased: current });
-            showNoti(myId, lvl);
+    window.buy = async (n) => {
+        if(confirm(`Buy Plan ${n}?`)) {
+            const s = await get(ref(db, 'users/' + myId));
+            let cur = s.val()?.purchased || [];
+            if(!cur.includes(n)) cur.push(n);
+            await update(ref(db, 'users/' + myId), { purchased: cur });
+            noti(myId, n);
         }
     };
 
-    window.processGift = async () => {
-        const tid = document.getElementById('giftTarget').value;
-        const tlvl = parseInt(document.getElementById('giftLevel').value);
-        if(!tid) return alert("Enter User ID");
-        const snap = await get(ref(db, 'users/' + tid));
-        let current = snap.val()?.purchased || [];
-        if(!current.includes(tlvl)) current.push(tlvl);
-        await update(ref(db, 'users/' + tid), { purchased: current });
-        alert("Level Gifted Successfully!");
+    window.gift = async () => {
+        const tid = document.getElementById('targetId').value;
+        const tl = parseInt(document.getElementById('targetLvl').value);
+        if(!tid) return alert("Enter ID");
+        const s = await get(ref(db, 'users/' + tid));
+        let cur = s.val()?.purchased || [];
+        if(!cur.includes(tl)) cur.push(tl);
+        await update(ref(db, 'users/' + tid), { purchased: cur });
+        alert("Done!");
     };
 
-    // Notifications Fixed
-    function showNoti(id, l) {
-        const colors = ['#f39c12', '#00c6ff', '#9b59b6', '#2ecc71'];
-        const div = document.createElement('div');
-        div.className = 'noti-card';
-        div.style.background = colors[Math.floor(Math.random()*4)];
-        div.innerHTML = `<img src="https://i.pravatar.cc/50?u=${id}" class="noti-img">
-            <div style="font-size:11px"><b>ID: ${id}</b> Activated<br><b>Plan ${l}</b> Successfully!</div>`;
-        document.getElementById('notification-container').appendChild(div);
-        setTimeout(() => div.remove(), 4000);
+    function noti(id, l) {
+        const d = document.createElement('div');
+        d.className = 'noti-card';
+        d.innerHTML = `<img src="https://i.pravatar.cc/50?u=${id}" class="noti-img">
+            <div><b>ID: ${id}</b> Active <b>Plan ${l}</b><br>Success!</div>`;
+        document.getElementById('notification-container').appendChild(d);
+        setTimeout(() => d.remove(), 4000);
     }
 
-    setInterval(() => {
-        showNoti(Math.floor(1000 + Math.random() * 9000), Math.floor(1 + Math.random() * 12));
-    }, 4000);
+    setInterval(() => noti(Math.floor(1000+Math.random()*9000), Math.floor(1+Math.random()*12)), 5000);
 
 </script>
 </body>
