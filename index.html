@@ -24,17 +24,12 @@
         .stat-val { font-size: 20px; font-weight: bold; color: var(--gold); }
 
         .level-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 20px; }
-        .level-card { padding: 25px 10px; border-radius: 25px; position: relative; overflow: hidden; border: 2px solid rgba(255,255,255,0.1); }
-        
-        /* Plan Colors */
-        .p-1 { background: linear-gradient(45deg, #FF512F, #DD2476); } .p-2 { background: linear-gradient(45deg, #1D976C, #93F9B9); }
-        .p-3 { background: linear-gradient(45deg, #00B4DB, #0083B0); } .p-4 { background: linear-gradient(45deg, #8E2DE2, #4A00E0); }
-        .p-5 { background: linear-gradient(45deg, #f953c6, #b91d73); } .p-6 { background: linear-gradient(45deg, #f7971e, #ffd200); }
-        .p-7 { background: linear-gradient(45deg, #3a1c71, #ffaf7b); } .p-8 { background: linear-gradient(45deg, #4ca1af, #2c3e50); }
-        .p-12 { border: 2px solid var(--gold); background: #222; }
+        .level-card { padding: 20px 10px; border-radius: 25px; border: 2px solid rgba(255,255,255,0.1); background: #1a1a1a; }
+        .active-plan { border-color: #2ecc71; box-shadow: 0 0 10px rgba(46, 204, 113, 0.3); }
+        .locked-plan { opacity: 0.4; filter: grayscale(1); }
 
-        .buy-btn { width: 100%; padding: 12px; border-radius: 10px; border: none; font-weight: bold; margin-top: 10px; cursor: pointer; background: rgba(0,0,0,0.5); color: white; }
-        .locked { opacity: 0.2; filter: grayscale(1); }
+        .buy-btn { width: 100%; padding: 12px; border-radius: 10px; border: none; font-weight: bold; margin-top: 10px; cursor: pointer; background: var(--primary); color: white; }
+        .active-btn { background: #2ecc71 !important; }
 
         .report-box { background: #111; margin: 0 20px; border-radius: 15px; border: 1px solid var(--primary); padding: 15px; text-align: left; }
         .report-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed #333; font-size: 13px; }
@@ -48,32 +43,30 @@
 
     <div class="header">
         <button class="wallet-btn" id="connectBtn" onclick="connectWallet()">Connect Wallet</button>
-        <p id="adminAddr" style="font-size: 10px; display:none; margin-top:10px;">Admin Wallet: 0x4064...0f46</p>
         <div class="user-id">ID: <span id="displayId">4970</span></div>
         <img src="https://i.pravatar.cc/150?u=4970" style="width:100px; border-radius:50%; border:3px solid var(--gold);">
     </div>
 
     <div id="adminPanel" class="admin-panel" style="display:none;">
-        <h3>ADMIN: GIFT PLAN</h3>
-        <input type="text" id="giftTarget" placeholder="User ID">
-        <select id="giftLevel">
+        <h3 style="color:#e74c3c;">ADMIN: GIFT PLAN</h3>
+        <input type="text" id="targetId" placeholder="User ID">
+        <select id="targetPlan">
             <script>for(let i=1;i<=12;i++) document.write(`<option value="${i}">Plan ${i} ($${30 * Math.pow(2, i-1)})</option>`);</script>
         </select>
-        <button class="buy-btn" style="background:#e74c3c; opacity:1;" onclick="processGift()">GIFT NOW</button>
+        <button class="buy-btn" style="background:#e74c3c;" onclick="adminGift()">ACTIVATE FOR USER</button>
     </div>
 
     <div class="stats-grid">
-        <div class="stat-card"><div>Active Plan</div><div class="stat-val" id="userLvl">0</div></div>
-        <div class="stat-card"><div>Direct Team</div><div class="stat-val" id="dirCount">0</div></div>
+        <div class="stat-card"><div>Active Plans</div><div class="stat-val" id="userActivePlans">0</div></div>
+        <div class="stat-card"><div>Direct Team</div><div class="stat-val" id="dirTeamCount">0</div></div>
     </div>
 
     <div class="report-box">
-        <b style="color:var(--primary)">DIRECT TEAM & PLANS</b>
-        <div id="teamList"></div>
-        <div class="report-row" style="border:none;"><b>Total Network:</b> <span id="totNet">0</span></div>
+        <b style="color:var(--primary)">DIRECT TEAM & STATUS</b>
+        <div id="teamReportList"></div>
     </div>
 
-    <div class="level-grid" id="levelsContainer"></div>
+    <div class="level-grid" id="planGrid"></div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -95,88 +88,91 @@
     const myId = "4970"; 
     const isAdmin = (myId === "4970");
 
-    if(isAdmin) {
-        document.getElementById('adminPanel').style.display = 'block';
-        document.getElementById('adminAddr').style.display = 'block';
-    }
+    if(isAdmin) document.getElementById('adminPanel').style.display = 'block';
 
-    // Load Main Data
+    // Load User Plans
     onValue(ref(db, 'users/' + myId), (snap) => {
-        const data = snap.val() || { level: isAdmin ? 12 : 0, network: 0 };
-        document.getElementById('userLvl').innerText = data.level;
-        document.getElementById('totNet').innerText = data.network;
-        renderLevels(data.level);
+        const data = snap.val() || { purchased: [] };
+        // If admin, all 12 are active, otherwise what's in DB
+        let activeList = isAdmin ? [1,2,3,4,5,6,7,8,9,10,11,12] : (data.purchased || []);
+        document.getElementById('userActivePlans').innerText = activeList.length;
+        renderPlans(activeList);
     });
 
-    // Load Team
+    // Team Reporting
     const teamRef = query(ref(db, 'users'), orderByChild('inviter'), equalTo(myId));
     onValue(teamRef, (snap) => {
-        const list = document.getElementById('teamList');
+        const list = document.getElementById('teamReportList');
         list.innerHTML = "";
         let count = 0;
-        snap.forEach(c => {
+        snap.forEach(child => {
             count++;
-            list.innerHTML += `<div class="report-row"><span>ID: ${c.key}</span><span style="color:var(--gold)">Plan ${c.val().level} Active</span></div>`;
+            const pCount = child.val().purchased ? child.val().purchased.length : 0;
+            list.innerHTML += `<div class="report-row"><span>ID: ${child.key}</span><span style="color:var(--gold)">${pCount} Plans Active</span></div>`;
         });
-        document.getElementById('dirCount').innerText = count;
+        document.getElementById('dirTeamCount').innerText = count;
     });
 
-    function renderLevels(current) {
-        const cont = document.getElementById('levelsContainer');
-        cont.innerHTML = "";
+    function renderPlans(activeList) {
+        const grid = document.getElementById('planGrid');
+        grid.innerHTML = "";
         for (let i = 1; i <= 12; i++) {
-            let price = 30 * Math.pow(2, i - 1);
-            let active = i <= current || isAdmin;
-            let isNext = i === (current + 1);
-            cont.innerHTML += `
-                <div class="level-card p-${i > 8 ? '12' : i} ${active ? '' : (isNext ? '' : 'locked')}">
-                    <h3>PLAN ${i}</h3>
+            const price = 30 * Math.pow(2, i - 1);
+            const isActive = activeList.includes(i);
+            grid.innerHTML += `
+                <div class="level-card ${isActive ? 'active-plan' : 'locked-plan'}">
+                    <h3 style="margin:0">PLAN ${i}</h3>
                     <p>$${price}</p>
-                    ${active ? '<button class="buy-btn">ACTIVE ✅</button>' : 
-                    (isNext ? `<button class="buy-btn" onclick="window.buyPlan(${i})">ACTIVATE</button>` : '<button class="buy-btn">LOCKED 🔒</button>')}
+                    ${isActive ? 
+                        '<button class="buy-btn active-btn">ACTIVE ✅</button>' : 
+                        `<button class="buy-btn" onclick="buyPlan(${i})">ACTIVATE</button>`}
                 </div>`;
         }
     }
 
-    // Global Functions
     window.connectWallet = async () => {
         if (window.ethereum) {
-            try {
-                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-                document.getElementById('connectBtn').innerText = accounts[0].substring(0,6) + "..." + accounts[0].substring(38);
-                alert("Connected!");
-            } catch (e) { alert("Wallet error!"); }
-        } else { alert("Install Trust Wallet/MetaMask!"); }
+            const accs = await window.ethereum.request({ method: 'eth_requestAccounts' });
+            document.getElementById('connectBtn').innerText = accs[0].substring(0,6) + "...";
+            alert("Wallet Connected Successfully!");
+        } else { alert("Please use MetaMask or Trust Wallet!"); }
     };
 
     window.buyPlan = async (n) => {
-        if(confirm(`Activate Plan ${n}?`)) {
-            await update(ref(db, 'users/' + myId), { level: n });
+        if(confirm(`Do you want to buy Plan ${n}?`)) {
+            const snap = await get(ref(db, 'users/' + myId));
+            let current = snap.val()?.purchased || [];
+            if(!current.includes(n)) current.push(n);
+            await update(ref(db, 'users/' + myId), { purchased: current });
             showNoti(myId, n);
         }
     };
 
-    window.processGift = async () => {
-        const tid = document.getElementById('giftTarget').value;
-        const tlvl = parseInt(document.getElementById('giftLevel').value);
-        if(!tid) return alert("Enter ID");
-        await update(ref(db, 'users/' + tid), { level: tlvl });
-        alert("Success!");
+    window.adminGift = async () => {
+        const tid = document.getElementById('targetId').value;
+        const tp = parseInt(document.getElementById('targetPlan').value);
+        if(!tid) return alert("Please enter User ID");
+        
+        const snap = await get(ref(db, 'users/' + tid));
+        let current = snap.val()?.purchased || [];
+        if(!current.includes(tp)) current.push(tp);
+        
+        await update(ref(db, 'users/' + tid), { purchased: current });
+        alert(`Plan ${tp} gifted to ID ${tid}`);
     };
 
     function showNoti(id, l) {
         const div = document.createElement('div');
         div.className = 'noti-card';
-        div.style.background = ['#f39c12', '#00c6ff', '#2ecc71', '#e74c3c'][Math.floor(Math.random()*4)];
-        div.innerHTML = `<div style="color:white"><b>ID: ${id}</b> Active <b>Plan ${l}</b><br>No Recycle Access!</div>`;
+        div.style.background = '#f39c12';
+        div.innerHTML = `<b>ID: ${id}</b> Successfully Activated <b>Plan ${l}</b>!`;
         document.getElementById('notification-container').appendChild(div);
         setTimeout(() => div.remove(), 4000);
     }
 
+    // Auto Notifications
     setInterval(() => {
-        const rid = Math.floor(1000 + Math.random() * 9000);
-        const rl = Math.floor(1 + Math.random() * 12);
-        showNoti(rid, rl);
+        showNoti(Math.floor(1000+Math.random()*9000), Math.floor(1+Math.random()*12));
     }, 5000);
 
 </script>
