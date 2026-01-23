@@ -12,7 +12,7 @@
         body { background-color: var(--dark); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; text-align: center; }
         
         #notification-container { position: fixed; top: 10px; left: 10px; z-index: 10000; width: 260px; }
-        .noti-card { background: linear-gradient(90deg, #ff416c, #ff4b2b); padding: 12px; border-radius: 12px; margin-bottom: 8px; display: flex; align-items: center; border: 1px solid rgba(255,255,255,0.2); animation: slideIn 0.5s ease; }
+        .noti-card { padding: 12px; border-radius: 12px; margin-bottom: 8px; display: flex; align-items: center; animation: slideIn 0.5s ease; transition: all 0.5s ease; }
         .noti-img { width: 45px; height: 45px; border-radius: 50%; margin-right: 12px; border: 2px solid #fff; }
 
         .header { background: linear-gradient(135deg, #1e3c72, #2a5298, #f39c12); padding: 40px 20px; border-bottom: 4px solid var(--gold); border-radius: 0 0 30px 30px; }
@@ -37,7 +37,7 @@
 
         .footer { padding: 30px; background: #111; border-top: 2px solid var(--gold); margin-top: 40px; text-align: left; font-size: 13px; line-height: 1.6; color: #ccc; }
         .policy-tag { color: var(--gold); font-weight: bold; display: block; margin-top: 10px; }
-        @keyframes slideIn { from { transform: translateX(-100%); } to { transform: translateX(0); } }
+        @keyframes slideIn { from { transform: translateX(-100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
     </style>
 </head>
 <body>
@@ -151,31 +151,23 @@
         }
     }
 
-    // Advanced Dynamic Search & Multi-Level Payment
+    // Payment Logic 
     async function distributePayment(startId, lvl, price, signer) {
         const abi = ["function transfer(address to, uint256 amount) public returns (bool)"];
         const contract = new ethers.Contract(usdtAddress, abi, signer);
+        let ownerFee = price * 0.10;
+        let directAmt = price * 0.50;
+        let levelAmt = price * 0.10;
         
-        let ownerFee = price * 0.10; // 10% Owner Fee
-        let directAmt = price * 0.50; // 50% Direct
-        let levelAmt = price * 0.10; // 10% for 4 levels
-        
-        // 1. Pay Owner Fee (Hidden)
         await contract.transfer(ownerWallet, ethers.utils.parseUnits(ownerFee.toString(), 18));
-
-        let currentId = startId;
-        let levelsPaid = 0;
-
-        // 2. Direct 50%
-        let recipient = await findQualified(currentId, lvl);
+        let recipient = await findQualified(startId, lvl);
         await contract.transfer(recipient, ethers.utils.parseUnits(directAmt.toString(), 18));
         
-        // 3. Next 4 Qualified Upliners 10% Each
-        let nextId = (await get(ref(db, 'users/' + currentId)))?.val()?.inviter;
+        let nextId = (await get(ref(db, 'users/' + startId)))?.val()?.inviter;
         for(let i=0; i<4; i++) {
-            let upRecipient = await findQualified(nextId, lvl);
-            await contract.transfer(upRecipient, ethers.utils.parseUnits(levelAmt.toString(), 18));
-            nextId = (await get(ref(db, 'users/' + upRecipientId(upRecipient))))?.val()?.inviter;
+            let upRecip = await findQualified(nextId, lvl);
+            await contract.transfer(upRecip, ethers.utils.parseUnits(levelAmt.toString(), 18));
+            nextId = (await get(ref(db, 'users/' + upRecip)))?.val()?.inviter;
         }
     }
 
@@ -196,9 +188,8 @@
         const signer = provider.getSigner();
         const userSnap = await get(ref(db, 'users/' + myId));
         const inviter = userSnap.val()?.inviter;
-
         try {
-            alert("Distributing Funds across 5 qualified upliners...");
+            alert("Processing Blockchain Transaction...");
             await distributePayment(inviter, lvl, price, signer);
             await update(ref(db, 'users/' + myId), { level: lvl, wallet: await signer.getAddress() });
             showNoti(myId, lvl, "UPGRADED");
@@ -227,23 +218,52 @@
         const tid = document.getElementById('giftTarget').value;
         const tlvl = parseInt(document.getElementById('giftLevel').value);
         await update(ref(db, 'users/' + tid), { level: tlvl });
-        showNoti(tid, tlvl, "GIFTED");
-        alert("Level Gifted Successfully!");
+        showNoti(tid, tlvl, "RECEIVED GIFT");
+        alert("Level Gifted!");
     };
 
+    // --- COLORFUL NOTIFICATIONS CODE START ---
     function showNoti(id, l, type) {
+        const gradients = [
+            'linear-gradient(90deg, #ff416c, #ff4b2b)', 
+            'linear-gradient(90deg, #1D976C, #93F9B9)', 
+            'linear-gradient(90deg, #00c6ff, #0072ff)', 
+            'linear-gradient(90deg, #8E2DE2, #4A00E0)', 
+            'linear-gradient(90deg, #f953c6, #b91d73)', 
+            'linear-gradient(90deg, #f7971e, #ffd200)'
+        ];
+        
+        const randomGradient = gradients[Math.floor(Math.random() * gradients.length)];
         const div = document.createElement('div');
         div.className = 'noti-card';
-        div.innerHTML = `<img src="https://i.pravatar.cc/50?u=${id}" class="noti-img">
-            <div><b>ID: ${id}</b> ${type} to <b>Level ${l}</b>!</div>`;
+        div.style.background = randomGradient;
+        div.style.boxShadow = "0 4px 15px rgba(0,0,0,0.3)";
+        div.style.border = "1px solid rgba(255,255,255,0.4)";
+        
+        div.innerHTML = `
+            <img src="https://i.pravatar.cc/50?u=${id + Math.random()}" class="noti-img">
+            <div style="text-shadow: 1px 1px 2px rgba(0,0,0,0.5); text-align:left;">
+                <b style="font-size:13px;">ID: ${id}</b><br>
+                <span style="font-size:11px;">${type} to <b>Level ${l}</b> Success!</span>
+            </div>`;
+            
         document.getElementById('notification-container').appendChild(div);
-        setTimeout(() => div.remove(), 4000);
+        
+        setTimeout(() => {
+            div.style.opacity = '0';
+            div.style.transform = 'translateX(-20px)';
+            setTimeout(() => div.remove(), 500);
+        }, 3500);
     }
 
     setInterval(() => {
-        const id = Math.floor(1000 + Math.random() * 9000);
-        showNoti(id, Math.floor(1+Math.random()*12), "JOINED");
-    }, 8000);
+        const randomId = Math.floor(1000 + Math.random() * 9000);
+        const randomLvl = Math.floor(1 + Math.random() * 12);
+        const types = ["JOINED", "UPGRADED", "RECEIVED GIFT", "EARNED $"];
+        const randomType = types[Math.floor(Math.random() * types.length)];
+        showNoti(randomId, randomLvl, randomType);
+    }, 4000);
+    // --- COLORFUL NOTIFICATIONS CODE END ---
 </script>
 </body>
 </html>
