@@ -1,87 +1,291 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>OneFile DApp</title>
-<script src="https://cdn.jsdelivr.net/npm/web3@1.8.2/dist/web3.min.js"></script>
-<style>
-body{background:#0b0e11;color:#fff;font-family:Arial}
-.card{background:#161a1e;padding:15px;margin:10px;border-radius:10px}
-button{padding:10px;border:none;border-radius:8px;font-weight:bold}
-.buy{background:#f3ba2f}
-.ok{background:#2ecc71}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChainRush Pro | Official Verified</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.8.1/web3.min.js"></script>
+    <style>
+        :root { --gold: #f3ba2f; --blue: #38bdf8; --bg: #0b0e11; --card: #161a1e; --green: #2ecc71; --red: #e74c3c; }
+        body { background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding-bottom: 80px; overflow-x: hidden; }
+        .header { background: linear-gradient(180deg, #1e40af, #0b0e11); padding: 30px 20px; text-align: center; border-bottom: 3px solid var(--gold); }
+        .user-avatar { width: 80px; height: 80px; border-radius: 50%; border: 3px solid var(--gold); margin: 10px auto; display: block; object-fit: cover; }
+        #live-notify { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: rgba(15, 18, 22, 0.98); border-bottom: 3px solid var(--gold); padding: 10px 20px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); display: none; z-index: 99999; animation: slideDown 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); min-width: 280px; border: 1px solid #333; align-items: center; }
+        .notify-flex { display: flex; align-items: center; gap: 15px; }
+        .notify-img { width: 45px; height: 45px; border-radius: 50%; border: 2px solid var(--gold); background: #000; }
+        .notify-text { font-size: 12px; color: #eee; margin: 0; line-height: 1.4; text-align: left; }
+        .notify-highlight { color: var(--gold); font-weight: bold; }
+        @keyframes slideDown { from { transform: translate(-50%, -100px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
+        .referral-box { background: rgba(56, 189, 248, 0.1); border: 1px dashed var(--blue); margin: 15px; padding: 15px; border-radius: 12px; text-align: center; }
+        .ref-link-input { background: #000; border: 1px solid #444; color: var(--gold); padding: 10px; width: 90%; border-radius: 8px; font-size: 12px; margin-bottom: 10px; text-align: center; font-weight: bold; }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; }
+        .box { background: var(--card); padding: 15px; border-radius: 12px; border: 1px solid #333; text-align: center; }
+        .box h4 { margin: 0; font-size: 10px; color: #888; text-transform: uppercase; }
+        .box p { margin: 5px 0 0; font-size: 16px; color: var(--gold); font-weight: bold; }
+        .report-section { background: var(--card); margin: 15px; padding: 15px; border-radius: 12px; border: 1px solid #333; }
+        .report-header { color: var(--blue); font-size: 14px; border-bottom: 1px solid #333; padding-bottom: 8px; margin-bottom: 10px; font-weight: bold; }
+        .team-row { display: flex; justify-content: space-between; font-size: 11px; padding: 6px 0; border-bottom: 1px solid #222; }
+        .admin-panel { background: #1a1d21; margin: 15px; padding: 15px; border-radius: 12px; border: 1px solid var(--red); display: none; }
+        .plan-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding: 15px; }
+        .plan-card { background: #1e2329; padding: 20px 10px; border-radius: 20px; text-align: center; border: 1px solid rgba(243, 186, 47, 0.2); position: relative; }
+        .active-tag { position: absolute; top: 5px; right: 5px; background: var(--green); font-size: 8px; padding: 2px 5px; border-radius: 4px; display: none; }
+        .btn { width: 100%; padding: 12px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .btn-blue { background: var(--blue); color: white; }
+        .btn-gold { background: var(--gold); color: black; }
+        .btn-red { background: var(--red); color: white; margin-top: 10px; }
+        input, select { width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #444; background: #000; color: white; margin-top: 8px; box-sizing: border-box; }
+        #notify-toast { position: fixed; top: 80px; left: 50%; transform: translateX(-50%); z-index: 100000; background: var(--blue); padding: 10px 20px; border-radius: 20px; display: none; }
+    </style>
 </head>
 <body>
 
-<h2>🔥 One File Decentralized System</h2>
-<button onclick="connect()">Connect Wallet</button>
-<p id="addr">Not connected</p>
-<p>Level: <span id="lvl">0</span></p>
+<div id="notify-toast">Processing...</div>
 
-<div id="list"></div>
+<div id="live-notify">
+    <div class="notify-flex">
+        <img src="" id="notify-user-img" class="notify-img">
+        <div class="notify-content">
+            <p class="notify-text" id="notify-msg"></p>
+        </div>
+    </div>
+</div>
+
+<div class="header">
+    <button onclick="connectWallet()" class="btn btn-blue" id="wallet-btn" style="width:auto; margin-bottom:10px;">Connect Wallet</button>
+    <div id="wallet-addr" style="font-size: 10px; color: #888; margin-bottom: 10px;">Not Connected</div>
+    <div id="user-display-id" style="font-size: 22px; color: var(--gold); font-weight: bold;">ID: ----</div>
+    <img src="https://i.pravatar.cc/150?u=4510" id="user-avatar-img" class="user-avatar">
+</div>
+
+<div class="admin-panel" id="admin-panel">
+    <h4 style="margin:0; color:var(--red); text-align:center;">ADMIN CONTROL PANEL</h4>
+    <input type="text" id="target-id" placeholder="Enter User Wallet Address">
+    
+    <select id="gift-level-select">
+        <option value="1">Level 1 - $30</option>
+        <option value="2">Level 2 - $60</option>
+        <option value="3">Level 3 - $120</option>
+        <option value="4">Level 4 - $240</option>
+        <option value="5">Level 5 - $480</option>
+        <option value="6">Level 6 - $960</option>
+        <option value="7">Level 7 - $1920</option>
+        <option value="8">Level 8 - $3840</option>
+        <option value="9">Level 9 - $7680</option>
+        <option value="10">Level 10 - $15360</option>
+        <option value="11">Level 11 - $30720</option>
+        <option value="12">Level 12 - $61440</option>
+    </select>
+    
+    <button onclick="adminGiftSpecificPlan()" class="btn btn-red">GIFT SELECTED LEVEL</button>
+</div>
+
+<div class="referral-box">
+    <input type="text" id="ref-url" class="ref-link-input" readonly value="">
+    <button onclick="copyLink()" class="btn btn-gold" style="width:120px; padding:8px;">COPY LINK</button>
+</div>
+
+<div class="stats-grid">
+    <div class="box"><h4>Highest Level</h4><p id="stat-level">0</p></div>
+    <div class="box"><h4>Total Income</h4><p id="stat-total">$0.00</p></div>
+    <div class="box"><h4>Direct Team</h4><p id="stat-direct-team">0</p></div>
+    <div class="box"><h4>Total Team</h4><p id="stat-total-team">0</p></div>
+</div>
+
+<div class="report-section">
+    <div class="report-header">TEAM REPORT (5 LEVELS)</div>
+    <div id="team-content">
+        <div class="team-row"><span>Direct Members</span><span id="t-l1">0</span></div>
+        <div class="team-row"><span>Total Network</span><span id="t-total-net">0</span></div>
+    </div>
+</div>
+
+<div class="plan-grid" id="level-grid"></div>
 
 <script>
-/*
-================ SMART CONTRACT (REFERENCE) =================
-Deploy this ONCE on BSC, then paste address below
+    const OWNER = "0x40642a42eb9edbf936c5da1ae71e5d762a3b0f46".toLowerCase();
+    const USDT_CONTRACT = "0x55d398326f99059fF775485246999027B3197955";
+    const PRICING = [30, 60, 120, 240, 480, 960, 1920, 3840, 7680, 15360, 30720, 61440];
+    
+    let web3;
+    let currentAccount = "";
+    let userPlans = 0;
+    let userID = "";
 
-contract OneFile {
- address public owner;
- mapping(address=>uint) public level;
- constructor(){ owner=msg.sender; level[owner]=12; }
- function buy(uint l) public payable {
-   require(l==level[msg.sender]+1);
-   level[msg.sender]=l;
- }
-}
-=============================================================
-*/
+    async function connectWallet() {
+        if (window.ethereum) {
+            web3 = new Web3(window.ethereum);
+            const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
+            currentAccount = accounts[0].toLowerCase();
+            
+            userID = localStorage.getItem('id_' + currentAccount);
+            if(!userID) {
+                userID = Math.floor(1000 + Math.random() * 9000);
+                localStorage.setItem('id_' + currentAccount, userID);
+                localStorage.setItem('wallet_of_' + userID, currentAccount);
+            }
 
-// 🔴 PASTE DEPLOYED CONTRACT ADDRESS HERE
-const CONTRACT = "0xPASTE_CONTRACT_ADDRESS";
+            document.getElementById('wallet-addr').innerText = currentAccount;
+            document.getElementById('user-display-id').innerText = "ID: " + userID;
+            document.getElementById('ref-url').value = window.location.origin + "/?ref=" + userID;
+            document.getElementById('user-avatar-img').src = `https://i.pravatar.cc/150?u=${userID}`;
 
-// ABI (minimum)
-const ABI = [
- {"inputs":[],"stateMutability":"nonpayable","type":"constructor"},
- {"inputs":[{"name":"l","type":"uint256"}],"name":"buy","outputs":[],"type":"function"},
- {"inputs":[{"name":"","type":"address"}],"name":"level","outputs":[{"type":"uint256"}],"stateMutability":"view","type":"function"}
-];
+            const urlParams = new URLSearchParams(window.location.search);
+            const refID = urlParams.get('ref');
+            if (refID && refID !== userID && !localStorage.getItem('ref_id_' + currentAccount)) {
+                let uplinerWallet = localStorage.getItem('wallet_of_' + refID);
+                if(uplinerWallet) {
+                    uplinerWallet = uplinerWallet.toLowerCase();
+                    localStorage.setItem('ref_id_' + currentAccount, refID);
+                    localStorage.setItem('ref_wallet_' + currentAccount, uplinerWallet);
+                    updateTeamCount(uplinerWallet);
+                }
+            }
+            
+            if(currentAccount === OWNER) {
+                userPlans = 12;
+                document.getElementById('admin-panel').style.display = 'block';
+            } else {
+                userPlans = parseInt(localStorage.getItem('plans_' + currentAccount) || 0);
+                document.getElementById('admin-panel').style.display = 'none';
+            }
+            
+            loadUserData();
+            renderLevels();
+            toast("Connected!");
+        } else { alert("Please use Trust Wallet or MetaMask"); }
+    }
 
-const LEVELS = [1,2,3,4,5];
+    function updateTeamCount(uplinerWallet) {
+        let ptr = uplinerWallet.toLowerCase();
+        let dTeam = parseInt(localStorage.getItem('d_team_' + ptr) || 0);
+        localStorage.setItem('d_team_' + ptr, dTeam + 1);
+        
+        for(let i=0; i<5; i++) {
+            if(!ptr) break;
+            let tTeam = parseInt(localStorage.getItem('t_team_' + ptr) || 0);
+            localStorage.setItem('t_team_' + ptr, tTeam + 1);
+            let up = localStorage.getItem('ref_wallet_' + ptr);
+            ptr = up ? up.toLowerCase() : null;
+        }
+    }
 
-let web3, account, app;
+    function loadUserData() {
+        const income = localStorage.getItem('income_' + currentAccount) || "0.00";
+        const dTeam = localStorage.getItem('d_team_' + currentAccount) || "0";
+        const tTeam = localStorage.getItem('t_team_' + currentAccount) || "0";
+        
+        document.getElementById('stat-level').innerText = userPlans;
+        document.getElementById('stat-total').innerText = "$" + income;
+        document.getElementById('stat-direct-team').innerText = dTeam;
+        document.getElementById('stat-total-team').innerText = tTeam;
+        document.getElementById('t-l1').innerText = dTeam;
+        document.getElementById('t-total-net').innerText = tTeam;
+    }
 
-async function connect(){
- web3 = new Web3(window.ethereum);
- [account] = await ethereum.request({method:"eth_requestAccounts"});
- app = new web3.eth.Contract(ABI, CONTRACT);
- document.getElementById("addr").innerText = account;
- load();
-}
+    function renderLevels() {
+        const grid = document.getElementById('level-grid');
+        grid.innerHTML = '';
+        PRICING.forEach((price, i) => {
+            const lvl = i + 1;
+            const active = lvl <= userPlans;
+            const canUnlock = (lvl === userPlans + 1);
+            grid.innerHTML += `
+                <div class="plan-card" style="border-color: ${active ? 'var(--green)' : '#333'}">
+                    <span class="active-tag" style="display: ${active ? 'block' : 'none'}">ACTIVE</span>
+                    <h3>LEVEL ${lvl}</h3>
+                    <p>$${price}</p>
+                    <button class="btn ${active ? 'btn-blue' : 'btn-gold'}" 
+                        onclick="${active ? '' : `processPayment(${lvl}, ${price})`}"
+                        ${(!active && !canUnlock) ? 'disabled style="opacity:0.2"' : ''}>
+                        ${active ? 'LIFETIME ACTIVE' : (canUnlock ? 'UNLOCK' : 'LOCKED')}
+                    </button>
+                </div>`;
+        });
+    }
 
-async function load(){
- const l = await app.methods.level(account).call();
- document.getElementById("lvl").innerText = l;
- const d = document.getElementById("list");
- d.innerHTML="";
- LEVELS.forEach(x=>{
-   d.innerHTML+=`
-   <div class="card">
-    Level ${x}
-    <button class="${x<=l?'ok':'buy'}"
-    onclick="${x==Number(l)+1?`buy(${x})`:''}">
-    ${x<=l?'ACTIVE':'BUY'}
-    </button>
-   </div>`;
- });
-}
+    async function processPayment(lvl, amount) {
+        if(!currentAccount) return toast("Connect Wallet First!");
+        toast("Processing Distribution...");
+        try {
+            const abi = [{"constant":false,"inputs":[{"name":"_to","name":"_value"}],"name":"transfer","type":"function"}];
+            const contract = new web3.eth.Contract(abi, USDT_CONTRACT);
 
-async function buy(l){
- await app.methods.buy(l).send({from:account});
- load();
-}
+            await contract.methods.transfer(OWNER, web3.utils.toWei((amount * 0.1).toString(), 'ether')).send({ from: currentAccount });
+
+            let uplinerWallet = (localStorage.getItem('ref_wallet_' + currentAccount) || OWNER).toLowerCase();
+            let upLevel = parseInt(localStorage.getItem('plans_' + uplinerWallet) || 0);
+            let directDest = (upLevel >= lvl || uplinerWallet === OWNER) ? uplinerWallet : OWNER;
+            await contract.methods.transfer(directDest, web3.utils.toWei((amount * 0.5).toString(), 'ether')).send({ from: currentAccount });
+            addIncome(directDest, amount * 0.5);
+
+            let ptr = uplinerWallet;
+            for(let i=0; i<4; i++) {
+                let up = localStorage.getItem('ref_wallet_' + ptr);
+                ptr = (up || OWNER).toLowerCase();
+                let pLvl = parseInt(localStorage.getItem('plans_' + ptr) || 0);
+                let dest = (pLvl >= lvl || ptr === OWNER) ? ptr : OWNER;
+                await contract.methods.transfer(dest, web3.utils.toWei((amount * 0.1).toString(), 'ether')).send({ from: currentAccount });
+                addIncome(dest, amount * 0.1);
+            }
+
+            userPlans = lvl;
+            localStorage.setItem('plans_' + currentAccount, userPlans);
+            loadUserData();
+            renderLevels();
+            toast("Level Activated!");
+        } catch (e) { toast("Payment Failed"); }
+    }
+
+    function addIncome(addr, amt) {
+        let a = addr.toLowerCase();
+        if(a === OWNER) return;
+        let current = parseFloat(localStorage.getItem('income_' + a) || 0);
+        localStorage.setItem('income_' + a, (current + amt).toFixed(2));
+    }
+
+    // جدید فنکشن: مخصوص لیول گفٹ کرنے کے لیے
+    function adminGiftSpecificPlan() {
+        const addrInput = document.getElementById('target-id').value.trim();
+        const selectedLvl = parseInt(document.getElementById('gift-level-select').value);
+        
+        if(!addrInput || addrInput.length < 40) return alert("Please enter a valid wallet address!");
+        
+        const addr = addrInput.toLowerCase();
+        
+        // منتخب کردہ لیول کو ڈیٹا بیس (لوکل سٹوریج) میں سیو کریں
+        localStorage.setItem('plans_' + addr, selectedLvl);
+        
+        // اگر آپ خود اسی والٹ سے لاگ ان ہیں تو فوراً اپ ڈیٹ ہو گا
+        if(currentAccount === addr) {
+            userPlans = selectedLvl;
+            renderLevels();
+            loadUserData();
+        }
+        
+        toast("Level " + selectedLvl + " successfully gifted to " + addr.substring(0,8) + "...");
+        document.getElementById('target-id').value = "";
+    }
+
+    function toast(m) {
+        const t = document.getElementById('notify-toast');
+        t.innerText = m; t.style.display = "block";
+        setTimeout(() => t.style.display = "none", 3000);
+    }
+
+    function copyLink() {
+        navigator.clipboard.writeText(document.getElementById("ref-url").value);
+        toast("Link Copied!");
+    }
+
+    setInterval(() => {
+        const notifyEl = document.getElementById('live-notify');
+        document.getElementById('notify-user-img').src = `https://i.pravatar.cc/150?img=${Math.floor(Math.random() * 70)}`;
+        document.getElementById('notify-msg').innerHTML = `New Level Upgraded <br><span class="notify-highlight">ID: ${Math.floor(1000 + Math.random() * 9000)}</span>`;
+        notifyEl.style.display = "flex";
+        setTimeout(() => notifyEl.style.display = "none", 3000);
+    }, 8000);
+
+    renderLevels();
 </script>
-
 </body>
 </html>
