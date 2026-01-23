@@ -20,7 +20,7 @@
         .user-id { font-size: 28px; font-weight: bold; color: var(--gold); }
         .profile-img { width: 110px; height: 110px; border-radius: 50%; border: 4px solid var(--gold); margin: 15px auto; display: block; }
 
-        .admin-panel { background: #151515; border: 2px solid #e74c3c; margin: 20px; padding: 20px; border-radius: 20px; }
+        .admin-panel { background: #151515; border: 2px solid #e74c3c; margin: 20px; padding: 20px; border-radius: 20px; display: none; }
         input, select { width: 85%; padding: 12px; margin: 8px 0; border-radius: 10px; border: 1px solid #333; background: #000; color: white; }
 
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 20px; }
@@ -47,11 +47,11 @@
     <div class="header">
         <button class="wallet-btn" onclick="connectWallet()" id="wallBtn">Connect Wallet</button>
         <div id="usdtBal" style="margin-top:10px; color:#2ecc71; font-weight:bold;">USDT: $0.00</div>
-        <div class="user-id">ID: <span id="displayId">4970</span></div>
-        <img src="https://i.pravatar.cc/150?u=4970" class="profile-img">
+        <div class="user-id">ID: <span id="displayId">Loading...</span></div>
+        <img src="https://i.pravatar.cc/150?u=newuser" class="profile-img" id="userAvatar">
     </div>
 
-    <div id="adminPanel" class="admin-panel" style="display:none;">
+    <div id="adminPanel" class="admin-panel">
         <h3 style="color:#e74c3c;">ADMIN: GIFT LEVEL</h3>
         <input type="text" id="giftTarget" placeholder="Target User ID">
         <select id="giftLevel">
@@ -74,7 +74,7 @@
     </div>
 
     <div class="copy-section" style="padding:20px;">
-        <div id="refUrl" style="font-size: 12px; word-break: break-all;">https://chain-rush-pro.vercel.app/?ref=4970</div>
+        <div id="refUrl" style="font-size: 12px; word-break: break-all;">Please connect wallet to get link</div>
         <button class="copy-btn" onclick="copyRef()" style="background:var(--gold); border:none; padding:10px; border-radius:5px; cursor:pointer; font-weight:bold; margin-top:10px;">COPY REFERRAL LINK</button>
     </div>
 
@@ -82,21 +82,13 @@
 
     <div class="footer">
         <h3 style="color:var(--gold); text-align:center;">ChainRush-Pro (Decentralized System)</h3>
-        <p>ChainRush-Pro is a fully decentralized system launched from <b>Berlin, Germany 🇩🇪</b>. The platform is fully connected to the <b>BNB Blockchain 🔗</b>, ensuring transparency, security, and reliability.</p>
-        
-        <span class="policy-tag">Key Highlights of the System:</span>
-        • 💯 100% of the income is distributed directly to the team — with zero deductions<br>
-        • ❌ No admin control — the system operates entirely on smart contracts<br>
-        • 🔐 Built on blockchain technology, ChainRush-Pro cannot be shut down (as long as blockchain technology exists)<br>
-        • ♻️ Slots never recycle, ensuring long-term stability<br>
-        • 🔁 One slot can be used for a lifetime with no expiration
-        
+        <p>ChainRush-Pro is a fully decentralized system launched from <b>Berlin, Germany 🇩🇪</b>. The platform is fully connected to the <b>BNB Blockchain 🔗</b>.</p>
         <p style="text-align:center; font-size:10px; color:#555; margin-top:20px;">© 2026 ChainRush Pro Germany. All Rights Reserved.</p>
     </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, onValue, update, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, onValue, update, get, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyDxzfp_f2Y0tStBsYNLx9xjWb6EgXFnXqg",
@@ -111,29 +103,68 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    const myId = "4970"; 
     const ownerWallet = "0x40642a42Eb9EDbf936C5DA1AE71E5d762A3B0f46";
     const usdtAddress = "0x55d398326f99059fF775485246999027B3197955";
-
+    
+    let currentUserWallet = "";
     const urlParams = new URLSearchParams(window.location.search);
-    const refBy = urlParams.get('ref');
-    if(!refBy && myId !== "4970") {
-        document.body.innerHTML = "<h2 style='margin-top:100px;'>ChainRush Pro: Valid referral link required.</h2>";
+    const inviterId = urlParams.get('ref') || "4970"; 
+
+    // Admin Security Check Function
+    function checkAdmin(wallet) {
+        if (wallet.toLowerCase() === ownerWallet.toLowerCase()) {
+            document.getElementById('adminPanel').style.display = 'block';
+        } else {
+            document.getElementById('adminPanel').style.display = 'none';
+        }
     }
 
-    if(myId === "4970") document.getElementById('adminPanel').style.display = 'block';
+    // Connect Wallet & Security Logic
+    window.connectWallet = async () => {
+        if (!window.ethereum) return alert("MetaMask not found!");
+        const accs = await window.ethereum.request({method:'eth_requestAccounts'});
+        currentUserWallet = accs[0];
+        document.getElementById('wallBtn').innerText = currentUserWallet.substring(0,6)+"..."+currentUserWallet.substring(38);
+        
+        // Check if admin
+        checkAdmin(currentUserWallet);
 
-    onValue(ref(db, 'users/' + myId), (snap) => {
-        const data = snap.val() || { level: 0, tIncome: 0, directs: 0, network: 0 };
-        let dispLvl = (myId === "4970") ? 12 : (data.level || 0);
-        document.getElementById('userLvl').innerText = dispLvl;
-        document.getElementById('dirTeam').innerText = data.directs || 0;
-        document.getElementById('totTeam').innerText = data.network || 0;
-        document.getElementById('repTot').innerText = data.network || 0;
+        // Fetch Balance
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        const abi = ["function balanceOf(address) view returns (uint256)"];
+        const contract = new ethers.Contract(usdtAddress, abi, provider);
+        const bal = await contract.balanceOf(currentUserWallet);
+        document.getElementById('usdtBal').innerText = "USDT: $" + parseFloat(ethers.utils.formatUnits(bal, 18)).toFixed(2);
+
+        // Load or Register User
+        loadUserData(currentUserWallet);
+    };
+
+    async function loadUserData(wallet) {
+        const userRef = ref(db, 'wallets/' + wallet);
+        const snapshot = await get(userRef);
+        let userData = snapshot.val();
+
+        if (!userData) {
+            // New User Registration
+            const newId = Math.floor(1000 + Math.random() * 8000).toString();
+            userData = { id: newId, level: 0, tIncome: 0, directs: 0, network: 0, inviter: inviterId, wallet: wallet };
+            await set(userRef, userData);
+        }
+
+        updateUI(userData);
+        renderLevels(userData.level);
+    }
+
+    function updateUI(data) {
+        document.getElementById('displayId').innerText = data.id;
+        document.getElementById('userAvatar').src = `https://i.pravatar.cc/150?u=${data.id}`;
+        document.getElementById('userLvl').innerText = data.level;
         document.getElementById('teamInc').innerText = "$" + (data.tIncome || 0).toFixed(2);
         document.getElementById('totInc').innerText = "$" + (data.tIncome || 0).toFixed(2);
-        renderLevels(dispLvl);
-    });
+        document.getElementById('totTeam').innerText = data.network || 0;
+        document.getElementById('refUrl').innerText = `https://chain-rush-pro.vercel.app/?ref=${data.id}`;
+    }
 
     function renderLevels(current) {
         const cont = document.getElementById('levelsContainer');
@@ -151,119 +182,42 @@
         }
     }
 
-    // Payment Logic 
-    async function distributePayment(startId, lvl, price, signer) {
-        const abi = ["function transfer(address to, uint256 amount) public returns (bool)"];
-        const contract = new ethers.Contract(usdtAddress, abi, signer);
-        let ownerFee = price * 0.10;
-        let directAmt = price * 0.50;
-        let levelAmt = price * 0.10;
-        
-        await contract.transfer(ownerWallet, ethers.utils.parseUnits(ownerFee.toString(), 18));
-        let recipient = await findQualified(startId, lvl);
-        await contract.transfer(recipient, ethers.utils.parseUnits(directAmt.toString(), 18));
-        
-        let nextId = (await get(ref(db, 'users/' + startId)))?.val()?.inviter;
-        for(let i=0; i<4; i++) {
-            let upRecip = await findQualified(nextId, lvl);
-            await contract.transfer(upRecip, ethers.utils.parseUnits(levelAmt.toString(), 18));
-            nextId = (await get(ref(db, 'users/' + upRecip)))?.val()?.inviter;
-        }
-    }
-
-    async function findQualified(id, lvl) {
-        let cid = id;
-        while(cid) {
-            let s = await get(ref(db, 'users/' + cid));
-            let u = s.val();
-            if(u && u.level >= lvl && u.wallet) return u.wallet;
-            cid = u ? u.inviter : null;
-        }
-        return ownerWallet;
-    }
-
-    window.handlePurchase = async (lvl, price) => {
-        if(!window.ethereum) return alert("Connect Wallet!");
-        const provider = new ethers.providers.Web3Provider(window.ethereum);
-        const signer = provider.getSigner();
-        const userSnap = await get(ref(db, 'users/' + myId));
-        const inviter = userSnap.val()?.inviter;
-        try {
-            alert("Processing Blockchain Transaction...");
-            await distributePayment(inviter, lvl, price, signer);
-            await update(ref(db, 'users/' + myId), { level: lvl, wallet: await signer.getAddress() });
-            showNoti(myId, lvl, "UPGRADED");
-            alert("Success!");
-        } catch(e) { alert("Transaction Failed!"); }
-    };
-
-    window.connectWallet = async () => {
-        const accs = await window.ethereum.request({method:'eth_requestAccounts'});
-        document.getElementById('wallBtn').innerText = accs[0].substring(0,6)+"...";
-        const provider = new ethers.providers.Web3Provider(window.ethereum);
-        const abi = ["function balanceOf(address) view returns (uint256)"];
-        const contract = new ethers.Contract(usdtAddress, abi, provider);
-        const bal = await contract.balanceOf(accs[0]);
-        document.getElementById('usdtBal').innerText = "USDT: $" + parseFloat(ethers.utils.formatUnits(bal, 18)).toFixed(2);
-        await update(ref(db, 'users/' + myId), { wallet: accs[0] });
-    };
-
     window.copyRef = () => {
-        const link = "https://chain-rush-pro.vercel.app/?ref=" + myId;
-        navigator.clipboard.writeText(link);
-        alert("Referral Link Copied!");
+        const link = document.getElementById('refUrl').innerText;
+        if(link.includes("vercel.app")) {
+            navigator.clipboard.writeText(link);
+            alert("Referral Link Copied!");
+        } else {
+            alert("Connect wallet first!");
+        }
     };
 
     window.processGift = async () => {
         const tid = document.getElementById('giftTarget').value;
         const tlvl = parseInt(document.getElementById('giftLevel').value);
-        await update(ref(db, 'users/' + tid), { level: tlvl });
+        // Find user by ID in Firebase and update level
+        alert("Gift functionality is only for Admin!");
         showNoti(tid, tlvl, "RECEIVED GIFT");
-        alert("Level Gifted!");
     };
 
-    // --- COLORFUL NOTIFICATIONS CODE START ---
+    // --- COLORFUL NOTIFICATIONS ---
     function showNoti(id, l, type) {
-        const gradients = [
-            'linear-gradient(90deg, #ff416c, #ff4b2b)', 
-            'linear-gradient(90deg, #1D976C, #93F9B9)', 
-            'linear-gradient(90deg, #00c6ff, #0072ff)', 
-            'linear-gradient(90deg, #8E2DE2, #4A00E0)', 
-            'linear-gradient(90deg, #f953c6, #b91d73)', 
-            'linear-gradient(90deg, #f7971e, #ffd200)'
-        ];
-        
+        const gradients = ['linear-gradient(90deg, #ff416c, #ff4b2b)', 'linear-gradient(90deg, #1D976C, #93F9B9)', 'linear-gradient(90deg, #00c6ff, #0072ff)', 'linear-gradient(90deg, #8E2DE2, #4A00E0)'];
         const randomGradient = gradients[Math.floor(Math.random() * gradients.length)];
         const div = document.createElement('div');
         div.className = 'noti-card';
         div.style.background = randomGradient;
         div.style.boxShadow = "0 4px 15px rgba(0,0,0,0.3)";
         div.style.border = "1px solid rgba(255,255,255,0.4)";
-        
-        div.innerHTML = `
-            <img src="https://i.pravatar.cc/50?u=${id + Math.random()}" class="noti-img">
-            <div style="text-shadow: 1px 1px 2px rgba(0,0,0,0.5); text-align:left;">
-                <b style="font-size:13px;">ID: ${id}</b><br>
-                <span style="font-size:11px;">${type} to <b>Level ${l}</b> Success!</span>
-            </div>`;
-            
+        div.innerHTML = `<img src="https://i.pravatar.cc/50?u=${id}" class="noti-img"><div style="text-shadow: 1px 1px 2px rgba(0,0,0,0.5); text-align:left;"><b style="font-size:13px;">ID: ${id}</b><br><span style="font-size:11px;">${type} to <b>Level ${l}</b> Success!</span></div>`;
         document.getElementById('notification-container').appendChild(div);
-        
-        setTimeout(() => {
-            div.style.opacity = '0';
-            div.style.transform = 'translateX(-20px)';
-            setTimeout(() => div.remove(), 500);
-        }, 3500);
+        setTimeout(() => { div.style.opacity = '0'; div.style.transform = 'translateX(-20px)'; setTimeout(() => div.remove(), 500); }, 3500);
     }
 
     setInterval(() => {
-        const randomId = Math.floor(1000 + Math.random() * 9000);
-        const randomLvl = Math.floor(1 + Math.random() * 12);
-        const types = ["JOINED", "UPGRADED", "RECEIVED GIFT", "EARNED $"];
-        const randomType = types[Math.floor(Math.random() * types.length)];
-        showNoti(randomId, randomLvl, randomType);
+        const rId = Math.floor(1000 + Math.random() * 9000);
+        showNoti(rId, Math.floor(1 + Math.random() * 12), "JOINED");
     }, 4000);
-    // --- COLORFUL NOTIFICATIONS CODE END ---
 </script>
 </body>
 </html>
