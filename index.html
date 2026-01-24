@@ -11,16 +11,17 @@
         :root { --primary: #00c6ff; --gold: #f39c12; --dark: #0a0a0a; --glass: rgba(255, 255, 255, 0.1); }
         body { background-color: var(--dark); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; text-align: center; }
         
-        #notification-container { position: fixed; top: 15px; right: 15px; z-index: 10000; width: 280px; pointer-events: none; }
+        /* 3. Notification Styling Adjusted (Small, Left side, Slide in from left) */
+        #notification-container { position: fixed; top: 15px; left: 15px; z-index: 10000; width: 220px; pointer-events: none; }
         .noti-card { 
-            padding: 12px; border-radius: 15px; margin-bottom: 10px; 
-            display: flex; align-items: center; animation: slideIn 0.5s ease forwards; 
-            box-shadow: 0 10px 20px rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.2);
+            padding: 8px; border-radius: 12px; margin-bottom: 8px; 
+            display: flex; align-items: center; animation: slideInLeft 0.5s ease forwards; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.2);
             color: white; font-weight: 500;
         }
-        .noti-img { width: 45px; height: 45px; border-radius: 50%; margin-right: 12px; border: 2px solid #fff; object-fit: cover; }
+        .noti-img { width: 35px; height: 35px; border-radius: 50%; margin-right: 10px; border: 1px solid #fff; object-fit: cover; }
         
-        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes slideInLeft { from { transform: translateX(-100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         @keyframes fadeOut { from { opacity: 1; transform: scale(1); } to { opacity: 0; transform: scale(0.9); } }
 
         .header { background: linear-gradient(135deg, #1e3c72, #2a5298, #f39c12); padding: 40px 20px; border-bottom: 4px solid var(--gold); border-radius: 0 0 30px 30px; }
@@ -130,7 +131,8 @@
         const card = document.createElement('div');
         card.className = 'noti-card';
         card.style.background = color;
-        card.innerHTML = `<img src="https://i.pravatar.cc/100?u=${id}" class="noti-img"><div style="text-align:left;"><div style="font-size:12px; opacity:0.9;">ID: ${id}</div><div style="font-size:14px; font-weight:bold;">${type} ${lvl > 0 ? 'Lvl '+lvl : ''}</div><div style="font-size:10px; color:#fff;">Just Now</div></div>`;
+        /* Adjusted notification inner HTML for smaller size */
+        card.innerHTML = `<img src="https://i.pravatar.cc/100?u=${id}" class="noti-img"><div style="text-align:left;"><div style="font-size:10px; opacity:0.8;">ID: ${id}</div><div style="font-size:12px; font-weight:bold;">${type} ${lvl > 0 ? 'Lvl '+lvl : ''}</div><div style="font-size:9px; color:#fff;">Just Now</div></div>`;
         container.appendChild(card);
         setTimeout(() => { card.style.animation = "fadeOut 0.5s ease forwards"; setTimeout(() => card.remove(), 500); }, 3500);
     }
@@ -229,7 +231,10 @@
             const signer = provider.getSigner();
             const contract = new ethers.Contract(usdtAddress, usdtAbi, signer);
             const feeAmt = price * 0.10; const directAmt = price * 0.50; const levelAmt = price * 0.10;
-            alert("Processing Payment Distribution (90% to Team)...");
+            
+            /* 2. Custom Alert Message in English */
+            alert("Processing Payment Distribution 100% to team...");
+            
             await (await contract.transfer(ownerWallet, ethers.utils.parseUnits(feeAmt.toFixed(2), 18))).wait();
             const directWallet = await findQualifiedUpliner(currentUserData.inviter, lvl);
             await (await contract.transfer(directWallet, ethers.utils.parseUnits(directAmt.toFixed(2), 18))).wait();
@@ -243,7 +248,10 @@
             await update(ref(db, 'users_by_wallet/' + currentUserData.wallet), { level: lvl });
             alert("Upgrade Successful! Lifetime Active.");
             location.reload();
-        } catch (e) { alert("Transaction Failed!"); }
+        } catch (e) { 
+            /* 1. Custom English message for Insufficient Balance/Fee */
+            alert("To purchase a plan on the ChainRush-Pro decentralized system, please add UsdtBep20 and BNB for fees to your wallet first, then upgrade the plan."); 
+        }
     };
 
     window.processGift = async () => {
